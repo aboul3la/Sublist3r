@@ -1,8 +1,8 @@
 ##About Sublist3r 
 
-Sublist3r is python tool that is designed to enumerate subdomains of websites using search engines. it helps penetration testers and bug hunters to collect and gather all the possible subdomains of the target. Sublist3r currently supports Google,Yahoo,Bing,Baidu,Ask search engines and more search engines could be added soon.
+Sublist3r is python tool that is designed to enumerate subdomains of websites using search engines. it helps penetration testers and bug hunters to collect and gather all the possible subdomains of the target. Sublist3r currently supports Google,Yahoo,Bing,Baidu,Ask search engines and more search engines could be added soon. it gathers subdomains also using Netcraft and DNSdumpster Service.
 
-[subbrute](https://github.com/TheRook/subbrute) also was integrated with Sublist3r to increase the possibility of finding more subdomains using bruteforce with improved wordlist. The credit goes to TheRook the author of subbrute
+[subbrute](https://github.com/TheRook/subbrute) also was integrated with Sublist3r to increase the possibility of finding more subdomains using bruteforce with an improved wordlist. The credit goes to TheRook the author of subbrute
 
 ##Screenshots
 
