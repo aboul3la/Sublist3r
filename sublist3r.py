@@ -16,6 +16,9 @@ import dns.resolver
 from subbrute import subbrute
 from collections import Counter
 
+#In case you cannot install some of the required development packages, there's also an option to disable the SSL warning:
+requests.packages.urllib3.disable_warnings()
+
 #Console Colors
 G = '\033[92m' #green
 Y = '\033[93m' #yellow
