@@ -635,8 +635,8 @@ def main():
         print Y+"[-] verbosity is enabled, will show the subdomains results in realtime"+W
 
     #Start the engines enumeration
-    enums = [enum(domain, verbose, q=subdomains_queue) for enum in AskEnum,
-        BaiduEnum, BingEnum, DNSdumpster, GoogleEnum, NetcraftEnum, YahooEnum]
+    enums = [enum(domain, verbose, q=subdomains_queue) for enum in BaiduEnum,
+        YahooEnum, GoogleEnum, BingEnum, AskEnum, NetcraftEnum, DNSdumpster]
     for enum in enums:
         enum.start()
     for enum in enums:
