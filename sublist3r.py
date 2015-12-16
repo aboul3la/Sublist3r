@@ -445,7 +445,7 @@ class NetcraftEnum(multiprocessing.Process):
         print G+"[-] Searching now in %s.." %(self.engine_name)+W
         return
 
-    def req(self, url, cookies=None:
+    def req(self, url, cookies=None)
         cookies = cookies or {}
         headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -630,7 +630,7 @@ def main():
         print Y+"[-] verbosity is enabled, will show the subdomains results in realtime"+W
 
     #Start the engines enumeration
-    enums = [enum(domain, verbose, q=q=subdomains_queue) for enum in AskEnum,
+    enums = [enum(domain, verbose, q=subdomains_queue) for enum in AskEnum,
         BaiduEnum, BingEnum, DNSdumpster, GoogleEnum, NetcraftEnum, YahooEnum]
     for enum in enums:
         enum.start()
