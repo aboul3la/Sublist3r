@@ -19,8 +19,10 @@ from subbrute import subbrute
 from collections import Counter
 
 #In case you cannot install some of the required development packages, there's also an option to disable the SSL warning:
-requests.packages.urllib3.disable_warnings()
-
+try:
+    requests.packages.urllib3.disable_warnings()
+except:
+    pass
 #Console Colors
 G = '\033[92m' #green
 Y = '\033[93m' #yellow
@@ -448,7 +450,7 @@ class NetcraftEnum(multiprocessing.Process):
         print G+"[-] Searching now in %s.." %(self.engine_name)+W
         return
 
-    def req(self, url, cookies=None)
+    def req(self, url, cookies=None):
         cookies = cookies or {}
         headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
