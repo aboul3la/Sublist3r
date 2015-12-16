@@ -38,7 +38,7 @@ def banner():
                  ___) | |_| | |_) | | \__ \ |_ ___) | |
                 |____/ \__,_|_.__/|_|_|___/\__|____/|_|%s%s
 
-    # Fast Subomains Enumeration tool using Search Engines and BruteForce
+    # Fast Subdomains Enumeration tool using Search Engines and BruteForce
     # Coded By Ahmed Aboul-Ela - @aboul3la
     # Special Thanks to Ibrahim Mosaad - @ibrahim_mosaad for his contributions%s
     """%(R,W,Y,W)
