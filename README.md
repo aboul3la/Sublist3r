@@ -43,9 +43,25 @@ sudo apt-get install python-dnspython
 
 - Install using pip:
 ```
-pip install dnspython
+sudo pip install dnspython
 ```
 
+####argparse library
+
+- Install for Ubuntu/Debian:
+```
+sudo apt-get install python-argparse
+```
+
+- Install for Centos/Redhat:
+```
+sudo yum install python-argparse
+``` 
+
+- Install using pip:
+```
+sudo pip install argparse
+```
 
 ##Usage
 
