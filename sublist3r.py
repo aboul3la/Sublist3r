@@ -12,6 +12,7 @@ import requests
 import urlparse
 import urllib
 import hashlib
+import random
 import multiprocessing
 import threading
 import dns.resolver
@@ -20,15 +21,23 @@ from collections import Counter
 
 #In case you cannot install some of the required development packages, there's also an option to disable the SSL warning:
 try:
-    requests.packages.urllib3.disable_warnings()
+	import requests.packages.urllib3
+	requests.packages.urllib3.disable_warnings()
 except:
     pass
+
+#Check if we are this running on windows platform
+is_windows = sys.platform.startswith('win')
+
 #Console Colors
-G = '\033[92m' #green
-Y = '\033[93m' #yellow
-B = '\033[94m' #blue
-R = '\033[91m' #red
-W = '\033[0m'  #white
+if is_windows:
+	G = Y = B = R = W = G = Y = B = R = W = '' #use no terminal colors on windows
+else:
+	G = '\033[92m' #green
+	Y = '\033[93m' #yellow
+	B = '\033[94m' #blue
+	R = '\033[91m' #red
+	W = '\033[0m'  #white
 
 def banner():
     print """%s
@@ -218,8 +227,8 @@ class GoogleEnum(enumratorBaseThreaded):
 
     def check_response_errors(self, resp):
         if 'Our systems have detected unusual traffic' in resp:
-            print R+"Error: Google now probably is blocking our requests"+W
-            print R+"Exiting..."+W
+            print R+"[!] Error: Google probably now is blocking our requests"+W
+            print R+"[~] Finished now the Google Enumeration ..."+W
             return False
         return True
 
@@ -248,7 +257,7 @@ class YahooEnum(enumratorBaseThreaded):
         return
 
     def extract_domains(self, resp):
-        link_regx2 = re.compile('<span class=" fz-15px fw-m fc-12th wr-bw">(.*?)</span>')
+        link_regx2 = re.compile('<span class=" fz-15px fw-m fc-12th wr-bw.*?">(.*?)</span>')
         link_regx = re.compile('<span class="txt"><span class=" cite fw-xl fz-15px">(.*?)</span>')
         try:
             links = link_regx.findall(resp)
@@ -372,7 +381,7 @@ class BingEnum(enumratorBaseThreaded):
 class BaiduEnum(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None):
         subdomains = subdomains or []
-        base_url = 'http://www.baidu.com/s?pn={page_no}&wd={query}'
+        base_url = 'https://www.baidu.com/s?pn={page_no}&wd={query}&oq={query}'
         self.engine_name = "Baidu"
         self.MAX_DOMAINS = 2
         self.MAX_PAGES = 760
@@ -416,14 +425,15 @@ class BaiduEnum(enumratorBaseThreaded):
         return True
 
     def should_sleep(self):
+    	time.sleep(random.randint(2, 5))
         return
 
     def generate_query(self):
         if self.subdomains and self.querydomain != self.domain:
             found = ' -site:'.join(self.querydomain)
-            query = "site:{domain} -site:{found} ".format(domain=self.domain, found=found)
+            query = "site:{domain} -site:www.{domain} -site:{found} ".format(domain=self.domain, found=found)
         else:
-            query = "site:{domain}".format(domain=self.domain)
+            query = "site:{domain} -site:www.{domain}".format(domain=self.domain)
         return query
 
 class NetcraftEnum(multiprocessing.Process):
