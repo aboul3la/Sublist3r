@@ -26,7 +26,7 @@ try:
 except:
     pass
 
-#Check if we are this running on windows platform
+#Check if we are running this on windows platform
 is_windows = sys.platform.startswith('win')
 
 #Console Colors
