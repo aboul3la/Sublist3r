@@ -107,7 +107,13 @@ class enumratorBase(object):
         except Exception as e:
             print e
             raise
-        return resp.text
+        return self.get_response(resp)
+
+    def get_response(self,response):
+	if hasattr(response, "text"):
+	  return response.text
+	else:
+	  return response.content
 
     def check_max_subdomains(self,count):
         if self.MAX_DOMAINS == 0:
@@ -474,6 +480,12 @@ class NetcraftEnum(multiprocessing.Process):
             raise
         return resp
 
+    def get_response(self,response):
+	if hasattr(response, "text"):
+	  return response.text
+	else:
+	  return response.content
+
     def get_next(self, resp):
         link_regx = re.compile('<A href="(.*?)"><b>Next page</b></a>')
         link = link_regx.findall(resp)
@@ -494,7 +506,7 @@ class NetcraftEnum(multiprocessing.Process):
         cookies = self.create_cookies(resp.headers['set-cookie'])
         url = self.base_url.format(domain=self.domain)
         while True:
-            resp = self.req(url,cookies).text
+            resp = self.get_response(self.req(url,cookies))
             self.extract_domains(resp)
             if not 'Next page' in resp:
                 return self.subdomains
@@ -571,8 +583,14 @@ class DNSdumpster(multiprocessing.Process):
         except Exception as e:
             print e
             raise
-        return resp.text
+        return self.get_response(resp)
 
+    def get_response(self,response):
+	if hasattr(response, "text"):
+	  return response.text
+	else:
+	  return response.content
+	
     def get_csrftoken(self, resp):
         csrf_regex = re.compile("<input type='hidden' name='csrfmiddlewaretoken' value='(.*?)' />",re.S)
         token = csrf_regex.findall(resp)[0]
