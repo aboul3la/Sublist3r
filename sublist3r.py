@@ -114,10 +114,10 @@ class enumratorBase(object):
         return self.get_response(resp)
 
     def get_response(self,response):
-    if hasattr(response, "text"):
-      return response.text
-    else:
-      return response.content
+        if hasattr(response, "text"):
+          return response.text
+        else:
+          return response.content
 
     def check_max_subdomains(self,count):
         if self.MAX_DOMAINS == 0:
@@ -485,10 +485,10 @@ class NetcraftEnum(multiprocessing.Process):
         return resp
 
     def get_response(self,response):
-    if hasattr(response, "text"):
-      return response.text
-    else:
-      return response.content
+        if hasattr(response, "text"):
+          return response.text
+        else:
+          return response.content
 
     def get_next(self, resp):
         link_regx = re.compile('<A href="(.*?)"><b>Next page</b></a>')
@@ -590,10 +590,10 @@ class DNSdumpster(multiprocessing.Process):
         return self.get_response(resp)
 
     def get_response(self,response):
-    if hasattr(response, "text"):
-      return response.text
-    else:
-      return response.content
+        if hasattr(response, "text"):
+          return response.text
+        else:
+          return response.content
     
     def get_csrftoken(self, resp):
         csrf_regex = re.compile("<input type='hidden' name='csrfmiddlewaretoken' value='(.*?)' />",re.S)
