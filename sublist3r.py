@@ -691,6 +691,7 @@ def main():
         if savefile:
             write_file(savefile, subdomains)
         print Y+"[-] Total Unique Subdomains Found: %s"%len(subdomains)+W
+        subdomains = sorted(set(subdomains))
         for subdomain in subdomains:
             print G+subdomain+W
 
