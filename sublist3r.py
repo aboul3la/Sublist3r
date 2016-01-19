@@ -472,7 +472,7 @@ class NetcraftEnum(multiprocessing.Process):
 
     def req(self, url, cookies=None):
         cookies = cookies or {}
-        headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
+        headers = {'User-Agent': useragentlist[(randint(1, len(useragentlist)))-1],
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-GB,en;q=0.5',
         'Accept-Encoding': 'gzip, deflate',
@@ -572,7 +572,7 @@ class DNSdumpster(multiprocessing.Process):
 
     def req(self, req_method, url, params=None):
         params = params or {}
-        headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
+        headers = {'User-Agent': useragentlist[(randint(1, len(useragentlist)))-1],
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-GB,en;q=0.5',
         'Accept-Encoding': 'gzip, deflate',
