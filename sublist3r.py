@@ -18,11 +18,12 @@ import threading
 import dns.resolver
 from subbrute import subbrute
 from collections import Counter
+from random import randint
 
 #In case you cannot install some of the required development packages, there's also an option to disable the SSL warning:
 try:
-	import requests.packages.urllib3
-	requests.packages.urllib3.disable_warnings()
+    import requests.packages.urllib3
+    requests.packages.urllib3.disable_warnings()
 except:
     pass
 
@@ -31,13 +32,13 @@ is_windows = sys.platform.startswith('win')
 
 #Console Colors
 if is_windows:
-	G = Y = B = R = W = G = Y = B = R = W = '' #use no terminal colors on windows
+    G = Y = B = R = W = G = Y = B = R = W = '' #use no terminal colors on windows
 else:
-	G = '\033[92m' #green
-	Y = '\033[93m' #yellow
-	B = '\033[94m' #blue
-	R = '\033[91m' #red
-	W = '\033[0m'  #white
+    G = '\033[92m' #green
+    Y = '\033[93m' #yellow
+    B = '\033[94m' #blue
+    R = '\033[91m' #red
+    W = '\033[0m'  #white
 
 def banner():
     print """%s
@@ -77,6 +78,9 @@ def write_file(filename, subdomains):
         for subdomain in subdomains:
             f.write(subdomain+"\r\n")
 
+def getuseragent():
+    return [line.rstrip('\n') for line in open('useragent_list.txt', 'r')]
+
 class enumratorBase(object):
     def __init__(self, base_url, engine_name, domain, subdomains=None):
         subdomains = subdomains or []
@@ -94,7 +98,7 @@ class enumratorBase(object):
         return
 
     def send_req(self, query, page_no=1):
-        headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0',
+        headers = {'User-Agent': useragentlist[(randint(1, len(useragentlist)))-1],
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-GB,en;q=0.5',
         'Accept-Encoding': 'gzip, deflate',
@@ -110,10 +114,10 @@ class enumratorBase(object):
         return self.get_response(resp)
 
     def get_response(self,response):
-	if hasattr(response, "text"):
-	  return response.text
-	else:
-	  return response.content
+    if hasattr(response, "text"):
+      return response.text
+    else:
+      return response.content
 
     def check_max_subdomains(self,count):
         if self.MAX_DOMAINS == 0:
@@ -431,7 +435,7 @@ class BaiduEnum(enumratorBaseThreaded):
         return True
 
     def should_sleep(self):
-    	time.sleep(random.randint(2, 5))
+        time.sleep(random.randint(2, 5))
         return
 
     def generate_query(self):
@@ -481,10 +485,10 @@ class NetcraftEnum(multiprocessing.Process):
         return resp
 
     def get_response(self,response):
-	if hasattr(response, "text"):
-	  return response.text
-	else:
-	  return response.content
+    if hasattr(response, "text"):
+      return response.text
+    else:
+      return response.content
 
     def get_next(self, resp):
         link_regx = re.compile('<A href="(.*?)"><b>Next page</b></a>')
@@ -586,11 +590,11 @@ class DNSdumpster(multiprocessing.Process):
         return self.get_response(resp)
 
     def get_response(self,response):
-	if hasattr(response, "text"):
-	  return response.text
-	else:
-	  return response.content
-	
+    if hasattr(response, "text"):
+      return response.text
+    else:
+      return response.content
+    
     def get_csrftoken(self, resp):
         csrf_regex = re.compile("<input type='hidden' name='csrfmiddlewaretoken' value='(.*?)' />",re.S)
         token = csrf_regex.findall(resp)[0]
@@ -662,6 +666,14 @@ def main():
     if verbose:
         print Y+"[-] verbosity is enabled, will show the subdomains results in realtime"+W
 
+    # Import User Agents list
+    global useragentlist
+    try:
+        useragentlist = getuseragent()
+        print Y+'[-] Successfully loaded %i user agent' % len(useragentlist)+W
+    except:
+        exit('[!] Something went terribly wrong when loading the user agent list. Does the file exist?')
+
     #Start the engines enumeration
     enums = [enum(domain, verbose, q=subdomains_queue) for enum in BaiduEnum,
         YahooEnum, GoogleEnum, BingEnum, AskEnum, NetcraftEnum, DNSdumpster]
@@ -691,6 +703,7 @@ def main():
         if savefile:
             write_file(savefile, subdomains)
         print Y+"[-] Total Unique Subdomains Found: %s"%len(subdomains)+W
+        subdomains = sorted(set(subdomains))
         for subdomain in subdomains:
             print G+subdomain+W
 
