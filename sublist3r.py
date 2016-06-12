@@ -590,7 +590,7 @@ class DNSdumpster(multiprocessing.Process):
 	  return response.text
 	else:
 	  return response.content
-	
+
     def get_csrftoken(self, resp):
         csrf_regex = re.compile("<input type='hidden' name='csrfmiddlewaretoken' value='(.*?)' />",re.S)
         token = csrf_regex.findall(resp)[0]
@@ -608,7 +608,10 @@ class DNSdumpster(multiprocessing.Process):
         tbl_regex = re.compile('<a name="hostanchor"><\/a>Host Records.*?<table.*?>(.*?)</table>',re.S)
         link_regex = re.compile('<td class="col-md-4">(.*?)<br>',re.S)
         links = []
-        results_tbl = tbl_regex.findall(resp)[0]
+        try:
+            results_tbl = tbl_regex.findall(resp)[0]
+        except IndexError:
+            results_tbl = ''
         links_list = link_regex.findall(results_tbl)
         links = list(set(links_list))
         for link in links:
