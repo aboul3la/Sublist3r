@@ -27,7 +27,7 @@ Other python versions maybe not **supported** at the moment.
 
 - Install for Windows:
 ```
-- c:\python27\python.exe -m pip install requests
+c:\python27\python.exe -m pip install requests
 ```
 
 - Install for Ubuntu/Debian:
@@ -49,7 +49,7 @@ sudo pip install requests
 
 - Install for Windows:
 ```
-- c:\python27\python.exe -m pip install dnspython
+c:\python27\python.exe -m pip install dnspython
 ```
 
 - Install for Ubuntu/Debian:
