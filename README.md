@@ -25,22 +25,32 @@ Other python versions maybe not **supported** at the moment.
 
 ####Requests library (http://docs.python-requests.org/en/latest/)
 
+- Install for Windows:
+```
+- c:\python27\python.exe -m pip install requests
+```
+
 - Install for Ubuntu/Debian:
 ```
 sudo apt-get install python-requests
 ```
+
 - Install for Centos/Redhat:
 ```
 sudo yum install python-requests
 ```
 
-- Install using pip:
+- Install using pip on Linux:
 ```
 sudo pip install requests
 ```
 
 ####dnspython library (http://www.dnspython.org/)
 
+- Install for Windows:
+```
+- c:\python27\python.exe -m pip install dnspython
+```
 
 - Install for Ubuntu/Debian:
 ```
