@@ -500,10 +500,17 @@ class NetcraftEnum(multiprocessing.Process):
         cookies['netcraft_js_verification_response'] = hashlib.sha1(urllib.unquote(cookies_list[1])).hexdigest()
         return cookies
 
+    def get_cookies(self,headers):
+        if 'set-cookie' in headers:
+            cookies = self.create_cookies(headers['set-cookie'])
+        else:
+            cookies = {}
+        return cookies
+
     def enumerate(self):
         start_url = self.base_url.format(domain='example.com')
         resp = self.req(start_url)
-        cookies = self.create_cookies(resp.headers['set-cookie'])
+        cookies = self.get_cookies(resp.headers)
         url = self.base_url.format(domain=self.domain)
         while True:
             resp = self.get_response(self.req(url,cookies))
