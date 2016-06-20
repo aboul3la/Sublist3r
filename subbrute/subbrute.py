@@ -426,8 +426,12 @@ def run(target, record_type = None, subdomains = "names.txt", resolve_list = "re
     resolve_list = check_open(resolve_list)
     if (len(resolve_list) / 16) < process_count:
         sys.stderr.write('Warning: Fewer than 16 resovlers per thread, consider adding more nameservers to resolvers.txt.\n')
-    wildcards = {}
-    spider_blacklist = {}
+    if os.name == 'nt':
+        wildcards = {}
+        spider_blacklist = {}
+    else:
+        wildcards = multiprocessing.Manager().dict()
+        spider_blacklist = multiprocessing.Manager().dict()
     in_q = multiprocessing.Queue()
     out_q = multiprocessing.Queue()
     #have a buffer of at most two new nameservers that lookup processes can draw from.
