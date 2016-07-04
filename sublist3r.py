@@ -924,9 +924,6 @@ def main():
     for enum in enums:
         enum.join()
     
-    
-
-    
     subdomains =  set(subdomains_queue)
     for subdomain in subdomains:
         search_list.add(subdomain)
