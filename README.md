@@ -1,6 +1,6 @@
 ##About Sublist3r 
 
-Sublist3r is python tool that is designed to enumerate subdomains of websites using search engines. It helps penetration testers and bug hunters collect and gather subdomains for the domain they are targeting. Sublist3r currently supports the following search engines: Google, Yahoo, Bing, Baidu, and Ask. More search engines may be added in the future. Sublist3r also gathers subdomains using Netcraft and DNSdumpster.
+Sublist3r is python tool that is designed to enumerate subdomains of websites using search engines. It helps penetration testers and bug hunters collect and gather subdomains for the domain they are targeting. Sublist3r currently supports the following search engines: Google, Yahoo, Bing, Baidu, and Ask. More search engines may be added in the future. Sublist3r also gathers subdomains using Netcraft, Virustotal, DNSdumpster and PassiveDNS.
 
 [subbrute](https://github.com/TheRook/subbrute) was integrated with Sublist3r to increase the possibility of finding more subdomains using bruteforce with an improved wordlist. The credit goes to TheRook who is the author of subbrute.
 
@@ -85,6 +85,7 @@ Short Form    | Long Form     | Description
 ------------- | ------------- |-------------
 -d            | --domain      | Domain name to enumerate subdomains of
 -b            | --bruteforce  | Enable the subbrute bruteforce module
+-p            | --ports       | Scan the found subdomains against specified tcp ports
 -v            | --verbose     | Enable Verbosity and display results in realtime
 -t            | --threads     | Number of threads to use for subbrute bruteforce
 -o            | --output      | Save the results to text file
@@ -99,6 +100,10 @@ Short Form    | Long Form     | Description
 * To enumerate subdomains of specific domain:
 
 ``python sublist3r.py -d example.com``
+
+* To enumerate subdomains of specific domain and show only subdomains with opened ports 80 and 443 :
+
+``python sublist3r.py -d example.com -p 80,443``
 
 * To enumerate subdomains of specific domain and show results in realtime:
 
@@ -116,10 +121,11 @@ Sublist3r is licensed under the GNU GPL license. take a look at the [LICENSE](ht
 ##Credits
 
 * [TheRook](https://github.com/TheRook) - The bruteforce module was based on his script **subbrute**. 
+* [Bitquark](https://github.com/bitquark) - The Subbrute's wordlist was based on his research **dnspop**. 
 
 ##Thanks
 
 * Special Thanks to [Ibrahim Mosaad](https://twitter.com/ibrahim_mosaad) for his great contributions that helped in improving the tool.
 
 ##Version
-**Current version is 0.1 alpha**
+**Current version is 1.0**
