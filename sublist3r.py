@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-# SubList3r v0.1
+# Sublist3r v1.0
 # By Ahmed Aboul-Ela - twitter.com/aboul3la
 
 import re
@@ -886,7 +886,11 @@ def main():
     baidu_list = []
     bruteforce_list = set()
     search_list = set()
-    subdomains_queue = multiprocessing.Manager().list()
+    
+    if is_windows:
+        subdomains_queue = list()
+    else:
+        subdomains_queue = multiprocessing.Manager().list()
 
     #Check Verbosity
     global verbose
