@@ -106,6 +106,7 @@ class enumratorBase(object):
         try:
             resp = self.session.get(url, headers=headers, timeout=self.timeout)
         except Exception as e:
+            resp = None
             pass
         return self.get_response(resp)
 
@@ -722,7 +723,7 @@ class ThreatCrowd(multiprocessing.Process):
         multiprocessing.Process.__init__(self)
         self.lock = lock
         self.q = q
-        self.timeout = 10
+        self.timeout = 20
         self.print_banner()
         return
 
@@ -747,6 +748,7 @@ class ThreatCrowd(multiprocessing.Process):
             resp = self.session.get(url, headers=headers, timeout=self.timeout)
         except Exception as e:
             print e
+            resp = None
             
         return self.get_response(resp)
 
