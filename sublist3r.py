@@ -111,6 +111,8 @@ class enumratorBase(object):
         return self.get_response(resp)
 
     def get_response(self,response):
+    	if response is None:
+    		return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -480,10 +482,12 @@ class NetcraftEnum(multiprocessing.Process):
             resp = self.session.get(url, headers=headers, timeout=self.timeout,cookies=cookies)
         except Exception as e:
             print e
-            raise
+            resp = None
         return resp
 
     def get_response(self,response):
+    	if response is None:
+    		return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -600,10 +604,12 @@ class DNSdumpster(multiprocessing.Process):
                 resp = self.session.post(url, data=params, headers=headers, timeout=self.timeout)
         except Exception as e:
             print e
-            raise
+            resp = None
         return self.get_response(resp)
 
     def get_response(self,response):
+    	if response is None:
+    		return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -681,10 +687,13 @@ class Virustotal(multiprocessing.Process):
             resp = self.session.get(url, headers=headers, timeout=self.timeout)
         except Exception as e:
             print e
+            resp = None
             
         return self.get_response(resp)
 
     def get_response(self,response):
+    	if response is None:
+    		return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -747,12 +756,13 @@ class ThreatCrowd(multiprocessing.Process):
         try:
             resp = self.session.get(url, headers=headers, timeout=self.timeout)
         except Exception as e:
-            print e
             resp = None
             
         return self.get_response(resp)
 
     def get_response(self,response):
+    	if response is None:
+    		return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -820,11 +830,13 @@ class CrtSearch(multiprocessing.Process):
         try:
             resp = self.session.get(url, headers=headers, timeout=self.timeout)
         except Exception as e:
-            return 0
+            resp = None
             
         return self.get_response(resp)
 
     def get_response(self,response):
+    	if response is None:
+    		return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -888,11 +900,13 @@ class PassiveDNS(multiprocessing.Process):
             resp = self.session.get(url, headers=headers, timeout=self.timeout)
         except Exception as e:
             print e
-            return 0
+            resp = None
             
         return self.get_response(resp)
 
     def get_response(self,response):
+    	if response is None:
+    		return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -933,7 +947,7 @@ class portscan():
         for port in ports:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.settimeout(1)
+                s.settimeout(2)
                 result = s.connect_ex((host, int(port)))
                 if result == 0:
                     openports.append(port)
