@@ -48,7 +48,7 @@ def banner():
                 \___ \| | | | '_ \| | / __| __| |_ \| '__|
                  ___) | |_| | |_) | | \__ \ |_ ___) | |
                 |____/ \__,_|_.__/|_|_|___/\__|____/|_|%s%s
-                
+
                  # Coded By Ahmed Aboul-Ela - @aboul3la
     """%(R,W,Y)
 
@@ -230,7 +230,7 @@ class GoogleEnum(enumratorBaseThreaded):
                 if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
                     if verbose:
                         print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
+                    self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
         return links_list
@@ -283,7 +283,7 @@ class YahooEnum(enumratorBaseThreaded):
                 if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
                     if verbose:
                         print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
+                    self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
 
@@ -326,7 +326,7 @@ class AskEnum(enumratorBaseThreaded):
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if verbose:
                         print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
+                    self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
 
@@ -372,7 +372,7 @@ class BingEnum(enumratorBaseThreaded):
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if verbose:
                         print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
+                    self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
 
@@ -417,7 +417,7 @@ class BaiduEnum(enumratorBaseThreaded):
                         found_newdomain = True
                         if verbose:
                             print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                        self.subdomains.append(subdomain)
+                        self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
         if not found_newdomain and subdomain_list:
@@ -538,7 +538,7 @@ class NetcraftEnum(multiprocessing.Process):
                 if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
                     if verbose:
                         print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
+                    self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
         return links_list
@@ -614,7 +614,7 @@ class DNSdumpster(multiprocessing.Process):
             return response.text
         else:
             return response.content
-        
+
     def get_csrftoken(self, resp):
         csrf_regex = re.compile("<input type='hidden' name='csrfmiddlewaretoken' value='(.*?)' />",re.S)
         token = csrf_regex.findall(resp)[0]
@@ -631,7 +631,7 @@ class DNSdumpster(multiprocessing.Process):
             t.start()
             t.join()
         return self.live_subdomains
-    
+
 
     def extract_domains(self, resp):
         tbl_regex = re.compile('<a name="hostanchor"><\/a>Host Records.*?<table.*?>(.*?)</table>',re.S)
@@ -648,7 +648,7 @@ class DNSdumpster(multiprocessing.Process):
             if not subdomain.endswith(self.domain):
                 continue
             if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
-                self.subdomains.append(subdomain)
+                self.subdomains.append(subdomain.strip())
         return links
 
 class Virustotal(multiprocessing.Process):
@@ -688,7 +688,7 @@ class Virustotal(multiprocessing.Process):
         except Exception as e:
             print e
             resp = None
-            
+
         return self.get_response(resp)
 
     def get_response(self,response):
@@ -716,11 +716,11 @@ class Virustotal(multiprocessing.Process):
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if verbose:
                         print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
+                    self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
-        
-        
+
+
 class ThreatCrowd(multiprocessing.Process):
     def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock()):
         subdomains = subdomains or []
@@ -757,7 +757,7 @@ class ThreatCrowd(multiprocessing.Process):
             resp = self.session.get(url, headers=headers, timeout=self.timeout)
         except Exception as e:
             resp = None
-            
+
         return self.get_response(resp)
 
     def get_response(self,response):
@@ -781,7 +781,7 @@ class ThreatCrowd(multiprocessing.Process):
             print e
             return
 
-        
+
         try:
             links = json.loads(resp)['subdomains']
             for link in links:
@@ -791,7 +791,7 @@ class ThreatCrowd(multiprocessing.Process):
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if verbose:
                         print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
+                    self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
 
@@ -831,7 +831,7 @@ class CrtSearch(multiprocessing.Process):
             resp = self.session.get(url, headers=headers, timeout=self.timeout)
         except Exception as e:
             resp = None
-            
+
         return self.get_response(resp)
 
     def get_response(self,response):
@@ -860,10 +860,10 @@ class CrtSearch(multiprocessing.Process):
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if verbose:
                         print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
+                    self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
-        
+
 class PassiveDNS(multiprocessing.Process):
     def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock()):
         subdomains = subdomains or []
@@ -901,7 +901,7 @@ class PassiveDNS(multiprocessing.Process):
         except Exception as e:
             print e
             resp = None
-            
+
         return self.get_response(resp)
 
     def get_response(self,response):
@@ -929,18 +929,18 @@ class PassiveDNS(multiprocessing.Process):
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if verbose:
                         print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
+                    self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
 
 class portscan():
-    
+
     def __init__(self,subdomains,ports):
         self.subdomains = subdomains
         self.ports = ports
         self.threads = 20
         self.lock = threading.BoundedSemaphore(value=self.threads)
-    
+
     def port_scan(self,host,ports):
         openports = []
         self.lock.acquire()
@@ -957,7 +957,7 @@ class portscan():
         self.lock.release()
         if len(openports) > 0:
             print "%s%s%s - %sFound open ports:%s %s%s%s"%(G,host,W,R,W,Y,', '.join(openports),W)
-        
+
     def run(self):
         for subdomain in self.subdomains:
             t = threading.Thread(target=self.port_scan,args=(subdomain,self.ports))
@@ -973,7 +973,7 @@ def main():
     baidu_list = []
     bruteforce_list = set()
     search_list = set()
-    
+
     if is_windows:
         subdomains_queue = list()
     else:
@@ -1014,7 +1014,7 @@ def main():
         enum.start()
     for enum in enums:
         enum.join()
-    
+
     subdomains =  set(subdomains_queue)
     for subdomain in subdomains:
         search_list.add(subdomain)
@@ -1036,18 +1036,18 @@ def main():
         subdomains = sorted(subdomains)
         if savefile:
             write_file(savefile, subdomains)
-        
+
         print Y+"[-] Total Unique Subdomains Found: %s"%len(subdomains)+W
-        
+
         if ports:
             print G+"[-] Start port scan now for the following ports: %s%s"%(Y,ports)+W
             ports = ports.split(',')
             pscan = portscan(subdomains,ports)
             pscan.run()
-            
+
         else:
             for subdomain in subdomains:
                 print G+subdomain+W
-                
+
 if __name__=="__main__":
     main()
