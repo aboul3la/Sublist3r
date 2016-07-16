@@ -22,7 +22,7 @@ class DomainSearch(enumratorBaseThreaded):
         subdomains = subdomains or []
         base_url = 'https://www.baidu.com/s?pn={page_no}&wd={query}&oq={query}'
         self.engine_name = "Baidu"
-        self.MAX_DOMAINS = 2
+        self.MAX_DOMAINS = 5
         self.MAX_PAGES = 760
         enumratorBaseThreaded.__init__(self, base_url, self.engine_name,domain, subdomains, q=q)
         self.querydomain = self.domain
