@@ -8,6 +8,7 @@ import re
 import time
 import urlparse
 
+from ..cleanup import *
 from collections import Counter
 from ..processor import enumratorBaseThreaded
 from ..layout import *
@@ -18,6 +19,8 @@ G,Y,B,R,W = colour()
 class DomainSearch(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None):
         global verbose
+        global parsed_domain
+        parsed_domain = urlparse.urlparse(domain)
         verbose = subdomains
         subdomains = subdomains or []
         base_url = 'https://www.baidu.com/s?pn={page_no}&wd={query}&oq={query}'
@@ -32,26 +35,13 @@ class DomainSearch(enumratorBaseThreaded):
     def extract_domains(self, resp):
         found_newdomain = False
         subdomain_list = []
-        link_regx = re.compile('<a.*?class="c-showurl".*?>(.*?)</a>')
-        try:
-            links = link_regx.findall(resp)
-            for link in links:
-                link = re.sub('<.*?>|>|<|&nbsp;', '', link)
-                if not link.startswith('http'):
-                    link="http://"+link
-                subdomain = urlparse.urlparse(link).netloc
-                if subdomain.endswith(self.domain):
-                    subdomain_list.append(subdomain)
-                    if subdomain not in self.subdomains and subdomain != self.domain:
-                        found_newdomain = True
-                        if verbose:
-                            print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                        self.subdomains.append(subdomain)
-        except Exception as e:
-            pass
+        link_regx = re.compile('<a.*?class="c-showurl".*?>(.*?)/&nbsp;</a>')
+        links_list = link_regx.findall(resp)
+        for link in links_list:
+            clean_up_domain_text(parsed_domain,link,verbose,self)
         if not found_newdomain and subdomain_list:
             self.querydomain = self.findsubs(subdomain_list)
-        return links
+        return links_list
 
     def findsubs(self, subdomains):
         count = Counter(subdomains)
