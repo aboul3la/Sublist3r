@@ -8,7 +8,7 @@ from layout import *
 #Import Colour Scheme
 G,Y,B,R,W = colour()
 
-def clean_up_domain_text(parsed_domain,s,verbose,self,):
+def clean_up_domain_text(parsed_domain,subdomain,verbose,self,):
 	# Remove all Chinese and text before
 	RE = re.compile(u'.*[^\x00-\x7F]+', re.UNICODE)
 	subdomain = RE.sub('', subdomain)
