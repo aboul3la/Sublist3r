@@ -24,8 +24,11 @@ class DomainSearch(enumratorBaseThreaded):
 
     def extract_domains(self, resp):
         link_regx = re.compile('<p class="web-result-url">(.*?)</p>')
+        link_regx2 = re.compile('<p class="rightrail-web-result-url">(.*?)</p>')
         try:
-            links_list = link_regx.findall(resp)
+            links = link_regx.findall(resp)
+            links2 = link_regx2.findall(resp)
+            links_list = links+links2
             for link in links_list:
                 if not link.startswith('http'):
                     link="http://"+link
