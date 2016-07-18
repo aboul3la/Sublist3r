@@ -75,8 +75,8 @@ class DomainSearch(multiprocessing.Process):
             for link in links:
                 if self.domain not in link:
                     continue
-                subdomain = link[:link.find('[')]
-                if subdomain not in self.subdomains and subdomain != self.domain:
+                subdomain = link[:link.find('[')].strip()
+                if subdomain not in self.subdomains and subdomain != self.domain and subdomain.endswith(self.domain):
                     if verbose:
                         print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
                     self.subdomains.append(subdomain.strip())
