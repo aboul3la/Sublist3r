@@ -3,6 +3,8 @@
 
 import re
 import urlparse
+
+from ..cleanup import *
 from ..processor import enumratorBaseThreaded
 from ..layout import *
 
@@ -12,6 +14,8 @@ G,Y,B,R,W = colour()
 class DomainSearch(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None):
         global verbose
+        global parsed_domain
+        parsed_domain = urlparse.urlparse(domain)
         verbose = subdomains
         subdomains = subdomains or []
         base_url = 'https://www.bing.com/search?q={query}&go=Submit&first={page_no}'
@@ -23,24 +27,13 @@ class DomainSearch(enumratorBaseThreaded):
         return
 
     def extract_domains(self, resp):
-        link_regx = re.compile('<li class="b_algo"><h2><a href="(.*?)"')
-        link_regx2 = re.compile('<div class="b_title"><h2><a href="(.*?)"')
-        try:
-            links = link_regx.findall(resp)
-            links2 = link_regx2.findall(resp)
-            links_list = links+links2
-
-            for link in links_list:
-                link = re.sub('<(\/)?strong>|<span.*?>|<|>', '', link)
-                if not link.startswith('http'):
-                    link="http://"+link
-                subdomain = urlparse.urlparse(link).netloc
-                if subdomain not in self.subdomains and subdomain != self.domain:
-                    if verbose:
-                        print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain.strip())
-        except Exception as e:
-            pass
+        link_regx = re.compile('<li class="b_algo"><h2><a href="(.*?)'+parsed_domain.netloc)
+        link_regx2 = re.compile('<div class="b_title"><h2><a href="(.*?)'+parsed_domain.netloc)
+        links = link_regx.findall(resp)
+        links2 = link_regx2.findall(resp)
+        links_list = links+links2
+        for link in links_list:
+            clean_up_domain_text(parsed_domain,link,verbose,self)
 
         return links_list
 
