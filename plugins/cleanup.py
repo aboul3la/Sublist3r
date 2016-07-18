@@ -23,7 +23,7 @@ def clean_up_domain_text(parsed_domain,subdomain,verbose,self,):
 		else:
 			subdomain = subdomain.strip(i)
 
-	if parsed_domain.netloc not in subdomain:
+	if parsed_domain.netloc not in subdomain and subdomain:
 		subdomain = subdomain+'.'+parsed_domain.netloc
 
 	if subdomain not in self.subdomains and '...' not in subdomain and subdomain != self.domain and subdomain:
