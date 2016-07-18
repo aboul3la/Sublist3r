@@ -15,7 +15,7 @@ def clean_up_domain_text(parsed_domain,subdomain,verbose,self,):
 
 	# Remove Misc Artifacts
 	subdomain = re.sub('https?://|[|]|“|<(\/)?kw>|<(\/)?em>|<(\/)?strong>|<(\/)?b>|u\'|\', |\'|.+?<p>|<span.*?>|\*|"|;|<|mailto:|Email:|:|\\(|&lt;|&#39|{|}|', '', subdomain.lower())
-	remove_list = {'32':'split','}':'split','&quot':'split','>':'split','&amp;':'split','>':'split',',':'split','+':'split','/':'split','.':'strip'}
+	remove_list = {'32':'split','}':'split','&quot':'split','>':'split','&amp;':'split','>':'split',',':'split','+':'split','/':'split','.':'strip',' ':'split'}
 	for i, j in remove_list.items():
 		# Check is any characters are in remove list
 		if j is "split":
