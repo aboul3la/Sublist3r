@@ -7,6 +7,7 @@ import requests
 import threading
 import urlparse
 
+from ..cleanup import *
 from ..layout import *
 
 #Import Colour Scheme
@@ -15,6 +16,8 @@ G,Y,B,R,W = colour()
 class DomainSearch(multiprocessing.Process):
     def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock()):
         global verbose
+        global parsed_domain
+        parsed_domain = urlparse.urlparse(domain)
         verbose = subdomains
         subdomains = subdomains or []
         self.base_url = 'https://crt.sh/?q=%25.{domain}'
@@ -70,15 +73,6 @@ class DomainSearch(multiprocessing.Process):
 
     def extract_domains(self, resp):
         link_regx = re.compile('<TD>(.*?)</TD>')
-        try:
-            links = link_regx.findall(resp)
-            for link in links:
-                subdomain = link.strip()
-                if not subdomain.endswith(self.domain) or '*' in subdomain:
-                    continue
-                if subdomain not in self.subdomains and subdomain != self.domain:
-                    if verbose:
-                        print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
-        except Exception as e:
-            pass
+        links_list = link_regx.findall(resp)
+        for link in links_list:
+            clean_up_domain_text(parsed_domain,link,verbose,self)
