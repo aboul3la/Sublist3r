@@ -8,6 +8,7 @@ import re
 import urlparse
 import dns.resolver
 
+from ..cleanup import *
 from ..layout import *
 
 #Import Colour Scheme
@@ -16,6 +17,8 @@ G,Y,B,R,W = colour()
 class DomainSearch(multiprocessing.Process):
     def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock()):
         global verbose
+        global parsed_domain
+        parsed_domain = urlparse.urlparse(domain)
         verbose = subdomains
         subdomains = subdomains or []
         self.base_url = 'https://dnsdumpster.com/'
@@ -113,11 +116,6 @@ class DomainSearch(multiprocessing.Process):
         except IndexError:
             results_tbl = ''
         links_list = link_regex.findall(results_tbl)
-        links = list(set(links_list))
-        for link in links:
-            subdomain = link.strip()
-            if not subdomain.endswith(self.domain):
-                continue
-            if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
-                self.subdomains.append(subdomain)
+        for link in links_list:
+            clean_up_domain_text(parsed_domain,link,verbose,self)
         return links

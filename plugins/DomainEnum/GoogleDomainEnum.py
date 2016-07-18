@@ -3,7 +3,9 @@
 
 import re
 import time
+import urlparse
 
+from ..cleanup import *
 from ..processor import enumratorBaseThreaded
 from ..layout import *
 
@@ -13,6 +15,8 @@ G,Y,B,R,W = colour()
 class DomainSearch(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None):
         global verbose
+        global parsed_domain
+        parsed_domain = urlparse.urlparse(domain)
         verbose = subdomains
         subdomains = subdomains or []
         base_url = "https://google.com/search?q={query}&btnG=Search&hl=en-US&biw=&bih=&gbv=1&start={page_no}&filter=0"
@@ -25,19 +29,9 @@ class DomainSearch(enumratorBaseThreaded):
 
     def extract_domains(self, resp):
         link_regx = re.compile('<cite.*?>(.*?)<\/cite>')
-        try:
-            links_list = link_regx.findall(resp)
-            for link in links_list:
-                link = re.sub('<span.*>', '', link)
-                if not link.startswith('http'):
-                    link="http://"+link
-                subdomain = urlparse.urlparse(link).netloc
-                if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
-                    if verbose:
-                        print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
-        except Exception as e:
-            pass
+        links_list = link_regx.findall(resp)
+        for link in links_list:
+            clean_up_domain_text(parsed_domain,link,verbose,self)
         return links_list
 
     def check_response_errors(self, resp):
