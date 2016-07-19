@@ -28,7 +28,7 @@ class DomainSearch(enumratorBaseThreaded):
         return
 
     def extract_domains(self, resp):
-        link_regx = re.compile('<cite.*?>(.*?)<\/cite>')
+        link_regx = re.compile('<cite.*?>(.*?).'+parsed_domain.netloc+'.*?<\/cite>')
         links_list = link_regx.findall(resp)
         for link in links_list:
             clean_up_domain_text(parsed_domain,link,verbose,self)
