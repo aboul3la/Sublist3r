@@ -7,6 +7,7 @@ import requests
 import threading
 import urlparse
 
+from ..cleanup import *
 from ..layout import *
 
 #Import Colour Scheme
@@ -15,6 +16,8 @@ G,Y,B,R,W = colour()
 class DomainSearch(multiprocessing.Process):
     def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock()):
         global verbose
+        global parsed_domain
+        parsed_domain = urlparse.urlparse(domain)
         verbose = subdomains
         subdomains = subdomains or []
         self.base_url = 'http://ptrarchive.com/tools/search.htm?label={domain}'
@@ -69,16 +72,7 @@ class DomainSearch(multiprocessing.Process):
         return self.subdomains
 
     def extract_domains(self, resp):
-        link_regx = re.compile('<td>(.*?)</td>')
-        try:
-            links = link_regx.findall(resp)
-            for link in links:
-                if self.domain not in link:
-                    continue
-                subdomain = link[:link.find('[')].strip()
-                if subdomain not in self.subdomains and subdomain != self.domain and subdomain.endswith(self.domain):
-                    if verbose:
-                        print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain.strip())
-        except Exception as e:
-            pass
+        link_regx = re.compile('<td>.*<td>.*<td>(.*?).'+parsed_domain.netloc)
+        links_list = link_regx.findall(resp)
+        for link in links_list:
+            clean_up_domain_text(parsed_domain,link,verbose,self)

@@ -7,6 +7,7 @@ import requests
 import re
 import urlparse
 
+from ..cleanup import *
 from ..layout import *
 
 #Import Colour Scheme
@@ -15,6 +16,8 @@ G,Y,B,R,W = colour()
 class DomainSearch(multiprocessing.Process):
     def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock()):
         global verbose
+        global parsed_domain
+        parsed_domain = urlparse.urlparse(domain)
         verbose = subdomains
         subdomains = subdomains or []
         self.base_url = 'https://www.threatcrowd.org/searchApi/v2/domain/report/?domain={domain}'
@@ -73,17 +76,6 @@ class DomainSearch(multiprocessing.Process):
         except Exception as e:
             print e
             return
-
-
-        try:
-            links = json.loads(resp)['subdomains']
-            for link in links:
-                subdomain = link.strip()
-                if not subdomain.endswith(self.domain):
-                    continue
-                if subdomain not in self.subdomains and subdomain != self.domain:
-                    if verbose:
-                        print "%s%s: %s%s"%(R, self.engine_name, W, subdomain)
-                    self.subdomains.append(subdomain)
-        except Exception as e:
-            pass
+        links_list = json.loads(resp)['subdomains']
+        for link in links_list:
+            clean_up_domain_text(parsed_domain,link,verbose,self)
