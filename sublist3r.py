@@ -88,7 +88,7 @@ def write_ipfile(filename, subdomains):
 	    try:
 	        resolvedSave = subdomain+" with the IP address of: "+socket.gethostbyname(subdomain)
 		f.write(resolvedSave+"\r\n")
-	    except ValueError:
+	    except:
 	        print G+subdomain+" could not be resolved. May be a private hostname."+W
 
 class enumratorBase(object):
@@ -1059,7 +1059,7 @@ def main():
 	    for subdomain in subdomains:
 	        try:
 	            print G+subdomain+" with the IP address of: "+socket.gethostbyname(subdomain)+""+W
-	        except ValueError:
+	        except:
 	            print G+subdomain+" could not be resolved. Maybe a private hostname."+W
 
 
