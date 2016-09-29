@@ -69,6 +69,8 @@ def parse_args():
     parser.add_argument('-v', '--verbose', help='Enable Verbosity and display results in realtime',nargs='?', default=False)
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
     parser.add_argument('-o', '--output', help='Save the results to text file')
+    parser.add_argument('-r', '--resolve', help='Resolve found subdomains',nargs='?', default=False)
+    parser.add_argument('-rs', '--rsave', help='Save the results of the IP resolution to text file')
     return parser.parse_args()
 
 def write_file(filename, subdomains):
@@ -77,6 +79,17 @@ def write_file(filename, subdomains):
     with open(str(filename), 'wb') as f:
         for subdomain in subdomains:
             f.write(subdomain+"\r\n")
+
+def write_ipfile(filename, subdomains):
+    #saving subdomains reverse loopup results to output file
+    print "%s[-] Saving IP resolution results to file: %s%s%s%s"%(Y,W,R,filename,W)
+    with open(str(filename), 'wb') as f:
+        for subdomain in subdomains:
+	    try:
+	        resolvedSave = subdomain+" with the IP address of: "+socket.gethostbyname(subdomain)
+		f.write(resolvedSave+"\r\n")
+	    except:
+	        print G+subdomain+" could not be resolved. May be a private hostname."+W
 
 class enumratorBase(object):
     def __init__(self, base_url, engine_name, domain, subdomains=None):
@@ -967,6 +980,8 @@ def main():
     domain = args.domain
     threads = args.threads
     savefile = args.output
+    resolve = args.resolve
+    resolvedfile = args.rsave
     ports = args.ports
     google_list = []
     bing_list = []
@@ -1036,6 +1051,17 @@ def main():
         subdomains = sorted(subdomains)
         if savefile:
             write_file(savefile, subdomains)
+
+        if resolvedfile:
+            write_ipfile(resolvedfile, subdomains)
+
+	if resolve:
+	    for subdomain in subdomains:
+	        try:
+	            print G+subdomain+" with the IP address of: "+socket.gethostbyname(subdomain)+""+W
+	        except:
+	            print G+subdomain+" could not be resolved. Maybe a private hostname."+W
+
 
         print Y+"[-] Total Unique Subdomains Found: %s"%len(subdomains)+W
 
