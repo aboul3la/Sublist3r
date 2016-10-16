@@ -45,7 +45,7 @@ else:
     W = '\033[0m'  #white
 
 def banner():
-      print """%s
+      print("""%s
                  ____        _     _ _     _   _____
                 / ___| _   _| |__ | (_)___| |_|___ / _ __
                 \___ \| | | | '_ \| | / __| __| |_ \| '__|
@@ -53,7 +53,7 @@ def banner():
                 |____/ \__,_|_.__/|_|_|___/\__|____/|_|%s%s
 
                  # Coded By Ahmed Aboul-Ela - @aboul3la
-    """%(R,W,Y)
+    """%(R,W,Y))
 
 def parser_error(errmsg):
     banner()
@@ -135,7 +135,7 @@ class enumratorBase(object):
 
     def print_(self, text):
         if not self.silent:
-            print text
+            print(text)
         return
 
     def print_banner(self):
@@ -811,7 +811,6 @@ class PassiveDNS(enumratorBaseThreaded):
         super(PassiveDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
-
     def req(self, url):
         headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -954,7 +953,6 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce):
             for subdomain in subdomains:
                 print(G+subdomain+W)
     return subdomains
-    
 
 if __name__=="__main__":
     args = parse_args()

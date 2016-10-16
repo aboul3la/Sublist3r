@@ -416,7 +416,7 @@ def print_target(target, record_type = None, subdomains = "names.txt", resolve_l
             result = "%s,%s" % (hostname, ",".join(response).strip(","))
         if result not in found_subdomains:
             if verbose:
-                print result
+                print(result)
             subdomains_list.append(result)
 
     return  set(subdomains_list)
@@ -629,7 +629,7 @@ if __name__ == "__main__":
             #options.resolvers => the resolvers file
             #options.output
             #options.json
-            print target, record_type, options.subs, options.resolvers, options.process_count, output, json_output
+            print(target, record_type, options.subs, options.resolvers, options.process_count, output, json_output)
             print_target(target, record_type, options.subs, options.resolvers, options.process_count, output, json_output)
 
 
