@@ -9,8 +9,6 @@ import sys
 import os
 import argparse
 import time
-import urlparse
-import urllib
 import hashlib
 import random
 import multiprocessing
@@ -23,6 +21,16 @@ from collections import Counter
 from subbrute import subbrute
 import dns.resolver
 import requests
+
+#Python 2.x and 3.x compatiablity
+if sys.version > '3':
+    from queue import Queue
+    import urllib.parse as urlparse
+    import urllib.parse as urllib
+else:
+    from Queue import Queue
+    import urlparse
+    import urllib
 
 #In case you cannot install some of the required development packages, there's also an option to disable the SSL warning:
 try:
