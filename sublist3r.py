@@ -24,11 +24,9 @@ import requests
 
 #Python 2.x and 3.x compatiablity
 if sys.version > '3':
-    from queue import Queue
     import urllib.parse as urlparse
     import urllib.parse as urllib
 else:
-    from Queue import Queue
     import urlparse
     import urllib
 
@@ -918,7 +916,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce):
         print(Y+"[-] verbosity is enabled, will show the subdomains results in realtime"+W)
 
     #Start the engines enumeration
-    enums = [enum(domain, [], q=subdomains_queue, silent=silent, verbose=verbose) for enum in BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum, NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd, CrtSearch, PassiveDNS]
+    enums = [enum(domain, [], q=subdomains_queue, silent=silent, verbose=verbose) for enum in (BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum, NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd, CrtSearch, PassiveDNS)]
     for enum in enums:
         enum.start()
     for enum in enums:
