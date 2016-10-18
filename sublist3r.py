@@ -146,7 +146,6 @@ class enumratorBase(object):
             resp = self.session.get(url, headers=headers, timeout=self.timeout)
         except Exception as e:
             resp = None
-            pass
         return self.get_response(resp)
 
     def get_response(self,response):
@@ -560,7 +559,7 @@ class NetcraftEnum(multiprocessing.Process):
         while True:
             resp = self.get_response(self.req(url,cookies))
             self.extract_domains(resp)
-            if not 'Next page' in resp:
+            if 'Next page' not in resp:
                 return self.subdomains
                 break
             url = self.get_next(resp)
@@ -989,7 +988,7 @@ class portscan():
                 result = s.connect_ex((host, int(port)))
                 if result == 0:
                     openports.append(port)
-                s.close
+                s.close()
             except Exception as e:
                 pass
         self.lock.release()
