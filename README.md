@@ -23,9 +23,11 @@ Other python versions maybe not **supported** at the moment.
 
 ##Dependencies:
 
-Sublist3r depends on the `requests`, `dnspython` and `argparse` python modules. These dependencies can be installed using the requirements file:
-- Installation on Windows:
+Sublist3r depends on the `requests`, `dnspython` and `argparse` python modules.
 
+These dependencies can be installed using the requirements file:
+
+- Installation on Windows:
 ```
 c:\python27\python.exe -m pip install -r requirements.txt
 ```
@@ -37,7 +39,7 @@ sudo pip install -r requirements.txt
 
 Alternatively, each module can be installed independently as shown below.
 
-####Requests library (http://docs.python-requests.org/en/latest/)
+####Requests Module (http://docs.python-requests.org/en/latest/)
 
 - Install for Windows:
 ```
@@ -59,7 +61,7 @@ sudo yum install python-requests
 sudo pip install requests
 ```
 
-####dnspython library (http://www.dnspython.org/)
+####dnspython Module (http://www.dnspython.org/)
 
 - Install for Windows:
 ```
@@ -76,7 +78,7 @@ sudo apt-get install python-dnspython
 sudo pip install dnspython
 ```
 
-####argparse library
+####argparse Module
 
 - Install for Ubuntu/Debian:
 ```
