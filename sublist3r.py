@@ -20,7 +20,6 @@ import socket
 import functools
 from subbrute import subbrute
 from collections import Counter
-from Queue import Queue
 
 #In case you cannot install some of the required development packages, there's also an option to disable the SSL warning:
 try:
@@ -196,7 +195,6 @@ class enumratorBase(object):
         flag = True
         page_no = 0
         prev_links = []
-        prev_subdomains = []
         retries = 0
 
         while flag:
@@ -1008,9 +1006,6 @@ def main():
     threads = args.threads
     savefile = args.output
     ports = args.ports
-    google_list = []
-    bing_list = []
-    baidu_list = []
     bruteforce_list = set()
     search_list = set()
 
