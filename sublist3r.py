@@ -149,8 +149,8 @@ class enumratorBase(object):
         return self.get_response(resp)
 
     def get_response(self,response):
-    	if response is None:
-    		return 0
+        if response is None:
+            return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -523,8 +523,8 @@ class NetcraftEnum(multiprocessing.Process):
         return resp
 
     def get_response(self,response):
-    	if response is None:
-    		return 0
+        if response is None:
+            return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -645,8 +645,8 @@ class DNSdumpster(multiprocessing.Process):
         return self.get_response(resp)
 
     def get_response(self,response):
-    	if response is None:
-    		return 0
+        if response is None:
+            return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -729,8 +729,8 @@ class Virustotal(multiprocessing.Process):
         return self.get_response(resp)
 
     def get_response(self,response):
-    	if response is None:
-    		return 0
+        if response is None:
+            return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -798,8 +798,8 @@ class ThreatCrowd(multiprocessing.Process):
         return self.get_response(resp)
 
     def get_response(self,response):
-    	if response is None:
-    		return 0
+        if response is None:
+            return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -872,8 +872,8 @@ class CrtSearch(multiprocessing.Process):
         return self.get_response(resp)
 
     def get_response(self,response):
-    	if response is None:
-    		return 0
+        if response is None:
+            return 0
         if hasattr(response, "text"):
             return response.text
         else:
@@ -942,8 +942,8 @@ class PassiveDNS(multiprocessing.Process):
         return self.get_response(resp)
 
     def get_response(self,response):
-    	if response is None:
-    		return 0
+        if response is None:
+            return 0
         if hasattr(response, "text"):
             return response.text
         else:
