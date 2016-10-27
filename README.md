@@ -17,9 +17,10 @@ git clone https://github.com/aboul3la/Sublist3r.git
 
 ##Recommended Python Version:
 
-The recommended python version to use is 2.7.x on any platform.
+Sublist3r now supports Python 2 and Python 3.
 
-Other python versions maybe not **supported** at the moment.
+* The recommended version for Python 2 is **2.7.x**
+* The recommened version for Python 3 is **3.4.x**
 
 ##Dependencies:
 
