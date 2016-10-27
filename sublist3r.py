@@ -9,8 +9,6 @@ import sys
 import os
 import argparse
 import time
-import urlparse
-import urllib
 import hashlib
 import random
 import multiprocessing
@@ -23,6 +21,14 @@ from collections import Counter
 from subbrute import subbrute
 import dns.resolver
 import requests
+
+#Python 2.x and 3.x compatiablity
+if sys.version > '3':
+    import urllib.parse as urlparse
+    import urllib.parse as urllib
+else:
+    import urlparse
+    import urllib
 
 #In case you cannot install some of the required development packages, there's also an option to disable the SSL warning:
 try:
@@ -45,7 +51,7 @@ else:
     W = '\033[0m'  #white
 
 def banner():
-      print """%s
+      print("""%s
                  ____        _     _ _     _   _____
                 / ___| _   _| |__ | (_)___| |_|___ / _ __
                 \___ \| | | | '_ \| | / __| __| |_ \| '__|
@@ -53,7 +59,7 @@ def banner():
                 |____/ \__,_|_.__/|_|_|___/\__|____/|_|%s%s
 
                  # Coded By Ahmed Aboul-Ela - @aboul3la
-    """%(R,W,Y)
+    """%(R,W,Y))
 
 def parser_error(errmsg):
     banner()
@@ -135,7 +141,7 @@ class enumratorBase(object):
 
     def print_(self, text):
         if not self.silent:
-            print text
+            print(text)
         return
 
     def print_banner(self):
@@ -811,7 +817,6 @@ class PassiveDNS(enumratorBaseThreaded):
         super(PassiveDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
-
     def req(self, url):
         headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -911,7 +916,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce):
         print(Y+"[-] verbosity is enabled, will show the subdomains results in realtime"+W)
 
     #Start the engines enumeration
-    enums = [enum(domain, [], q=subdomains_queue, silent=silent, verbose=verbose) for enum in BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum, NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd, CrtSearch, PassiveDNS]
+    enums = [enum(domain, [], q=subdomains_queue, silent=silent, verbose=verbose) for enum in (BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum, NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd, CrtSearch, PassiveDNS)]
     for enum in enums:
         enum.start()
     for enum in enums:
@@ -954,7 +959,6 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce):
             for subdomain in subdomains:
                 print(G+subdomain+W)
     return subdomains
-    
 
 if __name__=="__main__":
     args = parse_args()
