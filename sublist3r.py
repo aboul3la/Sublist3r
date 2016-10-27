@@ -3,23 +3,26 @@
 # Sublist3r v1.0
 # By Ahmed Aboul-Ela - twitter.com/aboul3la
 
+# modules in standard library
 import re
 import sys
 import os
 import argparse
 import time
-import requests
 import urlparse
 import urllib
 import hashlib
 import random
 import multiprocessing
 import threading
-import dns.resolver
 import socket
 import functools
-from subbrute import subbrute
 from collections import Counter
+
+# external modules
+from subbrute import subbrute
+import dns.resolver
+import requests
 
 #In case you cannot install some of the required development packages, there's also an option to disable the SSL warning:
 try:
