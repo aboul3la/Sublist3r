@@ -432,7 +432,6 @@ class BingEnum(enumratorBaseThreaded):
             query = "domain:{domain} -www.{domain}".format(domain=self.domain)
         return query
 
-
 class BaiduEnum(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
@@ -491,35 +490,14 @@ class BaiduEnum(enumratorBaseThreaded):
             query = "site:{domain} -site:www.{domain}".format(domain=self.domain)
         return query
 
-class NetcraftEnum(multiprocessing.Process):
-    def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock(), silent=False, verbose=True):
+class NetcraftEnum(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
         self.base_url = 'http://searchdns.netcraft.com/?restriction=site+ends+with&host={domain}'
-        self.domain = urlparse.urlparse(domain).netloc
-        self.subdomains = []
-        self.session = requests.Session()
         self.engine_name = "Netcraft"
-        multiprocessing.Process.__init__(self)
-        self.lock = lock
+        self.lock = threading.Lock()
+        super(NetcraftEnum, self).__init__(self.base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         self.q = q
-        self.timeout = 10
-        self.silent = silent
-        self.verbose=verbose
-        self.print_banner()
-        return
-
-    def print_(self, text):
-        if not self.silent:
-            print text
-
-    def run(self):
-        domain_list = self.enumerate()
-        for domain in domain_list:
-            self.q.append(domain)
-        return
-
-    def print_banner(self):
-        self.print_(G+"[-] Searching now in %s.." %(self.engine_name)+W)
         return
 
     def req(self, url, cookies=None):
@@ -535,14 +513,6 @@ class NetcraftEnum(multiprocessing.Process):
             self.print_(e)
             resp = None
         return resp
-
-    def get_response(self,response):
-        if response is None:
-            return 0
-        if hasattr(response, "text"):
-            return response.text
-        else:
-            return response.content
 
     def get_next(self, resp):
         link_regx = re.compile('<A href="(.*?)"><b>Next page</b></a>')
@@ -594,38 +564,17 @@ class NetcraftEnum(multiprocessing.Process):
             pass
         return links_list
 
-
-class DNSdumpster(multiprocessing.Process):
-    def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock(), silent=False, verbose=True):
+class DNSdumpster(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        self.base_url = 'https://dnsdumpster.com/'
-        self.domain = urlparse.urlparse(domain).netloc
-        self.subdomains = []
+        base_url = 'https://dnsdumpster.com/'
         self.live_subdomains = []
-        self.session = requests.Session()
         self.engine_name = "DNSdumpster"
-        multiprocessing.Process.__init__(self)
         self.threads = 70
         self.lock = threading.BoundedSemaphore(value=self.threads)
         self.q = q
         self.timeout = 25
-        self.silent = silent
-        self.verbose = verbose
-        self.print_banner()
-        return
-
-    def print_(self, text):
-        if not self.silent:
-            print text
-
-    def run(self):
-        domain_list = self.enumerate()
-        for domain in domain_list:
-            self.q.append(domain)
-        return
-
-    def print_banner(self):
-        self.print_(G+"[-] Searching now in %s.." %(self.engine_name)+W)
+        super(DNSdumpster, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
     def check_host(self,host):
@@ -664,14 +613,6 @@ class DNSdumpster(multiprocessing.Process):
             resp = None
         return self.get_response(resp)
 
-    def get_response(self,response):
-        if response is None:
-            return 0
-        if hasattr(response, "text"):
-            return response.text
-        else:
-            return response.content
-
     def get_csrftoken(self, resp):
         csrf_regex = re.compile("<input type='hidden' name='csrfmiddlewaretoken' value='(.*?)' />",re.S)
         token = csrf_regex.findall(resp)[0]
@@ -688,7 +629,6 @@ class DNSdumpster(multiprocessing.Process):
             t.start()
             t.join()
         return self.live_subdomains
-
 
     def extract_domains(self, resp):
         tbl_regex = re.compile('<a name="hostanchor"><\/a>Host Records.*?<table.*?>(.*?)</table>',re.S)
@@ -708,38 +648,19 @@ class DNSdumpster(multiprocessing.Process):
                 self.subdomains.append(subdomain.strip())
         return links
 
-class Virustotal(multiprocessing.Process):
-    def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock(), silent=False, verbose=True):
+class Virustotal(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        self.base_url = 'https://www.virustotal.com/en/domain/{domain}/information/'
-        self.domain = urlparse.urlparse(domain).netloc
-        self.subdomains = []
-        self.session = requests.Session()
+        base_url = 'https://www.virustotal.com/en/domain/{domain}/information/'
         self.engine_name = "Virustotal"
-        self.silent = silent
-        multiprocessing.Process.__init__(self)
-        self.lock = lock
+        self.lock = threading.Lock()
         self.q = q
         self.timeout = 10
-        self.verbose = verbose
-        self.print_banner()
+        super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
-    def run(self):
-        domain_list = self.enumerate()
-        for domain in domain_list:
-            self.q.append(domain)
-        return
-
-    def print_(self, text):
-        if not self.silent:
-            print text
-
-    def print_banner(self):
-        self.print_(G+"[-] Searching now in %s.." %(self.engine_name)+W)
-        return
-
-    def req(self, url):
+    #the main send_req need to be rewritten
+    def send_req(self, url):
         headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-GB,en;q=0.5',
@@ -754,17 +675,10 @@ class Virustotal(multiprocessing.Process):
 
         return self.get_response(resp)
 
-    def get_response(self,response):
-        if response is None:
-            return 0
-        if hasattr(response, "text"):
-            return response.text
-        else:
-            return response.content
-
+    #once the send_req is rewritten we don't need to call this function, the stock one should be ok
     def enumerate(self):
         url = self.base_url.format(domain=self.domain)
-        resp = self.req(url)
+        resp = self.send_req(url)
         self.extract_domains(resp)
         return self.subdomains
 
@@ -784,34 +698,15 @@ class Virustotal(multiprocessing.Process):
             pass
 
 
-class ThreatCrowd(multiprocessing.Process):
-    def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock(), silent=False, verbose=True):
+class ThreatCrowd(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        self.base_url = 'https://www.threatcrowd.org/searchApi/v2/domain/report/?domain={domain}'
-        self.domain = urlparse.urlparse(domain).netloc
-        self.subdomains = []
-        self.session = requests.Session()
+        base_url = 'https://www.threatcrowd.org/searchApi/v2/domain/report/?domain={domain}'
         self.engine_name = "ThreatCrowd"
-        multiprocessing.Process.__init__(self)
-        self.lock = lock
+        self.lock = threading.Lock()
         self.q = q
         self.timeout = 20
-        self.silent = silent
-        self.verbose = verbose
-        self.print_banner()
-        return
-
-    def run(self):
-        domain_list = self.enumerate()
-        for domain in domain_list:
-            self.q.append(domain)
-        return
-
-    def print_(self, text):
-        if not self.silent:
-            print text
-    def print_banner(self):
-        self.print_(G+"[-] Searching now in %s.." %(self.engine_name)+W)
+        super(ThreatCrowd, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
     def req(self, url):
@@ -827,14 +722,6 @@ class ThreatCrowd(multiprocessing.Process):
             resp = None
 
         return self.get_response(resp)
-
-    def get_response(self,response):
-        if response is None:
-            return 0
-        if hasattr(response, "text"):
-            return response.text
-        else:
-            return response.content
 
     def enumerate(self):
         url = self.base_url.format(domain=self.domain)
@@ -863,35 +750,15 @@ class ThreatCrowd(multiprocessing.Process):
         except Exception as e:
             pass
 
-class CrtSearch(multiprocessing.Process):
-    def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock(), silent=False, verbose=True):
+class CrtSearch(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        self.base_url = 'https://crt.sh/?q=%25.{domain}'
-        self.domain = urlparse.urlparse(domain).netloc
-        self.subdomains = []
-        self.session = requests.Session()
+        base_url = 'https://crt.sh/?q=%25.{domain}'
         self.engine_name = "SSL Certificates"
-        multiprocessing.Process.__init__(self)
-        self.lock = lock
+        self.lock = threading.Lock()
         self.q = q
         self.timeout = 25
-        self.silent = silent
-        self.verbose = verbose
-        self.print_banner()
-        return
-
-    def run(self):
-        domain_list = self.enumerate()
-        for domain in domain_list:
-            self.q.append(domain)
-        return
-
-    def print_(self, text):
-        if not self.silent:
-            print text
-
-    def print_banner(self):
-        self.print_(G+"[-] Searching now in %s.." %(self.engine_name)+W)
+        super(CrtSearch, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
     def req(self, url):
@@ -907,14 +774,6 @@ class CrtSearch(multiprocessing.Process):
             resp = None
 
         return self.get_response(resp)
-
-    def get_response(self,response):
-        if response is None:
-            return 0
-        if hasattr(response, "text"):
-            return response.text
-        else:
-            return response.content
 
     def enumerate(self):
         url = self.base_url.format(domain=self.domain)
@@ -938,36 +797,17 @@ class CrtSearch(multiprocessing.Process):
         except Exception as e:
             pass
 
-class PassiveDNS(multiprocessing.Process):
-    def __init__(self, domain, subdomains=None, q=None, lock=threading.Lock(), silent=False, verbose=True):
+class PassiveDNS(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        self.base_url = 'http://ptrarchive.com/tools/search.htm?label={domain}'
-        self.domain = urlparse.urlparse(domain).netloc
-        self.subdomains = []
-        self.session = requests.Session()
+        base_url = 'http://ptrarchive.com/tools/search.htm?label={domain}'
         self.engine_name = "PassiveDNS"
-        multiprocessing.Process.__init__(self)
-        self.lock = lock
+        self.lock = threading.Lock()
         self.q = q
         self.timeout = 25
-        self.silent = silent
-        self.verbose = verbose
-        self.print_banner()
+        super(PassiveDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
-    def run(self):
-        domain_list = self.enumerate()
-        for domain in domain_list:
-            self.q.append(domain)
-        return
-
-    def print_(self, text):
-        if not self.silent:
-            print text
-
-    def print_banner(self):
-        self.print_(G+"[-] Searching now in %s.." %(self.engine_name)+W)
-        return
 
     def req(self, url):
         headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
@@ -984,13 +824,6 @@ class PassiveDNS(multiprocessing.Process):
 
         return self.get_response(resp)
 
-    def get_response(self,response):
-        if response is None:
-            return 0
-        if hasattr(response, "text"):
-            return response.text
-        else:
-            return response.content
 
     def enumerate(self):
         url = self.base_url.format(domain=self.domain)
@@ -1133,4 +966,4 @@ if __name__=="__main__":
 
 
     banner()
-    res = main(domain, threads, savefile, ports, silent=True, verbose=verbose, enable_bruteforce=enable_bruteforce)
+    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce)
