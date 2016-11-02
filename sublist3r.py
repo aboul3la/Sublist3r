@@ -877,7 +877,7 @@ class portscan():
                 pass
         self.lock.release()
         if len(openports) > 0:
-            self.print_("%s%s%s - %sFound open ports:%s %s%s%s"%(G,host,W,R,W,Y,', '.join(openports),W))
+            print("%s%s%s - %sFound open ports:%s %s%s%s"%(G,host,W,R,W,Y,', '.join(openports),W))
 
     def run(self):
         for subdomain in self.subdomains:
