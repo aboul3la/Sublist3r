@@ -77,6 +77,7 @@ def parse_args():
     parser.add_argument('-p', '--ports', help='Scan the found subdomains against specified tcp ports')
     parser.add_argument('-v', '--verbose', help='Enable Verbosity and display results in realtime',nargs='?', default=False)
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
+    parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
     return parser.parse_args()
 
@@ -884,7 +885,7 @@ class portscan():
             t = threading.Thread(target=self.port_scan,args=(subdomain,self.ports))
             t.start()
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce):
+def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
     bruteforce_list = set()
     search_list = set()
 
@@ -915,8 +916,32 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce):
     if verbose and not silent:
         print(Y+"[-] verbosity is enabled, will show the subdomains results in realtime"+W)
 
+    supported_engines = {'baidu':BaiduEnum,
+                         'yahoo':YahooEnum,
+                         'google':GoogleEnum,
+                         'bing':BingEnum,
+                         'ask':AskEnum,
+                         'netcraft':NetcraftEnum,
+                         'dnsdumpster':DNSdumpster,
+                         'virstotal':Virustotal,
+                         'threatcrowd':ThreatCrowd,
+                         'ssl':CrtSearch,
+                         'passivedns':PassiveDNS
+                         }
+
+    chosenEnums = []
+
+    if engines == None:
+        chosenEnums = [BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
+                       NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd, CrtSearch, PassiveDNS]
+    else:
+        engines = engines.split(',')
+        for engine in engines:
+            if supported_engines.has_key(engine.lower()):
+                chosenEnums.append(supported_engines[engine.lower()])
+
     #Start the engines enumeration
-    enums = [enum(domain, [], q=subdomains_queue, silent=silent, verbose=verbose) for enum in (BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum, NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd, CrtSearch, PassiveDNS)]
+    enums = [enum(domain, [], q=subdomains_queue, silent=silent, verbose=verbose) for enum in chosenEnums]
     for enum in enums:
         enum.start()
     for enum in enums:
@@ -968,9 +993,10 @@ if __name__=="__main__":
     ports = args.ports
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
+    engines = args.engines
     if verbose or verbose is None:
         verbose = True
 
 
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce)
+    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
