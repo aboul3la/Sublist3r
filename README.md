@@ -105,6 +105,7 @@ Short Form    | Long Form     | Description
 -p            | --ports       | Scan the found subdomains against specified tcp ports
 -v            | --verbose     | Enable Verbosity and display results in realtime
 -t            | --threads     | Number of threads to use for subbrute bruteforce
+-e            | --engines     | Specify a comma-separated list of search engines
 -o            | --output      | Save the results to text file
 -h            | --help        | show the help message and exit
 
