@@ -923,7 +923,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'ask':AskEnum,
                          'netcraft':NetcraftEnum,
                          'dnsdumpster':DNSdumpster,
-                         'virstotal':Virustotal,
+                         'virustotal':Virustotal,
                          'threatcrowd':ThreatCrowd,
                          'ssl':CrtSearch,
                          'passivedns':PassiveDNS
