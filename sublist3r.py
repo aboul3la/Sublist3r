@@ -923,7 +923,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'ask':AskEnum,
                          'netcraft':NetcraftEnum,
                          'dnsdumpster':DNSdumpster,
-                         'virstotal':Virustotal,
+                         'virustotal':Virustotal,
                          'threatcrowd':ThreatCrowd,
                          'ssl':CrtSearch,
                          'passivedns':PassiveDNS
@@ -937,7 +937,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     else:
         engines = engines.split(',')
         for engine in engines:
-            if supported_engines.has_key(engine.lower()):
+            if engine.lower() in supported_engines:
                 chosenEnums.append(supported_engines[engine.lower()])
 
     #Start the engines enumeration
