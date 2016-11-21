@@ -72,6 +72,7 @@ def parser_error(errmsg):
     print(R + "Error: " + errmsg + W)
     sys.exit()
 
+
 def parse_args():
     # parse the arguments
     parser = argparse.ArgumentParser(epilog='\tExample: \r\npython ' + sys.argv[0] + " -d google.com")
@@ -289,7 +290,7 @@ class GoogleEnum(enumratorBaseThreaded):
                 subdomain = urlparse.urlparse(link).netloc
                 if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
                     if self.verbose:
-                        self.print_("%s%s: %s%s"%(R, self.engine_name, W, subdomain))
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
                     self.subdomains.append(subdomain.strip())
         except Exception:
             pass
@@ -323,7 +324,7 @@ class YahooEnum(enumratorBaseThreaded):
         self.engine_name = "Yahoo"
         self.MAX_DOMAINS = 10
         self.MAX_PAGES = 0
-        super(YahooEnum, self).__init__(base_url, self.engine_name,domain, subdomains, q=q, silent=silent, verbose=verbose)
+        super(YahooEnum, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         self.q = q
         return
 
@@ -388,7 +389,7 @@ class AskEnum(enumratorBaseThreaded):
                 subdomain = urlparse.urlparse(link).netloc
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if self.verbose:
-                        self.print_("%s%s: %s%s"%(R, self.engine_name, W, subdomain))
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
                     self.subdomains.append(subdomain.strip())
         except Exception:
             pass
@@ -532,7 +533,7 @@ class NetcraftEnum(enumratorBaseThreaded):
         }
 
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout,cookies=cookies)
+            resp = self.session.get(url, headers=headers, timeout=self.timeout, cookies=cookies)
         except Exception as e:
             self.print_(e)
             resp = None
@@ -587,6 +588,7 @@ class NetcraftEnum(enumratorBaseThreaded):
         except Exception:
             pass
         return links_list
+
 
 class DNSdumpster(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
@@ -710,7 +712,7 @@ class Virustotal(enumratorBaseThreaded):
         return self.subdomains
 
     def extract_domains(self, resp):
-        link_regx = re.compile('<div class="enum.*?">.*?<a target="_blank" href=".*?">(.*?)</a>',re.S)
+        link_regx = re.compile('<div class="enum.*?">.*?<a target="_blank" href=".*?">(.*?)</a>', re.S)
         try:
             links = link_regx.findall(resp)
             for link in links:
@@ -772,7 +774,7 @@ class ThreatCrowd(enumratorBaseThreaded):
                     continue
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if self.verbose:
-                        self.print_("%s%s: %s%s"%(R, self.engine_name, W, subdomain))
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
                     self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
@@ -821,7 +823,7 @@ class CrtSearch(enumratorBaseThreaded):
                     continue
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if self.verbose:
-                        self.print_("%s%s: %s%s"%(R, self.engine_name, W, subdomain))
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
                     self.subdomains.append(subdomain.strip())
         except Exception as e:
             pass
@@ -870,7 +872,7 @@ class PassiveDNS(enumratorBaseThreaded):
                 subdomain = link[:link.find('[')].strip()
                 if subdomain not in self.subdomains and subdomain != self.domain and subdomain.endswith(self.domain):
                     if self.verbose:
-                        self.print_("%s%s: %s%s" %( R, self.engine_name, W, subdomain))
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
                     self.subdomains.append(subdomain.strip())
         except Exception:
             pass
@@ -905,6 +907,7 @@ class portscan():
             t = threading.Thread(target=self.port_scan, args=(subdomain, self.ports))
             t.start()
 
+
 def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
     bruteforce_list = set()
     search_list = set()
@@ -930,8 +933,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
     parsed_domain = urlparse.urlparse(domain)
 
-    if not silent: 
-        print(B + "[-] Enumerating subdomains now for %s"%parsed_domain.netloc + W)
+    if not silent:
+        print(B + "[-] Enumerating subdomains now for %s" % parsed_domain.netloc + W)
 
     if verbose and not silent:
         print(Y + "[-] verbosity is enabled, will show the subdomains results in realtime" + W)
@@ -1001,7 +1004,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
         if ports:
             if not silent:
-                print(G + "[-] Start port scan now for the following ports: %s%s" % (Y,ports) + W)
+                print(G + "[-] Start port scan now for the following ports: %s%s" % (Y, ports) + W)
             ports = ports.split(',')
             pscan = portscan(subdomains, ports)
             pscan.run()
@@ -1012,7 +1015,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     return subdomains
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     args = parse_args()
     domain = args.domain
     threads = args.threads
