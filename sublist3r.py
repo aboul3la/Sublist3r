@@ -141,7 +141,7 @@ class enumratorBase(object):
         self.domain = urlparse.urlparse(domain).netloc
         self.session = requests.Session()
         self.subdomains = []
-        self.timeout = 10
+        self.timeout = 25
         self.base_url = base_url
         self.engine_name = engine_name
         self.silent = silent
@@ -597,7 +597,6 @@ class DNSdumpster(enumratorBaseThreaded):
         self.threads = 70
         self.lock = threading.BoundedSemaphore(value=self.threads)
         self.q = q
-        self.timeout = 25
         super(DNSdumpster, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
@@ -681,7 +680,6 @@ class Virustotal(enumratorBaseThreaded):
         self.engine_name = "Virustotal"
         self.lock = threading.Lock()
         self.q = q
-        self.timeout = 10
         super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
@@ -732,7 +730,6 @@ class ThreatCrowd(enumratorBaseThreaded):
         self.engine_name = "ThreatCrowd"
         self.lock = threading.Lock()
         self.q = q
-        self.timeout = 20
         super(ThreatCrowd, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
@@ -785,7 +782,6 @@ class CrtSearch(enumratorBaseThreaded):
         self.engine_name = "SSL Certificates"
         self.lock = threading.Lock()
         self.q = q
-        self.timeout = 25
         super(CrtSearch, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
@@ -834,7 +830,6 @@ class PassiveDNS(enumratorBaseThreaded):
         self.engine_name = "PassiveDNS"
         self.lock = threading.Lock()
         self.q = q
-        self.timeout = 25
         super(PassiveDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
