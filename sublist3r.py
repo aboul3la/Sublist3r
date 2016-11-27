@@ -14,7 +14,6 @@ import random
 import multiprocessing
 import threading
 import socket
-import functools
 from collections import Counter
 
 # external modules
@@ -95,10 +94,10 @@ def write_file(filename, subdomains):
             f.write(subdomain + "\r\n")
 
 
-def subdomain_cmp(d1, d2):
-    """cmp function for subdomains d1 and d2.
+def subdomain_sorting_key(hostname):
+    """Sorting key for subdomains
 
-    This cmp function orders subdomains from the top-level domain at the right
+    This sorting key orders subdomains from the top-level domain at the right
     reading left, then moving '^' and 'www' to the top of their group. For
     example, the following list is sorted correctly:
 
@@ -115,24 +114,10 @@ def subdomain_cmp(d1, d2):
     ]
 
     """
-    d1 = d1.split('.')[::-1]
-    d2 = d2.split('.')[::-1]
-
-    val = 1 if d1 > d2 else (-1 if d1 < d2 else 0)
-    if ((len(d1) < len(d2)) and
-        (d1[-1] == 'www') and
-        (d1[: - 1] == d2[:len(d1) - 1])):
-        val = -1
-    elif ((len(d1) > len(d2)) and
-          (d2[-1] == 'www') and
-          (d1[:len(d2) - 1] == d2[: - 1])):
-        val = 1
-    elif d1[:-1] == d2[:-1]:
-        if d1[-1] == 'www':
-            val = -1
-        elif d2[-1] == 'www':
-            val = 1
-    return val
+    parts = hostname.split('.')[::-1]
+    if parts[-1] == 'www':
+        return parts[:-1], 1
+    return parts, 0
 
 
 class enumratorBase(object):
@@ -984,10 +969,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     subdomains = search_list.union(bruteforce_list)
 
     if subdomains:
-        subdomains = sorted(
-            subdomains,
-            key=functools.cmp_to_key(subdomain_cmp),
-        )
+        subdomains = sorted(subdomains, key=subdomain_sorting_key)
+
         if savefile:
             write_file(savefile, subdomains)
 
