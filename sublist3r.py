@@ -815,6 +815,10 @@ class CrtSearch(enumratorBaseThreaded):
                 subdomain = link.strip()
                 if not subdomain.endswith(self.domain) or '*' in subdomain:
                     continue
+
+                if '@' in subdomain:
+                    subdomain = subdomain[subdomain.find('@')+1:]
+
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if self.verbose:
                         self.print_("%s%s: %s%s"%(R, self.engine_name, W, subdomain))
