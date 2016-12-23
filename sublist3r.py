@@ -15,7 +15,8 @@ import multiprocessing
 import threading
 import socket
 from collections import Counter
-
+from texttable import Texttable
+from geoip import geolite2
 # external modules
 from subbrute import subbrute
 import dns.resolver
@@ -914,7 +915,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
     parsed_domain = urlparse.urlparse(domain)
 
-    if not silent: 
+    if not silent:
         print(B + "[-] Enumerating subdomains now for %s"%parsed_domain.netloc + W)
 
     if verbose and not silent:
@@ -989,8 +990,17 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
             pscan.run()
 
         elif not silent:
+            table = Texttable()
+            table.set_deco(Texttable.HEADER)
             for subdomain in subdomains:
-                print(G + subdomain + W)
+                try:
+                    geo = geolite2.lookup(socket.gethostbyname(subdomain))
+                    table.add_rows([["Subdomain", "IP Address", "Location"],
+                [subdomain,    socket.gethostbyname(subdomain), geo.country + " - " + str(geo.location)]])
+                except socket.gaierror:
+                    table.add_rows([["Subdomain", "IP Address", "Location"],
+                [subdomain,    "-",    "-"]])
+            print(G + table.draw() + W)
     return subdomains
 
 
