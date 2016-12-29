@@ -79,6 +79,7 @@ def parse_args():
     parser._optionals.title = "OPTIONS"
     parser.add_argument('-d', '--domain', help="Domain name to enumerate it's subdomains", required=True)
     parser.add_argument('-b', '--bruteforce', help='Enable the subbrute bruteforce module', nargs='?', default=False)
+    parser.add_argument('-to', '--takeover-scan', help='Scan for subdomain takeover issues', nargs='?', default=False)
     parser.add_argument('-p', '--ports', help='Scan the found subdomains against specified tcp ports')
     parser.add_argument('-v', '--verbose', help='Enable Verbosity and display results in realtime', nargs='?', default=False)
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
@@ -120,6 +121,42 @@ def subdomain_sorting_key(hostname):
         return parts[:-1], 1
     return parts, 0
 
+def get_url_signatures(url):
+    service_signatures = {
+        'Heroku': '<iframe src="//www.herokucdn.com/error-pages/no-such-app.html"></iframe>',
+        'GitHub Pages': '<p> If you\'re trying to publish one, <a href="https://help.github.com/pages/">read the full documentation</a> to learn how to set up <strong>GitHub Pages</strong> for your repository, organization, or user account. </p>',
+        'Squarespace': '<title>Squarespace - No Such Account</title>',
+        'Shopify': '<div id="shop-not-found"> <h1 class="tc">Sorry, this shop is currently unavailable.</h1> </div>',
+        'Zendesk': '<span class="title">Bummer. It looks like the help center that you are trying to reach no longer exists.</span>',
+        'GitLab': '<head> <title>The page you\'re looking for could not be found (404)</title> <style> body { color: #666; text-align: center; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; margin: 0; width: 800px; margin: auto; font-size: 14px; } h1 { font-size: 56px; line-height: 100px; font-weight: normal; color: #456; } h2 { font-size: 24px; color: #666; line-height: 1.5em; } h3 { color: #456; font-size: 20px; font-weight: normal; line-height: 28px; } hr { margin: 18px 0; border: 0; border-top: 1px solid #EEE; border-bottom: 1px solid white; } </style> </head>'
+    }
+    data = get_url_data(url)
+    if data == 0:
+        return []
+    #Strip newlines
+    data = data.replace('\n', '').replace('\r', '')
+    data = re.sub("\s\s+", ' ', data);
+    results = []
+    for name in service_signatures:
+        if service_signatures[name] in data:
+            results.append(name)
+    return results
+
+def get_url_data(url, timeout=25):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-GB,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate',
+        'Connection': 'keep-alive',
+    }
+    try:
+        resp = requests.Session().get(url, headers=headers, timeout=timeout)
+    except Exception:
+        resp = None
+    if resp is None:
+        return 0
+    return resp.text if hasattr(resp, "text") else resp.content
 
 class enumratorBase(object):
     def __init__(self, base_url, engine_name, domain, subdomains=None, silent=False, verbose=True):
@@ -892,7 +929,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, takeover_check, engines):
     bruteforce_list = set()
     search_list = set()
 
@@ -904,6 +941,10 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     # Check Bruteforce Status
     if enable_bruteforce or enable_bruteforce is None:
         enable_bruteforce = True
+
+    # Check Takeover Status
+    if takeover_check or takeover_check is None:
+        takeover_check = True
 
     # Validate domain
     domain_check = re.compile("^(http|https)?[a-zA-Z0-9]+([\-\.]{1}[a-zA-Z0-9]+)*\.[a-zA-Z]{2,}$")
@@ -984,9 +1025,21 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         if not silent:
             print(Y + "[-] Total Unique Subdomains Found: %s" % len(subdomains) + W)
 
+        if takeover_check:
+            print(G + "[-] Checking for subdomains pointing to unregistered services" + W)
+            for subdomain in subdomains:
+                if(verbose):
+                    print(G + "[-] Checking " + subdomain + W)
+
+                services = get_url_signatures("http://" + subdomain)
+                if len(services) > 0:
+                    for service in services:
+                        print(Y + "[-] Found unregistered service \"" + service + "\" on subdomain " + subdomain + W)
+
+
         if ports:
             if not silent:
-                print(G + "[-] Start port scan now for the following ports: %s%s" % (Y, ports) + W)
+                print(G + "[-] Starting port scan for the following ports: %s%s" % (Y, ports) + W)
             ports = ports.split(',')
             pscan = portscan(subdomains, ports)
             pscan.run()
@@ -1006,7 +1059,8 @@ if __name__ == "__main__":
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    takeover_check = args.takeover_scan
     if verbose or verbose is None:
         verbose = True
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, takeover_check=takeover_check, engines=engines)
