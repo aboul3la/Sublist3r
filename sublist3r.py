@@ -992,8 +992,16 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
             pscan.run()
 
         elif not silent:
+            Resolver = dns.resolver.Resolver()
+            Resolver.nameservers = ['8.8.8.8', '8.8.4.4']
+
             for subdomain in subdomains:
-                print(G + subdomain + W)
+                try:
+                    ip = Resolver.query(subdomain)[0].to_text()
+                except Exception, e:
+                    ip = 'Not Resolved'
+
+                print(G + '%s --> %s' % (subdomain,ip) + W)
     return subdomains
 
 
