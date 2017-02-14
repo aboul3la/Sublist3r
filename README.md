@@ -30,9 +30,8 @@ These dependencies can be installed using the requirements file:
 
 - Installation on Windows:
 ```
-c:\python27\python.exe -m pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
-
 - Installation on Linux
 ```
 sudo pip install -r requirements.txt
@@ -44,7 +43,7 @@ Alternatively, each module can be installed independently as shown below.
 
 - Install for Windows:
 ```
-c:\python27\python.exe -m pip install requests
+python -m pip install requests
 ```
 
 - Install for Ubuntu/Debian:
@@ -66,7 +65,7 @@ sudo pip install requests
 
 - Install for Windows:
 ```
-c:\python27\python.exe -m pip install dnspython
+python -m pip install dnspython
 ```
 
 - Install for Ubuntu/Debian:
@@ -94,6 +93,17 @@ sudo yum install python-argparse
 - Install using pip:
 ```
 sudo pip install argparse
+```
+
+**And for coloring in windows install the following libraries**
+```
+python -m pip install win_unicode_console colorama
+```
+
+*Note:To get the path of python.exe for the windows installation process use :*
+```
+import sys
+sys.executable
 ```
 
 ##Usage
