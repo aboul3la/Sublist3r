@@ -514,7 +514,7 @@ class BaiduEnum(enumratorBaseThreaded):
 class NetcraftEnum(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        self.base_url = 'http://searchdns.netcraft.com/?restriction=site+ends+with&host={domain}'
+        self.base_url = 'https://searchdns.netcraft.com/?restriction=site+ends+with&host={domain}'
         self.engine_name = "Netcraft"
         self.lock = threading.Lock()
         super(NetcraftEnum, self).__init__(self.base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
