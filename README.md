@@ -151,13 +151,13 @@ subdomains = sublist3r.main(domain, no_threads, savefile, ports, silent, verbose
 The main function will return a set of unique subdomains found by Sublist3r
 
 **Function Usage:**
-* domain: The domain you want to enumerate subdomains of
-* savefile: Save the result into a text file
-* ports:  specify a comma-sperated list of tcp ports to scan
-* silent: Set Sublist3r to work in silent mode during execution (could be helpful when you don't need a lot of noise)
-* verbose: Show the found subdomains in real time
-* enable_bruteforce: Enable the subbrute module
-* engines: Optional to choose specific OSINT engines
+* domain: The domain you want to enumerate subdomains of.
+* savefile: save the output into text file.
+* ports: specify a comma-sperated list of the tcp ports to scan.
+* silent: set sublist3r to work in silent mode during the execution (helpful when you don't need a lot of noise),
+* verbose: display the found subdomains in real time,
+* enable_bruteforce: enable the bruteforce module,
+* engines: (Optional) to choose specific engines,
 
 Example to enumerate subdomains of Yahoo.com:
 ```python
