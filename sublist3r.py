@@ -56,7 +56,7 @@ if is_windows:
     except:
         print("[!] Error: Coloring libraries not installed ,no coloring will be used [Check the readme]")
         G = Y = B = R = W = G = Y = B = R = W = ''
-        
+
 
 else:
     G = '\033[92m'  # green
@@ -874,6 +874,87 @@ class PassiveDNS(enumratorBaseThreaded):
         except Exception:
             pass
 
+class Ipv4Info(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        base_url = 'http://ipv4info.com/search/{domain}'
+        self.engine_name = "IPv4Info"
+        self.lock = threading.Lock()
+        self.q = q
+        super(Ipv4Info, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        return
+
+    def req(self, url):
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-GB,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+        }
+
+        try:
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+
+            # Get IP address page token
+            tokens_regx = re.compile('href="/ip-address/(.*)/' + self.domain + '"')
+
+            tokens = tokens_regx.findall(resp.text)
+
+            if len(tokens) == 0:
+                return None
+
+            resp = self.session.get('http://ipv4info.com/ip-address/' + tokens[0] + '/' + self.domain, headers=self.headers, timeout=self.timeout)
+
+            tokens_regx = re.compile('href="/dns/(.*?)/' + self.domain + '"')
+            tokens = tokens_regx.findall(resp.text)
+
+            if len(tokens) == 0:
+                return None
+
+            token = tokens[0]
+
+            resp = self.session.get('http://ipv4info.com/subdomains/' + token + '/' + self.domain + '.html', headers=self.headers, timeout=self.timeout)
+
+        except Exception as e:
+            self.print_(e)
+            resp = None
+
+        return self.get_response(resp)
+
+    def enumerate(self):
+        url = self.base_url.format(domain=self.domain)
+        resp = self.req(url)
+        self.extract_domains(resp)
+        return self.subdomains
+
+    def extract_domains(self, resp):
+        link_regx = re.compile('title="Realtime DNS data for domain (.*)"')
+        try:
+            links = link_regx.findall(resp)
+
+            for link in links:
+                if self.domain not in link:
+                    continue
+
+                subdomain = link.strip()
+                if subdomain not in self.subdomains and subdomain != self.domain and subdomain.endswith(self.domain):
+                    if self.verbose:
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                    self.subdomains.append(subdomain.strip())
+
+            next_page_regx = re.compile('href="(/subdomains/.*/page\d/' + self.domain + '.html)"\s*>Next page', re.MULTILINE)
+            next_page = next_page_regx.findall(resp)
+
+            if len(next_page) != 0:
+                try:
+                    resp = self.session.get('http://ipv4info.com' + next_page[0], headers=self.headers, timeout=self.timeout)
+
+                    self.extract_domains(resp.text)
+                except Exception as e:
+                    self.print_(e)
+                    resp = None
+        except Exception:
+           pass
 
 class portscan():
     def __init__(self, subdomains, ports):
@@ -946,7 +1027,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'virustotal': Virustotal,
                          'threatcrowd': ThreatCrowd,
                          'ssl': CrtSearch,
-                         'passivedns': PassiveDNS
+                         'passivedns': PassiveDNS,
+                         'ipv4info': Ipv4Info
                          }
 
     chosenEnums = []
