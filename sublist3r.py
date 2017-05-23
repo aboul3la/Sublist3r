@@ -4,6 +4,7 @@
 # By Ahmed Aboul-Ela - twitter.com/aboul3la
 
 # modules in standard library
+import json
 import re
 import sys
 import os
@@ -380,6 +381,7 @@ class AskEnum(enumratorBaseThreaded):
     def extract_domains(self, resp):
         link_regx = re.compile('<p class="web-result-url">(.*?)</p>')
         try:
+            links_list = []
             links_list = link_regx.findall(resp)
             for link in links_list:
                 if not link.startswith('http'):
@@ -826,6 +828,58 @@ class CrtSearch(enumratorBaseThreaded):
         except Exception as e:
             pass
 
+class GoogleTER(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        base_url = 'https://www.google.com/transparencyreport/jsonp/ct/search?domain={domain}&incl_exp=false&incl_sub=true&c='
+        self.engine_name = "GoogleTER"
+        self.lock = threading.Lock()
+        self.q = q
+        self.Token = ""
+        super(GoogleTER, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        return
+    def req(self, url):
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-GB,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+        }
+
+        try:
+            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+        except Exception as e:
+            self.print_(e)
+            resp = None
+        return self.get_response(resp)
+
+    def enumerate(self):
+        url = self.base_url.format(domain=self.domain)
+        while True:
+            resp = self.req(url)
+            self.extract_domains(resp)
+            if "nextPageToken" not in resp:
+                return self.subdomains
+            url = self.base_url.format(domain=self.domain) + "&token=" + self.Token.replace("=","%3D")
+
+    def extract_domains(self, resp):
+        _jsonp_begin = r'/* API response */('
+        _jsonp_end = r'));'
+        try:
+
+            googleresult = json.loads(resp[len(_jsonp_begin):-len(_jsonp_end)])
+            for subs in googleresult["results"]:
+                if self.domain in googleresult:
+                    continue
+                subdomain = subs["subject"]
+                if subdomain not in self.subdomains and subdomain != self.domain and subdomain.endswith(self.domain):
+                    if self.verbose:
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                    self.subdomains.append(subdomain.strip())
+            self.Token = googleresult["nextPageToken"]
+        except Exception:
+            pass
+
 
 class PassiveDNS(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
@@ -946,7 +1000,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'virustotal': Virustotal,
                          'threatcrowd': ThreatCrowd,
                          'ssl': CrtSearch,
-                         'passivedns': PassiveDNS
+                         'passivedns': PassiveDNS,
+                         'googleter': GoogleTER
                          }
 
     chosenEnums = []
@@ -955,7 +1010,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
             NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
-            CrtSearch, PassiveDNS
+            CrtSearch, PassiveDNS, GoogleTER
         ]
     else:
         engines = engines.split(',')
