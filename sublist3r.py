@@ -145,6 +145,12 @@ class enumratorBase(object):
         self.engine_name = engine_name
         self.silent = silent
         self.verbose = verbose
+        self.headers = {
+              'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Language': 'en-GB,en;q=0.5',
+              'Accept-Encoding': 'gzip, deflate',
+          } 
         self.print_banner()
 
     def print_(self, text):
@@ -158,17 +164,10 @@ class enumratorBase(object):
         return
 
     def send_req(self, query, page_no=1):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-            'Connection': 'keep-alive',
-        }
 
         url = self.base_url.format(query=query, page_no=page_no)
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception:
             resp = None
         return self.get_response(resp)
@@ -523,15 +522,8 @@ class NetcraftEnum(enumratorBaseThreaded):
 
     def req(self, url, cookies=None):
         cookies = cookies or {}
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-        }
-
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout, cookies=cookies)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout, cookies=cookies)
         except Exception as e:
             self.print_(e)
             resp = None
@@ -619,14 +611,8 @@ class DNSdumpster(enumratorBaseThreaded):
 
     def req(self, req_method, url, params=None):
         params = params or {}
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-            'Referer': 'https://dnsdumpster.com'
-        }
-
+        headers = dict(self.headers)
+        headers['Referer'] = 'https://dnsdumpster.com'
         try:
             if req_method == 'GET':
                 resp = self.session.get(url, headers=headers, timeout=self.timeout)
@@ -685,15 +671,8 @@ class Virustotal(enumratorBaseThreaded):
 
     # the main send_req need to be rewritten
     def send_req(self, url):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-        }
-
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception as e:
             self.print_(e)
             resp = None
@@ -734,15 +713,8 @@ class ThreatCrowd(enumratorBaseThreaded):
         return
 
     def req(self, url):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-        }
-
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception:
             resp = None
 
@@ -786,15 +758,8 @@ class CrtSearch(enumratorBaseThreaded):
         return
 
     def req(self, url):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-        }
-
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception:
             resp = None
 
@@ -833,20 +798,30 @@ class PassiveDNS(enumratorBaseThreaded):
         base_url = 'http://ptrarchive.com/tools/search.htm?label={domain}'
         self.engine_name = "PassiveDNS"
         self.lock = threading.Lock()
-        self.q = q
+        self.q = q       
         super(PassiveDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
+    
+    def get_agent(self,ua=None):
+        agents_url = 'http://www.webuseragents.com/recent'
+        try:
+            resp = session.get(agents_url, headers=self.headers, timeout=self.timeout)
+            agents_list = self.get_response(resp)
+            agents_regex = re.compile('<a href="/ua/.*?>(.*)</a>')
+            agents = agents_regex.findall(agents_list)
+            ua =  random.choice(agents)        
+        except Exception as e:
+            pass
+        
+        return ua
 
     def req(self, url):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-        }
-
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+            if self.get_agent():
+                self.headers['User-Agent'] = self.get_agent()
+                
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+            
         except Exception as e:
             self.print_(e)
             resp = None
@@ -860,7 +835,7 @@ class PassiveDNS(enumratorBaseThreaded):
         return self.subdomains
 
     def extract_domains(self, resp):
-        link_regx = re.compile('<td>(.*?)</td>')
+        link_regx = re.compile('<td>(.*?)</td>',re.IGNORECASE)
         try:
             links = link_regx.findall(resp)
             for link in links:
