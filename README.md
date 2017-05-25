@@ -80,6 +80,11 @@ sudo pip install dnspython
 
 #### argparse Module
 
+- Install for Windows:
+```
+c:\python27\python.exe -m pip install argparse
+```
+
 - Install for Ubuntu/Debian:
 ```
 sudo apt-get install python-argparse
