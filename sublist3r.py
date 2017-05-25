@@ -599,11 +599,10 @@ class DNSdumpster(enumratorBaseThreaded):
         self.lock.acquire()
         try:
             ip = Resolver.query(host, 'A')[0].to_text()
-            if ip:
-                if self.verbose:
-                    self.print_("%s%s: %s%s" % (R, self.engine_name, W, host))
-                is_valid = True
-                self.live_subdomains.append(host)
+            if self.verbose:
+                self.print_("%s%s: %s%s" % (R, self.engine_name, W, host))
+            is_valid = True
+            self.live_subdomains.append(host)
         except:
             pass
         self.lock.release()
