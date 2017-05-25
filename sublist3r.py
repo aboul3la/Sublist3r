@@ -146,10 +146,10 @@ class enumratorBase(object):
         self.silent = silent
         self.verbose = verbose
         self.headers = {
-              'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-              'Accept-Language': 'en-GB,en;q=0.5',
-              'Accept-Encoding': 'gzip, deflate',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+              'Accept-Language': 'en-US,en;q=0.8',
+              'Accept-Encoding': 'gzip',
           } 
         self.print_banner()
 
@@ -805,7 +805,7 @@ class PassiveDNS(enumratorBaseThreaded):
     def get_agent(self,ua=None):
         agents_url = 'http://www.webuseragents.com/recent'
         try:
-            resp = session.get(agents_url, headers=self.headers, timeout=self.timeout)
+            resp = self.session.get(agents_url, headers=self.headers, timeout=self.timeout)
             agents_list = self.get_response(resp)
             agents_regex = re.compile('<a href="/ua/.*?>(.*)</a>')
             agents = agents_regex.findall(agents_list)
@@ -817,13 +817,14 @@ class PassiveDNS(enumratorBaseThreaded):
 
     def req(self, url):
         try:
-            if self.get_agent():
-                self.headers['User-Agent'] = self.get_agent()
-                
-            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
-            
+            headers = dict(self.headers)
+            user_agent = self.get_agent()
+            if user_agent:
+                headers['User-Agent'] = user_agent
+
+            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+
         except Exception as e:
-            self.print_(e)
             resp = None
 
         return self.get_response(resp)
@@ -831,17 +832,17 @@ class PassiveDNS(enumratorBaseThreaded):
     def enumerate(self):
         url = self.base_url.format(domain=self.domain)
         resp = self.req(url)
+        if not resp:
+            return self.subdomains
+
         self.extract_domains(resp)
         return self.subdomains
 
     def extract_domains(self, resp):
-        link_regx = re.compile('<td>(.*?)</td>',re.IGNORECASE)
+        link_regx = re.compile('[a-zA-Z0-9.-]*\.'+ self.domain,re.IGNORECASE)
         try:
             links = link_regx.findall(resp)
-            for link in links:
-                if self.domain not in link:
-                    continue
-                subdomain = link[:link.find('[')].strip()
+            for subdomain in links:
                 if subdomain not in self.subdomains and subdomain != self.domain and subdomain.endswith(self.domain):
                     if self.verbose:
                         self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
