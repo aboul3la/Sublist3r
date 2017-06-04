@@ -42,8 +42,21 @@ is_windows = sys.platform.startswith('win')
 
 # Console Colors
 if is_windows:
-    # use no terminal colors on windows
-    G = Y = B = R = W = G = Y = B = R = W = ''
+    # Windows deserve coloring too :D
+    G = '\033[92m'  # green
+    Y = '\033[93m'  # yellow
+    B = '\033[94m'  # blue
+    R = '\033[91m'  # red
+    W = '\033[0m'   # white
+    try:
+        import win_unicode_console , colorama
+        win_unicode_console.enable()
+        colorama.init()
+        #Now the unicode will work ^_^
+    except:
+        print("[!] Error: Coloring libraries not installed ,no coloring will be used [Check the readme]")
+        G = Y = B = R = W = G = Y = B = R = W = ''
+        
 
 else:
     G = '\033[92m'  # green
@@ -169,6 +182,12 @@ class enumratorBase(object):
         self.engine_name = engine_name
         self.silent = silent
         self.verbose = verbose
+        self.headers = {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+              'Accept-Language': 'en-US,en;q=0.8',
+              'Accept-Encoding': 'gzip',
+          } 
         self.print_banner()
 
     def print_(self, text):
@@ -182,17 +201,10 @@ class enumratorBase(object):
         return
 
     def send_req(self, query, page_no=1):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-            'Connection': 'keep-alive',
-        }
 
         url = self.base_url.format(query=query, page_no=page_no)
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception:
             resp = None
         return self.get_response(resp)
@@ -351,7 +363,7 @@ class YahooEnum(enumratorBaseThreaded):
         return
 
     def extract_domains(self, resp):
-        link_regx2 = re.compile('<span class=" fz-15px fw-m fc-12th wr-bw.*?">(.*?)</span>')
+        link_regx2 = re.compile('<span class=" fz-.*? fw-m fc-12th wr-bw.*?">(.*?)</span>')
         link_regx = re.compile('<span class="txt"><span class=" cite fw-xl fz-15px">(.*?)</span>')
         links_list = []
         try:
@@ -538,7 +550,7 @@ class BaiduEnum(enumratorBaseThreaded):
 class NetcraftEnum(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        self.base_url = 'http://searchdns.netcraft.com/?restriction=site+ends+with&host={domain}'
+        self.base_url = 'https://searchdns.netcraft.com/?restriction=site+ends+with&host={domain}'
         self.engine_name = "Netcraft"
         self.lock = threading.Lock()
         super(NetcraftEnum, self).__init__(self.base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
@@ -547,15 +559,8 @@ class NetcraftEnum(enumratorBaseThreaded):
 
     def req(self, url, cookies=None):
         cookies = cookies or {}
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-        }
-
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout, cookies=cookies)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout, cookies=cookies)
         except Exception as e:
             self.print_(e)
             resp = None
@@ -643,14 +648,8 @@ class DNSdumpster(enumratorBaseThreaded):
 
     def req(self, req_method, url, params=None):
         params = params or {}
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-            'Referer': 'https://dnsdumpster.com'
-        }
-
+        headers = dict(self.headers)
+        headers['Referer'] = 'https://dnsdumpster.com'
         try:
             if req_method == 'GET':
                 resp = self.session.get(url, headers=headers, timeout=self.timeout)
@@ -709,15 +708,8 @@ class Virustotal(enumratorBaseThreaded):
 
     # the main send_req need to be rewritten
     def send_req(self, url):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-        }
-
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception as e:
             self.print_(e)
             resp = None
@@ -758,15 +750,8 @@ class ThreatCrowd(enumratorBaseThreaded):
         return
 
     def req(self, url):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-        }
-
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception:
             resp = None
 
@@ -810,15 +795,8 @@ class CrtSearch(enumratorBaseThreaded):
         return
 
     def req(self, url):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-        }
-
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception:
             resp = None
 
@@ -857,22 +835,33 @@ class PassiveDNS(enumratorBaseThreaded):
         base_url = 'http://ptrarchive.com/tools/search.htm?label={domain}'
         self.engine_name = "PassiveDNS"
         self.lock = threading.Lock()
-        self.q = q
+        self.q = q       
         super(PassiveDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
+    
+    def get_agent(self,ua=None):
+        agents_url = 'http://www.webuseragents.com/recent'
+        try:
+            resp = self.session.get(agents_url, headers=self.headers, timeout=self.timeout)
+            agents_list = self.get_response(resp)
+            agents_regex = re.compile('<a href="/ua/.*?>(.*)</a>')
+            agents = agents_regex.findall(agents_list)
+            ua =  random.choice(agents)        
+        except Exception as e:
+            pass
+        
+        return ua
 
     def req(self, url):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/40.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-        }
-
         try:
+            headers = dict(self.headers)
+            user_agent = self.get_agent()
+            if user_agent:
+                headers['User-Agent'] = user_agent
+
             resp = self.session.get(url, headers=headers, timeout=self.timeout)
+
         except Exception as e:
-            self.print_(e)
             resp = None
 
         return self.get_response(resp)
@@ -880,17 +869,17 @@ class PassiveDNS(enumratorBaseThreaded):
     def enumerate(self):
         url = self.base_url.format(domain=self.domain)
         resp = self.req(url)
+        if not resp:
+            return self.subdomains
+
         self.extract_domains(resp)
         return self.subdomains
 
     def extract_domains(self, resp):
-        link_regx = re.compile('<td>(.*?)</td>')
+        link_regx = re.compile('[a-zA-Z0-9.-]*\.'+ self.domain,re.IGNORECASE)
         try:
             links = link_regx.findall(resp)
-            for link in links:
-                if self.domain not in link:
-                    continue
-                subdomain = link[:link.find('[')].strip()
+            for subdomain in links:
                 if subdomain not in self.subdomains and subdomain != self.domain and subdomain.endswith(self.domain):
                     if self.verbose:
                         self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
