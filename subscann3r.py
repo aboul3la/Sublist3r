@@ -127,17 +127,6 @@ class SubScann3r:
             if not self.scan_flags.Silent:
                 print(self.logger.Y + "[-] Total Unique Subdomains Found: %s" % len(subdomains) + self.logger.W)
 
-            if self.scan_flags.TakeoverCheck:
-                print(self.logger.G + "[-] Checking for subdomains pointing to unregistered services" + self.logger.W)
-                for subdomain in subdomains:
-                    if self.scan_flags.Verbose:
-                        print(self.logger.G + "[-] Checking " + subdomain + self.logger.W)
-
-                    services = Util.get_url_signatures("http://" + subdomain)
-                    if len(services) > 0:
-                        for service in services:
-                            print(self.logger.Y + "[-] Found unregistered service \"" + service + "\" on subdomain " + subdomain + self.logger.W)
-
             if self.scan_flags.Ports:
                 if not self.scan_flags.Silent:
                     print(self.logger.G + "[-] Starting port scan for the following ports: %s%s" % (self.logger.Y, self.scan_flags.Ports) + self.logger.W)
