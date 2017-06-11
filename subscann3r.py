@@ -1,32 +1,21 @@
+import multiprocessing
+import os
 import re
 import sys
-import os
-import argparse
-import time
-import hashlib
-import random
-import multiprocessing
-import threading
-import socket
-from collections import Counter
 
 from engines.engine import Engines
-from util.util import Util
 
 # external modules
 from subbrute import subbrute
-import dns.resolver
+
+from util.port_scanner import PortScanner
+from util.util import Util
 
 # Python 2.x and 3.x compatibility
-from util.port_scanner import PortScanner
-from util.logger import Logger
-
-if sys.version > '3':
+if sys.version >= '3':
     import urllib.parse as urlparse
-    import urllib.parse as urllib
 else:
     import urlparse
-    import urllib
 
 # Check if we are running this on windows platform
 is_windows = sys.platform.startswith('win')
