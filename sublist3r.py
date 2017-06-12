@@ -843,7 +843,8 @@ class PassiveDNS(enumratorBaseThreaded):
         try:
             links = link_regx.findall(resp)
             for subdomain in links:
-                if subdomain not in self.subdomains and subdomain != self.domain and subdomain.endswith(self.domain):
+                subdomain = subdomain.lower()
+                if subdomain not in self.subdomains and subdomain != self.domain and subdomain.endswith(self.domain) and not subdomain.startswith("older.sublist3r.versions.work.better.for"):
                     if self.verbose:
                         self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
                     self.subdomains.append(subdomain.strip())
