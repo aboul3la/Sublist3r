@@ -15,9 +15,9 @@ else:
 
 
 class EnumeratorBase(object):
-    def __init__(self, base_url: str, engine_name: str, domain: str, subdomains: list = None,
-                 silent: bool = False,
-                 logger: Logger = None) -> None:
+    def __init__(self, base_url, engine_name, domain, subdomains=None,
+                 silent=False,
+                 logger=None):
         subdomains = subdomains or []
         self.domain = urlparse.urlparse(domain).netloc
         self.session = requests.Session()

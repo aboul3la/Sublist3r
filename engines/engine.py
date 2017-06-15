@@ -25,9 +25,9 @@ else:
     import urllib
 
 class EnumratorBaseThreaded(multiprocessing.Process, EnumeratorBase):
-    def __init__(self, base_url: str, engine_name: str, domain: str, subdomains: list = None, q: list = None, lock: threading.Lock = threading.Lock(),
-                 silent: bool = False,
-                 logger: Logger = None) -> object:
+    def __init__(self, base_url, engine_name, domain, subdomains=None, q=None, lock=threading.Lock(),
+                 silent=False,
+                 logger=None):
         subdomains = subdomains or []
         EnumeratorBase.__init__(self, base_url, engine_name, domain, subdomains, silent, logger)
         multiprocessing.Process.__init__(self)
