@@ -870,13 +870,13 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         enable_bruteforce = True
 
     # Validate domain
-    domain_check = re.compile("^(http|https)?[a-zA-Z0-9]+([\-\.]{1}[a-zA-Z0-9]+)*\.[a-zA-Z]{2,}$")
+    domain_check = re.compile("^(?:[a-zA-Z][a-zA-Z0-9+.-]*:\/\/)?[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\/?$")
     if not domain_check.match(domain):
         if not silent:
             print(R + "Error: Please enter a valid domain" + W)
         return []
 
-    if not domain.startswith('http://') or not domain.startswith('https://'):
+    if not re.compile("^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/").match(domain):
         domain = 'http://' + domain
 
     parsed_domain = urlparse.urlparse(domain)
