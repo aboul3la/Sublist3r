@@ -141,6 +141,7 @@ class enumratorBase(object):
         subdomains = subdomains or []
         self.domain = urlparse.urlparse(domain).netloc
         self.session = requests.Session()
+        self.proxies = { "http": "http://127.0.0.1:6666", "https": "http://127.0.0.1:6666", }
         self.subdomains = []
         self.timeout = 25
         self.base_url = base_url
@@ -169,7 +170,7 @@ class enumratorBase(object):
 
         url = self.base_url.format(query=query, page_no=page_no)
         try:
-            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout, proxies=self.proxies)
         except Exception:
             resp = None
         return self.get_response(resp)
