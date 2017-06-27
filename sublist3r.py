@@ -830,9 +830,12 @@ class GoogleTER(enumratorBaseThreaded):
 
             googleresult = json.loads(resp[len(_jsonp_begin):-len(_jsonp_end)])
             for subs in googleresult["results"]:
+                
                 if self.domain in googleresult:
                     continue
                 subdomain = subs["subject"]
+                if subdomain.startswith("*."):
+                    subdomain = subdomain.replace("*.", None)
                 if subdomain not in self.subdomains and subdomain != self.domain and subdomain.endswith(self.domain):
                     if self.verbose:
                         self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
