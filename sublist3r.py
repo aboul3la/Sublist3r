@@ -808,7 +808,7 @@ class GoogleTER(enumratorBaseThreaded):
         }
 
         try:
-            resp = self.session.get(url, headers=headers, timeout=self.timeout)
+            resp = self.session.get(url, headers=headers, timeout=self.timeout, proxies=self.proxies)
         except Exception as e:
             self.print_(e)
             resp = None
