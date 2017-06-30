@@ -930,6 +930,45 @@ class HackerTarget(enumratorBaseThreaded):
             pass
 
 
+class DnsDB(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        base_url = 'http://www.dnsdb.org/f/{domain}.dnsdb.org/'
+        self.engine_name = "DnsDB"
+        self.lock = threading.Lock()
+        self.q = q
+        super(DnsDB, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        return
+
+    def req(self, url):
+        try:
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+        except Exception as e:
+            resp = None
+
+        return get_response(resp)
+
+    def enumerate(self):
+        url = self.base_url.format(domain=self.domain)
+        resp = self.req(url)
+        if not resp:
+            return self.subdomains
+
+        self.extract_domains(resp)
+        return self.subdomains
+
+    def extract_domains(self, resp):
+        try:
+            subdomains = re.findall(r"(?<=href=\").+?(?=\")|(?<=href=\').+?(?=\')", resp)
+            for subdomain in subdomains:
+                subdomain = subdomain.replace('http://', '').replace('.dnsdb.org/', '')
+                if subdomain not in self.subdomains and subdomain != self.domain:
+                    if self.verbose:
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                    self.subdomains.append(subdomain.strip())
+        except Exception as e:
+            pass
+
 class portscan():
     def __init__(self, subdomains, ports):
         self.subdomains = subdomains
@@ -1003,7 +1042,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'ssl': CrtSearch,
                          'passivedns': PassiveDNS,
                          'googleter': GoogleTER,
-                         'hackertarget': HackerTarget
+                         'hackertarget': HackerTarget,
+                         'dnsdb': DnsDB
                          }
 
     chosenEnums = []
@@ -1012,7 +1052,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
             NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
-            CrtSearch, PassiveDNS, GoogleTER, HackerTarget
+            CrtSearch, PassiveDNS, GoogleTER, HackerTarget, DnsDB
         ]
     else:
         engines = engines.split(',')
