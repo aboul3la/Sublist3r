@@ -22,7 +22,6 @@ import requests
 
 # external modules
 from subbrute import subbrute
-
 # Python 2.x and 3.x compatiablity
 if sys.version > '3':
     import urllib.parse as urlparse
@@ -969,6 +968,43 @@ class DnsDB(enumratorBaseThreaded):
         except Exception as e:
             pass
 
+class ChaXunDotLa(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        base_url = 'http://api.chaxun.la/toolsAPI/getDomain/?0.008538380996345518&callback=&k={domain}&page=1&order=default&sort=desc&action=moreson&_='
+        self.engine_name = "ChaXunDotLa"
+        self.lock = threading.Lock()
+        self.q = q
+        super(ChaXunDotLa, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        return
+
+    def req(self, url):
+        try:
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+        except Exception as e:
+            resp = None
+        return get_response(resp)
+
+    def enumerate(self):
+        url = self.base_url.format(domain=self.domain)
+        resp = self.req(url)
+        if not resp:
+            return self.subdomains
+
+        self.extract_domains(resp)
+        return self.subdomains
+
+    def extract_domains(self, resp):
+        try:
+            for data in json.loads(resp)['data']:
+                subdomain = data['domain']
+                if subdomain not in self.subdomains and subdomain != self.domain:
+                    if self.verbose:
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                    self.subdomains.append(subdomain.strip())
+        except Exception as e:
+            pass
+
 class portscan():
     def __init__(self, subdomains, ports):
         self.subdomains = subdomains
@@ -1043,7 +1079,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'passivedns': PassiveDNS,
                          'googleter': GoogleTER,
                          'hackertarget': HackerTarget,
-                         'dnsdb': DnsDB
+                         'dnsdb': DnsDB,
+                         'chaxundotla': ChaXunDotLa
                          }
 
     chosenEnums = []
@@ -1052,7 +1089,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
             NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
-            CrtSearch, PassiveDNS, GoogleTER, HackerTarget, DnsDB
+            CrtSearch, PassiveDNS, GoogleTER, HackerTarget, DnsDB,
+            ChaXunDotLa
         ]
     else:
         engines = engines.split(',')
