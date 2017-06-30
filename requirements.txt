@@ -1,4 +1,3 @@
-censys
 colorama
 win_unicode_console
 argparse
