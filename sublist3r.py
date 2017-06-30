@@ -51,7 +51,8 @@ if is_windows:
     R = '\033[91m'  # red
     W = '\033[0m'   # white
     try:
-        import win_unicode_console , colorama
+        import win_unicode_console
+        import colorama
         win_unicode_console.enable()
         colorama.init()
         #Now the unicode will work ^_^

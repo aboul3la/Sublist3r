@@ -1,3 +1,5 @@
+colorama
+win_unicode_console
 argparse
 dnspython
 requests
