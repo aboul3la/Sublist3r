@@ -824,10 +824,11 @@ class GoogleTER(enumratorBaseThreaded):
         url = self.base_url.format(domain=self.domain)
         while True:
             resp = self.req(url)
-            self.extract_domains(resp)
-            if "nextPageToken" not in resp:
-                return self.subdomains
-            url = self.base_url.format(domain=self.domain) + "&token=" + self.Token.replace("=", "%3D")
+            if not type(resp) == type(1):
+                self.extract_domains(resp)
+                if "nextPageToken" not in resp:
+                    return self.subdomains
+                url = self.base_url.format(domain=self.domain) + "&token=" + self.Token.replace("=", "%3D")
 
     def extract_domains(self, resp):
         _jsonp_begin = r'/* API response */('
