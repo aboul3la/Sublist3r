@@ -57,7 +57,7 @@ if is_windows:
     except:
         print("[!] Error: Coloring libraries not installed, no coloring will be used [Check the readme]")
         G = Y = B = R = W = G = Y = B = R = W = ''
-        
+
 
 else:
     G = '\033[92m'  # green
@@ -106,7 +106,7 @@ def write_file(filename, subdomains):
     print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R, filename, W))
     with open(str(filename), 'wt') as f:
         for subdomain in subdomains:
-            f.write(subdomain + "\r\n")
+            f.write(subdomain + os.linesep)
 
 
 def subdomain_sorting_key(hostname):
@@ -151,7 +151,7 @@ class enumratorBase(object):
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
               'Accept-Language': 'en-US,en;q=0.8',
               'Accept-Encoding': 'gzip',
-          } 
+          }
         self.print_banner()
 
     def print_(self, text):
@@ -793,7 +793,7 @@ class PassiveDNS(enumratorBaseThreaded):
         base_url = 'https://api.sublist3r.com/search.php?domain={domain}'
         self.engine_name = "PassiveDNS"
         self.lock = threading.Lock()
-        self.q = q       
+        self.q = q
         super(PassiveDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
