@@ -76,7 +76,7 @@ class verify_nameservers(multiprocessing.Process):
     def end(self):
         self.time_to_die = True
 
-    #This process cannot block forever,  it  needs to check if its time to die.
+    #This process cannot block forever, it needs to check if it's time to die.
     def add_nameserver(self, nameserver):
         keep_trying = True
         while not self.time_to_die and keep_trying:
@@ -104,7 +104,7 @@ class verify_nameservers(multiprocessing.Process):
                         #Only add the nameserver to the queue if we can detect wildcards. 
                         if(self.find_wildcards(self.target)):# and self.find_wildcards(".com")
                             #wildcards have been added to the set, it is now safe to be added to the queue.
-                            #blocking queue,  this process will halt on put() when the queue is full:
+                            #blocking queue, this process will halt on put() when the queue is full:
                             self.add_nameserver(server)
                             added_resolver = True
                         else:
@@ -115,10 +115,10 @@ class verify_nameservers(multiprocessing.Process):
         return added_resolver
 
     def run(self):
-        #Every user will get a different set of resovlers, this helps redistribute traffic.
+        #Every user will get a different set of resolvers, this helps redistribute traffic.
         random.shuffle(self.resolver_list)
         if not self.verify(self.resolver_list):
-            #This should never happen,  inform the user.
+            #This should never happen, inform the user.
             sys.stderr.write('Warning: No nameservers found, trying fallback list.\n')
             #Try and fix it for the user:
             self.verify(self.backup_resolver)
@@ -134,7 +134,7 @@ class verify_nameservers(multiprocessing.Process):
         #We want sovle the following three problems:
         #1)The target might have a wildcard DNS record.
         #2)The target maybe using geolocaiton-aware DNS.
-        #3)The DNS server we are testing may respond to non-exsistant 'A' records with advertizements.
+        #3)The DNS server we are testing may respond to non-exsistant 'A' records with advertisements.
         #I have seen a CloudFlare Enterprise customer with the first two conditions.
         try:
             #This is case #3,  these spam nameservers seem to be more trouble then they are worth.
