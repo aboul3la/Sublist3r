@@ -279,6 +279,7 @@ class GoogleEnum(enumratorBaseThreaded):
 
     def extract_domains(self, resp):
         link_regx = re.compile('<cite.*?>(.*?)<\/cite>')
+	links_list = []
         try:
             links_list = link_regx.findall(resp)
             for link in links_list:
@@ -379,6 +380,7 @@ class AskEnum(enumratorBaseThreaded):
 
     def extract_domains(self, resp):
         link_regx = re.compile('<p class="web-result-url">(.*?)</p>')
+	links_list = []
         try:
             links_list = link_regx.findall(resp)
             for link in links_list:
@@ -467,6 +469,7 @@ class BaiduEnum(enumratorBaseThreaded):
     def extract_domains(self, resp):
         found_newdomain = False
         subdomain_list = []
+	links = []
         link_regx = re.compile('<a.*?class="c-showurl".*?>(.*?)</a>')
         try:
             links = link_regx.findall(resp)
