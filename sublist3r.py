@@ -98,15 +98,20 @@ def parse_args():
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
+    parser.add_argument('-i', '--findip', help='Find IP address of each subdomain', action='store_true')
     return parser.parse_args()
 
 
-def write_file(filename, subdomains):
+def write_file(filename, subdomains, find_ip=False):
     # saving subdomains results to output file
     print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R, filename, W))
     with open(str(filename), 'wt') as f:
         for subdomain in subdomains:
-            f.write(subdomain + os.linesep)
+            if find_ip:
+                ip = get_host_by_name(subdomain)
+                f.write("{} ({}){}".format(subdomain, ip, os.linesep))
+            else:
+                f.write(subdomain + os.linesep)
 
 
 def subdomain_sorting_key(hostname):
@@ -133,6 +138,13 @@ def subdomain_sorting_key(hostname):
     if parts[-1] == 'www':
         return parts[:-1], 1
     return parts, 0
+
+
+def get_host_by_name(subdomain):
+    try:
+        return socket.gethostbyname(subdomain)
+    except Exception:
+        return "0.0.0.0"
 
 
 class enumratorBase(object):
@@ -856,7 +868,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines, find_ip):
     bruteforce_list = set()
     search_list = set()
 
@@ -943,7 +955,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         subdomains = sorted(subdomains, key=subdomain_sorting_key)
 
         if savefile:
-            write_file(savefile, subdomains)
+            write_file(savefile, subdomains, find_ip)
 
         if not silent:
             print(Y + "[-] Total Unique Subdomains Found: %s" % len(subdomains) + W)
@@ -957,7 +969,11 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
         elif not silent:
             for subdomain in subdomains:
-                print(G + subdomain + W)
+                if find_ip:
+                    ip = get_host_by_name(subdomain)
+                    print("{}{} ({}){}".format(G, subdomain, ip, W))
+                else:
+                    print(G + subdomain + W)
     return subdomains
 
 
@@ -970,7 +986,8 @@ if __name__ == "__main__":
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    find_ip = args.findip
     if verbose or verbose is None:
         verbose = True
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines, find_ip=find_ip)
