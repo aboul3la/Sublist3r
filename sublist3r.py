@@ -98,6 +98,7 @@ def parse_args():
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
+    parser.add_argument('-i', '--ip', help='Return host by ip', nargs='?', default=False)
     return parser.parse_args()
 
 
@@ -856,7 +857,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines, ip):
     bruteforce_list = set()
     search_list = set()
 
@@ -957,7 +958,13 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
         elif not silent:
             for subdomain in subdomains:
-                print(G + subdomain + W)
+            	try:
+            		if ip:
+                		print(G + subdomain + W + "   " + socket.gethostbyname(subdomain.strip()))
+                	else: 
+                		print(G + subdomain + W )
+                except:
+                	print(G + subdomain + W )
     return subdomains
 
 
@@ -970,7 +977,10 @@ if __name__ == "__main__":
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    ip = args.ip
+    if ip is None:
+    	ip = True
     if verbose or verbose is None:
         verbose = True
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines, ip=ip)
