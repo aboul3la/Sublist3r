@@ -278,6 +278,7 @@ class GoogleEnum(enumratorBaseThreaded):
         return
 
     def extract_domains(self, resp):
+        links_list = list()
         link_regx = re.compile('<cite.*?>(.*?)<\/cite>')
         try:
             links_list = link_regx.findall(resp)
@@ -295,7 +296,7 @@ class GoogleEnum(enumratorBaseThreaded):
         return links_list
 
     def check_response_errors(self, resp):
-        if 'Our systems have detected unusual traffic' in resp:
+        if isinstance(resp, basestring) and 'Our systems have detected unusual traffic' in resp:
             self.print_(R + "[!] Error: Google probably now is blocking our requests" + W)
             self.print_(R + "[~] Finished now the Google Enumeration ..." + W)
             return False
@@ -378,6 +379,7 @@ class AskEnum(enumratorBaseThreaded):
         return
 
     def extract_domains(self, resp):
+        links_list = list()
         link_regx = re.compile('<p class="web-result-url">(.*?)</p>')
         try:
             links_list = link_regx.findall(resp)
@@ -421,6 +423,7 @@ class BingEnum(enumratorBaseThreaded):
         return
 
     def extract_domains(self, resp):
+        links_list = list()
         link_regx = re.compile('<li class="b_algo"><h2><a href="(.*?)"')
         link_regx2 = re.compile('<div class="b_title"><h2><a href="(.*?)"')
         try:
@@ -465,6 +468,7 @@ class BaiduEnum(enumratorBaseThreaded):
         return
 
     def extract_domains(self, resp):
+        links = list()
         found_newdomain = False
         subdomain_list = []
         link_regx = re.compile('<a.*?class="c-showurl".*?>(.*?)</a>')
@@ -565,6 +569,7 @@ class NetcraftEnum(enumratorBaseThreaded):
             url = self.get_next(resp)
 
     def extract_domains(self, resp):
+        links_list = list()
         link_regx = re.compile('<a href="http://toolbar.netcraft.com/site_report\?url=(.*)">')
         try:
             links_list = link_regx.findall(resp)
