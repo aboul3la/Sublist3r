@@ -41,6 +41,9 @@ except:
 # Check if we are running this on windows platform
 is_windows = sys.platform.startswith('win')
 
+# to append in file when save output
+apply_append_mode = False
+
 # Console Colors
 if is_windows:
     # Windows deserves coloring too :D
@@ -66,7 +69,6 @@ else:
     R = '\033[91m'  # red
     W = '\033[0m'   # white
 
-
 def banner():
     print("""%s
                  ____        _     _ _     _   _____
@@ -91,8 +93,12 @@ def parse_args():
     parser = argparse.ArgumentParser(epilog='\tExample: \r\npython ' + sys.argv[0] + " -d google.com")
     parser.error = parser_error
     parser._optionals.title = "OPTIONS"
-    parser.add_argument('-d', '--domain', help="Domain name to enumerate it's subdomains", required=True)
+
+    grp_domains = parser.add_mutually_exclusive_group(required=True)
+    grp_domains.add_argument('-d', '--domain', help="Domain name to enumerate it's subdomains")
+    grp_domains.add_argument('-f', '--domfile', help='File with domain per line')
     parser.add_argument('-b', '--bruteforce', help='Enable the subbrute bruteforce module', nargs='?', default=False)
+    parser.add_argument('-n', '--names', help='File with subdomains to try.(word per line)')
     parser.add_argument('-p', '--ports', help='Scan the found subdomains against specified tcp ports')
     parser.add_argument('-v', '--verbose', help='Enable Verbosity and display results in realtime', nargs='?', default=False)
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
@@ -102,9 +108,20 @@ def parse_args():
 
 
 def write_file(filename, subdomains):
+
+    global apply_append_mode
+
     # saving subdomains results to output file
     print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R, filename, W))
-    with open(str(filename), 'wt') as f:
+
+
+    if apply_append_mode:
+        mode = 'at'
+    else:
+        mode = 'wt'
+        apply_append_mode = True
+
+    with open(str(filename), mode) as f:
         for subdomain in subdomains:
             f.write(subdomain + os.linesep)
 
@@ -856,7 +873,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines, sub_names):
     bruteforce_list = set()
     search_list = set()
 
@@ -929,8 +946,13 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         if not silent:
             print(G + "[-] Starting bruteforce module now using subbrute.." + W)
         record_type = False
+
         path_to_file = os.path.dirname(os.path.realpath(__file__))
-        subs = os.path.join(path_to_file, 'subbrute', 'names.txt')
+
+        if sub_names == None:
+            subs = os.path.join(path_to_file, 'subbrute', 'names.txt')
+        else:
+            subs = sub_names
         resolvers = os.path.join(path_to_file, 'subbrute', 'resolvers.txt')
         process_count = threads
         output = False
@@ -964,6 +986,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 if __name__ == "__main__":
     args = parse_args()
     domain = args.domain
+    domfile = args.domfile
+    names = args.names
     threads = args.threads
     savefile = args.output
     ports = args.ports
@@ -973,4 +997,12 @@ if __name__ == "__main__":
     if verbose or verbose is None:
         verbose = True
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+
+    if domfile != None:
+        with open(domfile, 'rt') as domf:
+            domains = domf.read().splitlines() # to skip newline characters
+    else:
+        domains = [domain]
+
+    for domain in domains:
+        res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines, sub_names=names)
