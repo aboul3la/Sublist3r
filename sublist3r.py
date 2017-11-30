@@ -296,7 +296,7 @@ class GoogleEnum(enumratorBaseThreaded):
         return links_list
 
     def check_response_errors(self, resp):
-        if isinstance(resp, basestring) and 'Our systems have detected unusual traffic' in resp:
+        if (type(resp) is str or type(resp) is unicode) and 'Our systems have detected unusual traffic' in resp:
             self.print_(R + "[!] Error: Google probably now is blocking our requests" + W)
             self.print_(R + "[~] Finished now the Google Enumeration ..." + W)
             return False
