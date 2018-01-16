@@ -6,6 +6,12 @@ Turbolist3r queries public DNS servers for each discovered subdomain. If the sub
 
 This is an early release and may contain bugs or other irregularities.
 
+## Screenshots
+
+![Screenshot 1](https://cp270.files.wordpress.com/2018/01/turbo_home.png)
+
+![Screenshot 2](https://cp270.files.wordpress.com/2018/01/turbo_analysis.png)
+
 ## Usage
 
 Short Form    | Long Form     | Description
@@ -111,10 +117,12 @@ Respect legal restrictions and only conduct testing against infrastructure that 
 ## Credits
 
 * [aboul3la](https://github.com/aboul3la/sublist3r) - The creator of **Sublist3r**; turbolist3r adds some features but is otherwise a near clone of sublist3r. 
+* [TheRook](https://github.com/TheRook/) - The bruteforce module was based on his script **subbrute**.
+* [bitquark](https://github.com/bitquark) - The Subbrute's wordlist was based on his research **dnspop**.
 
 ## Thanks
 
-* Thank you to [aboul3la](https://github.com/aboul3la/sublist3r) for releasing sublist3r, an incredible subdomain discovery tool!
+* Thank you to [aboul3la](https://github.com/aboul3la/) for releasing sublist3r, an incredible subdomain discovery tool!
 
 ## Version
 **1/15/18 Version 0.1**
