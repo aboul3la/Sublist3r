@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
-# Turbolist3r v1.0
+# Turbolist3r v0.2
 # By Carl Pearson - github.com/fleetcaptain
 # Based on Sublist3r code created by Ahmed Aboul-Ela - twitter.com/aboul3la
-# Tested on Ubuntu Linux 16.10
 #
 # Changes to Turbolist3r from Sublist3r:
 # - check subdomain for text "From http://PTRarchive.com: " and remove it (otherwise it ends up in the output and can impede automated analysis with other tools)
 # - added functionality to query found subdomains, record answer, and catagorize as A or CNAME record. Speeds up subdomain takeover analysis as CNAME records and the services they point to are collected and displayed
+#
+# TODO - merge Sublist3r dns requests with dnslib to avoid duplication of dns libraries
+#
+
 
 # modules in standard library
 import re
@@ -23,9 +26,13 @@ import socket
 from collections import Counter
 
 # external modules
-from subbrute import subbrute
+#from subbrute import subbrute
 import dns.resolver
 import requests
+# import dnslib, which provides better features compared to dns.resolver for finding subdomains
+# for example, a return status of NXDOMAIN causes an exception with dns.resolver, but dnslib allows
+# us to easily capture the reply, which could indicate the precsence of subdomain takeover
+import dnslib
 
 # Python 2.x and 3.x compatiablity
 if sys.version > '3':
@@ -1023,49 +1030,47 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 cnames = ['== CNAME records ==']
 ahosts = ['== A records ==']
 def lookup(guess, name_server):
-	Resolver = dns.resolver.Resolver()
-	Resolver.timeout = 3
-	Resolver.lifetime = 3
-	Resolver.nameservers = [name_server]
-	answer = None
+	#print 'Trying ' + guess + ' at ' + name_server
+	use_tcp = False
+	response = None
+	failed = False
+	record_type = ""
+	record_value = ""
+	query = dnslib.DNSRecord.question(guess, 'ANY')
 	try:
-		# obtain the DNS reply in DIG format, convert to string, and split newlines into an array
-		answer = str(Resolver.query(guess).response).split('\n')
+		response_q = query.send(name_server, 53, use_tcp, timeout = 3)
+		if response_q:
+			response = dnslib.DNSRecord.parse(response_q)
+	except KeyboardInterrupt:
+		print 'User exit'
+		exit()
 	except:
-		return "ERROR", "e"
-	
-	'''
-	the answer in DIG format looks like this
-
-	id 35423
-	opcode QUERY
-	rcode NOERROR
-	flags QR RD RA
-	;QUESTION
-	myservice.example.com. IN A
-	;ANSWER
-	myservice.example.com. 299 IN CNAME myservice.cloudservice.net.
-	myservice.cloudservice.net. 9 IN A 500.600.700.800
-	;AUTHORITY
-	;ADDITIONAL
-
-	we grab the first line after ";ANSWER" - it's the first answer and the one we care about. May be the only answer depending on the specific host (like if it's an A record only 1 IP may be returned)
-	'''
-	answerline = ""
-	for x in range(0, len(answer)): # for each line
-		if answer[x] == ";ANSWER":
-			answerline = answer[x + 1] # first answer
-			break
-	lineitems = answerline.split(' ')
-	host = lineitems[len(lineitems) - 1] # host is the last line
-	# determine if this is a CNAME or A record. A records can be interesting to find vulnerable hosts and CNAME
-	# records can be interesting for subdomain takeover
-	for item in lineitems:
-		if item == 'CNAME':
-			host = host[:-1] # remove the trailing period
-			return "CNAME", host
-		elif item == 'A':
-			return "A", host
+		# probably socket timed out
+		print "ERROR - possible socket timeout when trying " + guess
+		pass
+	if response:
+		#print response
+		rcode = dnslib.RCODE[response.header.rcode]
+		if rcode == 'NOERROR' or rcode == 'NXDOMAIN':
+			# success, this is a valid subdomain
+			for r in response.rr:
+				rtype = None
+				try:
+					rtype = str(dnslib.QTYPE[r.rtype])
+				except:
+					rtype = str(r.rtype)
+				#print rtype
+				
+				if (rtype == 'CNAME'):
+					#print r.rdata
+					record_type = 'CNAME'
+					record_value = str(r.rdata)
+				elif (rtype == 'A' or rtype == 'AAAA'):
+					record_type = 'A'
+					record_value = str(r.rdata)
+		else:
+			print "ERROR - returned stats " + rcode + " when trying " + guess
+	return record_type, record_value
 
 
 
@@ -1130,4 +1135,3 @@ if __name__ == "__main__":
 	#print ""
 	# save the analysis to a file. Merge the arrays into one list for easier reading
 	write_file(analysis, ahosts + ["\n"] + cnames)
-
