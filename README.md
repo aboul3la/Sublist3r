@@ -61,8 +61,16 @@ Short Form    | Long Form     | Description
 
 Note that turbolist3r has not been tested on Windows.
 
-Turbolist3r depends on the `requests`, `dnspython`, and `argparse` python modules.
+Turbolist3r depends on the `dnslib`, `requests`, `dnspython`, and `argparse` python modules.
 
+#### dnslib Module
+
+The dnslib module can be downloaded from [https://bitbucket.org/paulc/dnslib/](https://bitbucket.org/paulc/dnslib/) or installed on many systems using:
+
+``pip install dnslib``
+
+
+#### requests Module
 
 - Install for Ubuntu/Debian:
 ```
@@ -125,4 +133,4 @@ Respect legal restrictions and only conduct testing against infrastructure that 
 * Thank you to [aboul3la](https://github.com/aboul3la/) for releasing sublist3r, an incredible subdomain discovery tool!
 
 ## Version
-**1/15/18 Version 0.1**
+**1/15/18 Version 0.2**
