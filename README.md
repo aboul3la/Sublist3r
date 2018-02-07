@@ -85,12 +85,7 @@ sudo pip install dnspython
 sudo apt-get install python-argparse
 ```
 
-- Install for Centos/Redhat:
-```
-sudo yum install python-argparse
-``` 
-
-- Install using pip:
+- Install using Centos/Redhat/pip:
 ```
 sudo pip install argparse
 ```
