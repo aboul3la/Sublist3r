@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
-# Turbolist3r v0.2
+# Turbolist3r v0.3
 # By Carl Pearson - github.com/fleetcaptain
 # Based on Sublist3r code created by Ahmed Aboul-Ela - twitter.com/aboul3la
 #
-# Changes to Turbolist3r from Sublist3r:
+# Major changes to Turbolist3r from Sublist3r:
 # - check subdomain for text "From http://PTRarchive.com: " and remove it (otherwise it ends up in the output and can impede automated analysis with other tools)
 # - added functionality to query found subdomains, record answer, and catagorize as A or CNAME record. Speeds up subdomain takeover analysis as CNAME records and the services they point to are collected and displayed
 #
@@ -1102,7 +1102,7 @@ if __name__ == "__main__":
 	print(B + "[-] Beginning analysis of " + total + " subdomains..." + W)
 	for subdomain in res:
 		try:
-			name = subdomain.strip('\n').strip('\r')
+			name = subdomain.replace('\n', '').replace('\r', '')
 			(rtype, record) = lookup(name, resolvers[server])
 			# if the query did not return an error, then add result to appropriate array
 			if rtype != "ERROR":
@@ -1113,7 +1113,7 @@ if __name__ == "__main__":
 			# round robin the resolvers
 			server = server + 1
 			server = server % len(resolvers)
-			
+		
 			# update user on our progress - every 30 hosts
 			count = count + 1
 			if (count % 30) == 0:
@@ -1121,6 +1121,10 @@ if __name__ == "__main__":
 		except KeyboardInterrupt:
 			print(R + '\n[-] User exit' + W)
 			exit()
+		except:
+			# Generally unknown error. Keep going
+			# Known errors: subdomain sample starting with a dot, ex .domain.com
+			continue
 
 	ahosts.sort()
 	cnames.sort()
