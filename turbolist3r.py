@@ -23,10 +23,11 @@ import random
 import multiprocessing
 import threading
 import socket
+#import subbrute
 from collections import Counter
 
 # external modules
-#from subbrute import subbrute
+from subbrute import subbrute
 import dns.resolver
 import requests
 # import dnslib, which provides better features compared to dns.resolver for finding subdomains
@@ -69,7 +70,7 @@ if is_windows:
     except:
         print("[!] Error: Coloring libraries not installed ,no coloring will be used [Check the readme]")
         G = Y = B = R = W = G = Y = B = R = W = ''
-        
+
 
 else:
     G = '\033[92m'  # green
@@ -1060,7 +1061,7 @@ def lookup(guess, name_server):
 				except:
 					rtype = str(r.rtype)
 				#print rtype
-				
+
 				if (rtype == 'CNAME'):
 					#print r.rdata
 					record_type = 'CNAME'
@@ -1089,7 +1090,7 @@ if __name__ == "__main__":
         verbose = True
     banner()
     res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
-    
+
 
     # Code added here
     if (analysis):
@@ -1113,7 +1114,7 @@ if __name__ == "__main__":
 			# round robin the resolvers
 			server = server + 1
 			server = server % len(resolvers)
-		
+
 			# update user on our progress - every 30 hosts
 			count = count + 1
 			if (count % 30) == 0:
