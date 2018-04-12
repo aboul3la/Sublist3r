@@ -30,7 +30,7 @@ setup(
     keywords='subdomain dns detection',
     entry_points={
         'console_scripts': [
-            'sublist3r = sublist3r:main',
+            'sublist3r = sublist3r:interactive',
         ],
     },
 )
