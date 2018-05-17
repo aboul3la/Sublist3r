@@ -865,20 +865,20 @@ class Portscan():
                 print("{}{} ({}){} - {}Found open ports:{} {}{}{}".format(G, subdomain, ip, W, R,
                       W, Y, ', '.join(open_ports), W))
                 if self.savefile:
-                    write_file(self.savefile, "{} ({}) - Found open ports: {}".format(subdomain,
-                               ip, ', '.join(open_ports)))
+                    write_file(self.savefile, "{},{},{}".format(subdomain,
+                               ip, ','.join(open_ports)))
             else:
                 print("{}{}{} - {}Found open ports:{} {}{}{}".format(G, subdomain, W, R, W, Y,
                       ', '.join(open_ports), W))
                 if self.savefile:
-                    write_file(self.savefile, "{} - Found open ports: {}".format(subdomain,
-                               ', '.join(open_ports)))
+                    write_file(self.savefile, "{},{}".format(subdomain,
+                               ','.join(open_ports)))
         else:
             if self.find_ip:
                 ip = get_host_by_name(subdomain)
                 print("{}{} ({}){}".format(G, subdomain, ip, W))
                 if self.savefile:
-                    write_file(self.savefile, "{} ({})".format(subdomain, ip))
+                    write_file(self.savefile, "{},{}".format(subdomain, ip))
             else:
                 print("{}{}{}".format(G, subdomain, W))
                 if self.savefile:
@@ -1006,11 +1006,11 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                     ip = get_host_by_name(subdomain)
                     print("{}{} ({}){}".format(G, subdomain, ip, W))
                     if savefile:
-                        write_file(savefile, "{} ({})".format(subdomain, ip))
+                        write_file(savefile, "{},{}".format(subdomain, ip))
                 else:
                     print("{}{}{}".format(G, subdomain, W))
                     if savefile:
-                        write_file(savefile, "{} ({})".format(subdomain, ip))
+                        write_file(savefile, "{},{}".format(subdomain, ip))
 
     return subdomains
 
