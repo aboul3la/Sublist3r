@@ -1,4 +1,10 @@
-## About Sublist3r 
+## About this Fork
+
+This fork differs from the original Sublist3r project in the following ways:
+* Includes Bogka IP lookups for subdomains discovered
+* Output to a file in Comma-delimited format that can be ingested by many other tools
+
+## About Sublist3r
 
 Sublist3r is a python tool designed to enumerate subdomains of websites using OSINT. It helps penetration testers and bug hunters collect and gather subdomains for the domain they are targeting. Sublist3r enumerates subdomains using many search engines such as Google, Yahoo, Bing, Baidu, and Ask. Sublist3r also enumerates subdomains using Netcraft, Virustotal, ThreatCrowd, DNSdumpster, and ReverseDNS.
 
@@ -88,7 +94,7 @@ sudo apt-get install python-argparse
 - Install for Centos/Redhat:
 ```
 sudo yum install python-argparse
-``` 
+```
 
 - Install using pip:
 ```
@@ -111,7 +117,8 @@ Short Form    | Long Form     | Description
 -t            | --threads     | Number of threads to use for subbrute bruteforce
 -e            | --engines     | Specify a comma-separated list of search engines
 -o            | --output      | Save the results to text file
--h            | --help        | show the help message and exit
+-h            | --help        | Show the help message and exit
+-i            | --findip      | Find IP address of each subdomain
 
 ### Examples
 
@@ -123,9 +130,13 @@ Short Form    | Long Form     | Description
 
 ``python sublist3r.py -d example.com``
 
-* To enumerate subdomains of specific domain and show only subdomains which have open ports 80 and 443 :
+* To enumerate subdomains of specific domain and check for ports 80 and 443:
 
 ``python sublist3r.py -d example.com -p 80,443``
+
+* To enumerate subdomains and enable IP address resolution:
+
+``python sublist3r.py -v -i -d example.com``
 
 * To enumerate subdomains of specific domain and show the results in realtime:
 
@@ -145,7 +156,7 @@ Short Form    | Long Form     | Description
 **Example**
 
 ```python
-import sublist3r 
+import sublist3r
 subdomains = sublist3r.main(domain, no_threads, savefile, ports, silent, verbose, enable_bruteforce, engines)
 ```
 The main function will return a set of unique subdomains found by Sublist3r
@@ -161,7 +172,7 @@ The main function will return a set of unique subdomains found by Sublist3r
 
 Example to enumerate subdomains of Yahoo.com:
 ```python
-import sublist3r 
+import sublist3r
 subdomains = sublist3r.main('yahoo.com', 40, 'yahoo_subdomains.txt', ports= None, silent=False, verbose= False, enable_bruteforce= False, engines=None)
 ```
 
@@ -172,8 +183,8 @@ Sublist3r is licensed under the GNU GPL license. take a look at the [LICENSE](ht
 
 ## Credits
 
-* [TheRook](https://github.com/TheRook) - The bruteforce module was based on his script **subbrute**. 
-* [Bitquark](https://github.com/bitquark) - The Subbrute's wordlist was based on his research **dnspop**. 
+* [TheRook](https://github.com/TheRook) - The bruteforce module was based on his script **subbrute**.
+* [Bitquark](https://github.com/bitquark) - The Subbrute's wordlist was based on his research **dnspop**.
 
 ## Thanks
 
