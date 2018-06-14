@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
-# Turbolist3r v0.3
+# Turbolist3r
 # By Carl Pearson - github.com/fleetcaptain
 # Based on Sublist3r code created by Ahmed Aboul-Ela - twitter.com/aboul3la
 #
-# Major changes to Turbolist3r from Sublist3r:
+# Changes to Turbolist3r from Sublist3r:
 # - check subdomain for text "From http://PTRarchive.com: " and remove it (otherwise it ends up in the output and can impede automated analysis with other tools)
 # - added functionality to query found subdomains, record answer, and catagorize as A or CNAME record. Speeds up subdomain takeover analysis as CNAME records and the services they point to are collected and displayed
 #
@@ -23,11 +23,10 @@ import random
 import multiprocessing
 import threading
 import socket
-#import subbrute
 from collections import Counter
 
 # external modules
-from subbrute import subbrute
+#from subbrute import subbrute
 import dns.resolver
 import requests
 # import dnslib, which provides better features compared to dns.resolver for finding subdomains
@@ -54,6 +53,9 @@ except:
 # Check if we are running this on windows platform
 is_windows = sys.platform.startswith('win')
 
+global debug
+
+
 # Console Colors
 if is_windows:
     # Windows deserve coloring too :D
@@ -70,7 +72,7 @@ if is_windows:
     except:
         print("[!] Error: Coloring libraries not installed ,no coloring will be used [Check the readme]")
         G = Y = B = R = W = G = Y = B = R = W = ''
-
+        
 
 else:
     G = '\033[92m'  # green
@@ -112,6 +114,7 @@ def parse_args():
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save just domain names to specified text file')
     parser.add_argument('-a', '--analysis', help='Do analysis of the results and save to specified text file')
+    parser.add_argument('--debug', default=False, help='Enable verbose debug output', action="store_true")
     return parser.parse_args()
 
 
@@ -1031,16 +1034,19 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 cnames = ['== CNAME records ==']
 ahosts = ['== A records ==']
 def lookup(guess, name_server):
-	#print 'Trying ' + guess + ' at ' + name_server
+	if (debug):
+		print 'Trying ' + guess + ' at ' + name_server
 	use_tcp = False
 	response = None
 	failed = False
 	record_type = ""
 	record_value = ""
-	query = dnslib.DNSRecord.question(guess, 'ANY')
+	query = dnslib.DNSRecord.question(guess)
 	try:
 		response_q = query.send(name_server, 53, use_tcp, timeout = 3)
 		if response_q:
+			if (debug):
+				print "response_q: " + response_q
 			response = dnslib.DNSRecord.parse(response_q)
 	except KeyboardInterrupt:
 		print 'User exit'
@@ -1050,22 +1056,51 @@ def lookup(guess, name_server):
 		print "ERROR - possible socket timeout when trying " + guess
 		pass
 	if response:
-		#print response
+		if debug:
+			print "Decoded response:\n" + str(response) + "\n"
 		rcode = dnslib.RCODE[response.header.rcode]
 		if rcode == 'NOERROR' or rcode == 'NXDOMAIN':
 			# success, this is a valid subdomain
+			if debug:
+				print "response.rr:\n" + str(response.rr) + "\n"
 			for r in response.rr:
+			# note that we are looping through each piece of the answer but we only return from this method once... we must pick what we return verrry carefully, see explantion below
+				if debug:
+					print "r:\n" + str(r) + "\n"
 				rtype = None
 				try:
 					rtype = str(dnslib.QTYPE[r.rtype])
 				except:
 					rtype = str(r.rtype)
 				#print rtype
-
+				
 				if (rtype == 'CNAME'):
 					#print r.rdata
 					record_type = 'CNAME'
 					record_value = str(r.rdata)
+					''' 
+					*Why the following break keyword is here
+					So if we submit a query and get back a CNAME, the response contains the CNAME record and also the 
+					CNAME records' record, and so on down to the A or AAAA record with the final IP address for the
+					query we submitted. 
+					Example:
+					;; ANSWER SECTION:
+					support.indeed.com.	7200	IN	CNAME	indeed.zendesk.com.
+					indeed.zendesk.com.	900	IN	A	52.34.200.91
+					indeed.zendesk.com.	900	IN	A	35.167.245.158
+					indeed.zendesk.com.	900	IN	A	34.216.174.56
+
+					That's fine, and we loop through each of these "answers" in the 'for r in response.rr' loop.
+					PROBLEM: we were overwriting the value of record_type and record_value each time around the loop. 
+					So if the first 'r' was a CNAME record we wouldn't know about it since the subsequent A/AAAA record would update 'record_type
+					and record_value to reflect the A record not the first CNAME record!
+					The user would see the subdomain as a plain A record but that wasn't true... depending on if the CNAME was processed first.
+					Since this is structered as a method call that returns a single record type and value pair, and because
+					we care more about the CNAME record our query points to than the IP (at least for subdomain takeover recon), we will
+					halt analysis and return the CNAME data if we encounter a CNAME record. We care that a domain name points to an
+					AWS bucket, for example, not the particular Amazon IP it ultimately has to talk to.
+					'''
+					break 
 				elif (rtype == 'A' or rtype == 'AAAA'):
 					record_type = 'A'
 					record_value = str(r.rdata)
@@ -1075,6 +1110,11 @@ def lookup(guess, name_server):
 
 
 
+
+
+#####################
+# Program entry point
+#####################
 if __name__ == "__main__":
     args = parse_args()
     domain = args.domain
@@ -1086,11 +1126,14 @@ if __name__ == "__main__":
     engines = args.engines
     # Line added here
     analysis = args.analysis
+    debug = args.debug
+    if (debug):
+	print "Debugging output enabled for analysis module"
     if verbose or verbose is None:
         verbose = True
     banner()
     res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
-
+    
 
     # Code added here
     if (analysis):
@@ -1114,7 +1157,7 @@ if __name__ == "__main__":
 			# round robin the resolvers
 			server = server + 1
 			server = server % len(resolvers)
-
+		
 			# update user on our progress - every 30 hosts
 			count = count + 1
 			if (count % 30) == 0:
@@ -1140,3 +1183,4 @@ if __name__ == "__main__":
 	#print ""
 	# save the analysis to a file. Merge the arrays into one list for easier reading
 	write_file(analysis, ahosts + ["\n"] + cnames)
+

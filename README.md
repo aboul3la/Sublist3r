@@ -25,6 +25,7 @@ Short Form    | Long Form     | Description
 -o            | --output      | Save discovered domain names to specified text file
 -h            | --help        | show the help message and exit
 -a            | --analysis    | Do analysis of the results and save to specified text file
+              | --debug       | Print debug information during the analysis module (-a)
 
 ### Examples
 
@@ -131,6 +132,3 @@ Respect legal restrictions and only conduct testing against infrastructure that 
 ## Thanks
 
 * Thank you to [aboul3la](https://github.com/aboul3la/) for releasing sublist3r, an incredible subdomain discovery tool!
-
-## Version
-**1/15/18 Version 0.2**
