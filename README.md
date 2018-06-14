@@ -25,7 +25,7 @@ Short Form    | Long Form     | Description
 -o            | --output      | Save discovered domain names to specified text file
 -h            | --help        | show the help message and exit
 -a            | --analysis    | Do analysis of the results and save to specified text file
-              | --debug       | Print debug information during the analysis module (-a)
+              | --debug       | Print debug information during the analysis module (-a). Prints mostly raw DNS data, familarity with the DIG Linux DNS utility and it's output is helpful to interpret the debug output
 
 ### Examples
 
