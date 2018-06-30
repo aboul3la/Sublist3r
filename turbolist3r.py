@@ -625,7 +625,7 @@ class DNSdumpster(enumratorBaseThreaded):
     def check_host(self, host):
         is_valid = False
         Resolver = dns.resolver.Resolver()
-        Resolver.nameservers = ['8.8.8.8', '8.8.4.4']
+        Resolver.nameservers = ['8.8.8.8', '8.8.4.4', '1.1.1.1', '1.0.0.1']
         self.lock.acquire()
         try:
             ip = Resolver.query(host, 'A')[0].to_text()
@@ -1135,7 +1135,7 @@ if __name__ == "__main__":
     # Code added here
     if (analysis):
         # res is the list of subdomains e.g. www.example.com, mail.example.com, etc
-        resolvers = ['8.8.8.8', '8.8.4.4', '9.9.9.9', '75.75.75.75']
+        resolvers = ['8.8.8.8', '8.8.4.4', '9.9.9.9', '75.75.75.75', '1.1.1.1', '1.0.0.1']
         server = 0
         count = 0
         total = str(len(res))
