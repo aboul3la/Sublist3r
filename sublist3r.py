@@ -914,7 +914,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile, ports=None, silent=True, verbose=True, enable_bruteforce=False, engines=None):
     bruteforce_list = set()
     search_list = set()
 
@@ -922,10 +922,6 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         subdomains_queue = list()
     else:
         subdomains_queue = multiprocessing.Manager().list()
-
-    # Check Bruteforce Status
-    if enable_bruteforce or enable_bruteforce is None:
-        enable_bruteforce = True
 
     # Validate domain
     domain_check = re.compile(
@@ -963,7 +959,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
     chosenEnums = []
 
-    if engines is None:
+    if not engines:
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
             NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
@@ -1040,8 +1036,6 @@ if __name__ == "__main__":
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
-    if verbose or verbose is None:
-        verbose = True
     banner()
     res = main(domain, threads, savefile, ports, silent=False,
                verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
