@@ -5,7 +5,7 @@
 #
 # Maintained by rook
 # Contributors:
-#JordanMilne, KxCode, rc0r, memoryprint, ppaulojr
+# JordanMilne, KxCode, rc0r, memoryprint, ppaulojr
 #
 import re
 import optparse
@@ -15,9 +15,9 @@ import sys
 import uuid
 import random
 import ctypes
+import json
 import dns.resolver
 import dns.rdatatype
-import json
 
 # Python 2.x and 3.x compatiablity
 # We need the Queue library for exception handling

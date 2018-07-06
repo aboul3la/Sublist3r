@@ -18,9 +18,9 @@ import json
 from collections import Counter
 
 # external modules
-from subbrute import subbrute
-import dns.resolver
 import requests
+import dns.resolver
+from subbrute import subbrute
 
 # Python 2.x and 3.x compatiablity
 if sys.version > '3':
@@ -55,7 +55,7 @@ if is_windows:
         win_unicode_console.enable()
         colorama.init()
         # Now the unicode will work ^_^
-    except:
+    except (ImportError, ImportWarning):
         print("[!] Error: Coloring libraries not installed, no coloring will be used [Check the readme]")
         G = Y = B = R = W = G = Y = B = R = W = ''
 
@@ -954,12 +954,11 @@ def main(domain, threads, savefile, ports=None, silent=True, verbose=True, enabl
                          'virustotal': Virustotal,
                          'threatcrowd': ThreatCrowd,
                          'ssl': CrtSearch,
-                         'passivedns': PassiveDNS
-                         }
+                         'passivedns': PassiveDNS}
 
     chosenEnums = []
 
-    if not engines:
+    if engines is None:
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
             NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
