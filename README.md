@@ -147,7 +147,7 @@ c:\python27\python.exe -m pip install win_unicode_console colorama
 
 ```python
 import sublist3r
-subdomains = sublist3r.main(domain, no_threads, savefile, ports, silent, verbose, enable_bruteforce, engines)
+subdomains = sublist3r.main(domain, no_threads, savefile, ports=None, silent=True, verbose=False, enable_bruteforce=False, engines=None)
 ```
 The main function will return a set of unique subdomains found by Sublist3r
 
@@ -163,7 +163,7 @@ The main function will return a set of unique subdomains found by Sublist3r
 Example to enumerate subdomains of Yahoo.com:
 ```python
 import sublist3r
-subdomains = sublist3r.main('yahoo.com', 40, 'yahoo_subdomains.txt', ports= None, silent=False, verbose= False, enable_bruteforce= False, engines=None)
+subdomains = sublist3r.main('yahoo.com', 40, 'yahoo_subdomains.txt', ports=None, silent=False, verbose=False, enable_bruteforce=False, engines=None)
 ```
 
 ## License

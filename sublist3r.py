@@ -914,7 +914,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports=None, silent=True, verbose=True, enable_bruteforce=False, engines=None):
+def main(domain, threads, savefile, ports=None, silent=True, verbose=False, enable_bruteforce=False, engines=None):
     bruteforce_list = set()
     search_list = set()
 
