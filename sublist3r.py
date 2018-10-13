@@ -967,7 +967,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     return subdomains
 
 
-if __name__ == "__main__":
+def interactive():
     args = parse_args()
     domain = args.domain
     threads = args.threads
@@ -980,3 +980,6 @@ if __name__ == "__main__":
         verbose = True
     banner()
     res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+
+if __name__ == "__main__":
+    interactive()
