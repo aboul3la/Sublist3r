@@ -104,7 +104,7 @@ def parse_args():
 def write_file(filename, subdomains):
     # saving subdomains results to output file
     print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R, filename, W))
-    with open(str(filename), 'wt') as f:
+    with open(str(filename), 'wt',encoding='utf-8') as f:
         for subdomain in subdomains:
             f.write(subdomain + os.linesep)
 
@@ -545,7 +545,8 @@ class NetcraftEnum(enumratorBaseThreaded):
         cookies = dict()
         cookies_list = cookie[0:cookie.find(';')].split("=")
         cookies[cookies_list[0]] = cookies_list[1]
-        cookies['netcraft_js_verification_response'] = hashlib.sha1(urllib.unquote(cookies_list[1])).hexdigest()
+        # hashlib.sha1 requires utf-8 encoded str
+        cookies['netcraft_js_verification_response'] = hashlib.sha1(urllib.unquote(cookies_list[1]).encode('utf-8')).hexdigest()
         return cookies
 
     def get_cookies(self, headers):
