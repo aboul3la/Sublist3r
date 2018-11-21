@@ -22,7 +22,7 @@ from subbrute import subbrute
 import dns.resolver
 import requests
 
-# Python 2.x and 3.x compatiablity
+# Python 2.x and 3.x compatibility
 if sys.version > '3':
     import urllib.parse as urlparse
     import urllib.parse as urllib
@@ -53,7 +53,7 @@ if is_windows:
         import win_unicode_console , colorama
         win_unicode_console.enable()
         colorama.init()
-        #Now the unicode will work ^_^
+        # Now the unicode will work ^_^
     except:
         print("[!] Error: Coloring libraries not installed, no coloring will be used [Check the readme]")
         G = Y = B = R = W = G = Y = B = R = W = ''
@@ -91,10 +91,10 @@ def parse_args():
     parser = argparse.ArgumentParser(epilog='\tExample: \r\npython ' + sys.argv[0] + " -d google.com")
     parser.error = parser_error
     parser._optionals.title = "OPTIONS"
-    parser.add_argument('-d', '--domain', help="Domain name to enumerate it's subdomains", required=True)
+    parser.add_argument('-d', '--domain', help="Domain name to enumerate its subdomains", required=True)
     parser.add_argument('-b', '--bruteforce', help='Enable the subbrute bruteforce module', nargs='?', default=False)
     parser.add_argument('-p', '--ports', help='Scan the found subdomains against specified tcp ports')
-    parser.add_argument('-v', '--verbose', help='Enable Verbosity and display results in realtime', nargs='?', default=False)
+    parser.add_argument('-v', '--verbose', help='Enable verbosity and display results in realtime', nargs='?', default=False)
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
@@ -160,7 +160,7 @@ class enumratorBase(object):
         return
 
     def print_banner(self):
-        """ subclass can override this if they want a fancy banner :)"""
+        """ subclass can override this if they want a fancy banner :) """
         self.print_(G + "[-] Searching now in %s.." % (self.engine_name) + W)
         return
 
@@ -190,26 +190,26 @@ class enumratorBase(object):
 
     # override
     def extract_domains(self, resp):
-        """ chlid class should override this function """
+        """ child class should override this function """
         return
 
     # override
     def check_response_errors(self, resp):
-        """ chlid class should override this function
+        """ child class should override this function
         The function should return True if there are no errors and False otherwise
         """
         return True
 
     def should_sleep(self):
-        """Some enumrators require sleeping to avoid bot detections like Google enumerator"""
+        """Some enumrators require sleeping to avoid bot detections like Google enumerator """
         return
 
     def generate_query(self):
-        """ chlid class should override this function """
+        """ child class should override this function """
         return
 
     def get_page(self, num):
-        """ chlid class that user different pagnation counter should override this function """
+        """ child class that user different pagnation counter should override this function """
         return num + 10
 
     def enumerate(self, altquery=False):
@@ -222,7 +222,7 @@ class enumratorBase(object):
             query = self.generate_query()
             count = query.count(self.domain)  # finding the number of subdomains found so far
 
-            # if they we reached the maximum number of subdomains in search query
+            # if we reached the maximum number of subdomains in search query
             # then we should go over the pages
             if self.check_max_subdomains(count):
                 page_no = self.get_page(page_no)
@@ -231,7 +231,7 @@ class enumratorBase(object):
                 return self.subdomains
             resp = self.send_req(query, page_no)
 
-            # check if there is any error occured
+            # check if any error occurred
             if not self.check_response_errors(resp):
                 return self.subdomains
             links = self.extract_domains(resp)
@@ -241,7 +241,7 @@ class enumratorBase(object):
                 retries += 1
                 page_no = self.get_page(page_no)
 
-        # make another retry maybe it isn't the last page
+                # make another retry maybe it isn't the last page
                 if retries >= 3:
                     return self.subdomains
 
@@ -676,7 +676,7 @@ class Virustotal(enumratorBaseThreaded):
         super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
-    # the main send_req need to be rewritten
+    # the main send_req needs to be rewritten
     def send_req(self, url):
         try:
             resp = self.session.get(url, headers=self.headers, timeout=self.timeout)

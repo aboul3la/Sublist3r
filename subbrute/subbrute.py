@@ -19,7 +19,7 @@ import dns.resolver
 import dns.rdatatype
 import json
 
-#Python 2.x and 3.x compatiablity
+#Python 2.x and 3.x compatibility
 #We need the Queue library for exception handling
 try:
     import queue as Queue
@@ -64,7 +64,7 @@ class verify_nameservers(multiprocessing.Process):
         resolver.timeout = 1
         resolver.lifetime = 1
         try:
-            #Lets test the letancy of our connection.
+            #Lets test the latency of our connection.
             #Google's DNS server should be an ideal time test.
             resolver.nameservers = ['8.8.8.8']
             resolver.query(self.most_popular_website, self.record_type)
@@ -76,7 +76,7 @@ class verify_nameservers(multiprocessing.Process):
     def end(self):
         self.time_to_die = True
 
-    #This process cannot block forever,  it  needs to check if its time to die.
+    #This process cannot block forever,  it  needs to check if it's time to die.
     def add_nameserver(self, nameserver):
         keep_trying = True
         while not self.time_to_die and keep_trying:
@@ -115,7 +115,7 @@ class verify_nameservers(multiprocessing.Process):
         return added_resolver
 
     def run(self):
-        #Every user will get a different set of resovlers, this helps redistribute traffic.
+        #Every user will get a different set of resolvers, this helps redistribute traffic.
         random.shuffle(self.resolver_list)
         if not self.verify(self.resolver_list):
             #This should never happen,  inform the user.
@@ -131,13 +131,13 @@ class verify_nameservers(multiprocessing.Process):
     #Only add the nameserver to the queue if we can detect wildcards. 
     #Returns False on error.
     def find_wildcards(self, host):
-        #We want sovle the following three problems:
+        #We want to solve the following three problems:
         #1)The target might have a wildcard DNS record.
-        #2)The target maybe using geolocaiton-aware DNS.
-        #3)The DNS server we are testing may respond to non-exsistant 'A' records with advertizements.
+        #2)The target may be using geolocation-aware DNS.
+        #3)The DNS server we are testing may respond to non-existent 'A' records with advertisements.
         #I have seen a CloudFlare Enterprise customer with the first two conditions.
         try:
-            #This is case #3,  these spam nameservers seem to be more trouble then they are worth.
+            #This is case #3,  these spam nameservers seem to be more trouble than they are worth.
              wildtest = self.resolver.query(uuid.uuid4().hex + ".com", "A")
              if len(wildtest):
                 trace("Spam DNS detected:", host)
@@ -167,10 +167,10 @@ class verify_nameservers(multiprocessing.Process):
                     #not found
                     return True
                 else:
-                    #This resolver maybe flakey, we don't want it for our tests.
+                    #This resolver may be flakey, we don't want it for our tests.
                     trace("wildcard exception:", self.resolver.nameservers, type(e)) 
                     return False 
-        #If we hit the end of our depth counter and,
+        #If we hit the end of our depth counter and
         #there are still wildcards, then reject this nameserver because it smells bad.
         return (test_counter >= 0)
 
@@ -217,7 +217,7 @@ class lookup(multiprocessing.Process):
         cname_record = []
         retries = 0        
         if len(self.resolver.nameservers) <= self.required_nameservers:
-            #This process needs more nameservers,  lets see if we have one avaible
+            #This process needs more nameservers,  let's see if we have one available
             self.resolver.nameservers += self.get_ns()
         #Ok we should be good to go.
         while True:
@@ -314,7 +314,7 @@ class lookup(multiprocessing.Process):
                         self.in_q.put(False)
                 except:#Queue.Empty
                     trace('End of work queue')
-                    #There isn't an item behind the end marker
+                    #There is no item behind the end marker
                     work = False
                     break
             #Is this the end all work that needs to be done?
@@ -335,8 +335,8 @@ class lookup(multiprocessing.Process):
                 sys.stdout.flush()
                 trace(response)                  
                 #self.wildcards is populated by the verify_nameservers() thread.
-                #This variable doesn't need a muetex, because it has a queue. 
-                #A queue ensure nameserver cannot be used before it's wildcard entries are found.
+                #This variable doesn't need a mutex, because it has a queue. 
+                #A queue ensures nameserver cannot be used before its wildcard entries are found.
                 reject = False
                 if response:
                     for a in response:
@@ -437,7 +437,7 @@ def run(target, record_type = None, subdomains = "names.txt", resolve_list = "re
     #have a buffer of at most two new nameservers that lookup processes can draw from.
     resolve_q = multiprocessing.Queue(maxsize = 2)
 
-    #Make a source of fast nameservers avaiable for other processes.
+    #Make a source of fast nameservers available for other processes.
     verify_nameservers_proc = verify_nameservers(target, record_type, resolve_q, resolve_list, wildcards)
     verify_nameservers_proc.start()
     #The empty string 
@@ -449,7 +449,7 @@ def run(target, record_type = None, subdomains = "names.txt", resolve_list = "re
         if s:
             if s.find(","):
                 #SubBrute should be forgiving, a comma will never be in a url
-                #but the user might try an use a CSV file as input.
+                #but the user might try and use a CSV file as input.
                 s=s.split(",")[0]
             if not s.endswith(target):
                 hostname = "%s.%s" % (s, target)
@@ -495,7 +495,7 @@ def run(target, record_type = None, subdomains = "names.txt", resolve_list = "re
     trace("End")
 
 #exit handler for signals.  So ctrl+c will work. 
-#The 'multiprocessing' library each process is it's own process which side-steps the GIL
+#The 'multiprocessing' library each process is its own process which side-steps the GIL
 #If the user wants to exit prematurely,  each process must be killed.
 def killproc(signum = 0, frame = 0, pid = False):
     if not pid:
@@ -541,7 +541,7 @@ def check_open(input_file):
 #Every 'multiprocessing' process needs a signal handler.
 #All processes need to die, we don't want to leave zombies.
 def signal_init():
-    #Escliate signal to prevent zombies.
+    #Escalate signal to prevent zombies.
     signal.signal(signal.SIGINT, killproc)
     try:
         signal.signal(signal.SIGTSTP, killproc)
@@ -562,7 +562,7 @@ if __name__ == "__main__":
     parser.add_option("-s", "--subs", dest = "subs", default = os.path.join(base_path, "names.txt"),
               type = "string", help = "(optional) list of subdomains,  default = 'names.txt'")
     parser.add_option("-r", "--resolvers", dest = "resolvers", default = os.path.join(base_path, "resolvers.txt"),
-              type = "string", help = "(optional) A list of DNS resolvers, if this list is empty it will OS's internal resolver default = 'resolvers.txt'")
+              type = "string", help = "(optional) A list of DNS resolvers, if this list is empty it will use OS's internal resolver default = 'resolvers.txt'")
     parser.add_option("-t", "--targets_file", dest = "targets", default = "",
               type = "string", help = "(optional) A file containing a newline delimited list of domains to brute force.")
     parser.add_option("-o", "--output", dest = "output",  default = False, help = "(optional) Output to file (Greppable Format)")
@@ -570,10 +570,10 @@ if __name__ == "__main__":
     parser.add_option("-a", "-A", action = 'store_true', dest = "ipv4", default = False,
               help = "(optional) Print all IPv4 addresses for sub domains (default = off).")
     parser.add_option("--type", dest = "type", default = False,
-              type = "string", help = "(optional) Print all reponses for an arbitrary DNS record type (CNAME, AAAA, TXT, SOA, MX...)")                  
+              type = "string", help = "(optional) Print all responses for an arbitrary DNS record type (CNAME, AAAA, TXT, SOA, MX...)")                  
     parser.add_option("-c", "--process_count", dest = "process_count",
               default = 16, type = "int",
-              help = "(optional) Number of lookup theads to run. default = 16")
+              help = "(optional) Number of lookup threads to run. default = 16")
     parser.add_option("-f", "--filter_subs", dest = "filter", default = "",
               type = "string", help = "(optional) A file containing unorganized domain names which will be filtered into a list of subdomains sorted by frequency.  This was used to build names.txt.")                 
     parser.add_option("-v", "--verbose", action = 'store_true', dest = "verbose", default = False,
@@ -584,7 +584,7 @@ if __name__ == "__main__":
     verbose = options.verbose
 
     if len(args) < 1 and options.filter == "" and options.targets == "":
-        parser.error("You must provie a target. Use -h for help.")
+        parser.error("You must provide a target. Use -h for help.")
 
     if options.filter != "":
         #cleanup this file and print it out
