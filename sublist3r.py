@@ -324,6 +324,7 @@ class YahooEnum(enumratorBaseThreaded):
         self.MAX_DOMAINS = 10
         self.MAX_PAGES = 0
         super(YahooEnum, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        del self.headers['Accept']
         self.q = q
         return
 
