@@ -314,7 +314,67 @@ class GoogleEnum(enumratorBaseThreaded):
         else:
             query = "site:{domain} -www.{domain}".format(domain=self.domain)
         return query
+#------------duckduckgo--------------
 
+class DuckgoEnum(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        base_url = "https://duckduckgo.com/html?q={query}&s={page_no}&nextParams=&v=l&o=json&dc=&api=%2Fd.js&kl=us-en"
+        self.engine_name = "Duckduckgo"
+        self.MAX_DOMAINS = 10
+        self.MAX_PAGES = 500
+        super(DuckgoEnum, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        self.q = q
+        return
+
+    def extract_domains(self, resp):
+	links_list = list()
+	link_regx = re.compile('<a class="result__url" href="(.*?)">')
+        try:
+            links_list = link_regx.findall(resp)
+	    for link in links_list:
+		if not link.startswith('http'):
+                    link = "http://" + link
+                subdomain = urlparse.urlparse(link).netloc
+                if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
+                    if self.verbose:
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                    self.subdomains.append(subdomain.strip())
+        except Exception:
+            pass
+        return links_list
+
+    def check_response_errors(self, resp):
+	if (type(resp) is str or type(resp) is unicode) and 'If this error persists' in resp:
+	    if 'We\'ve detected that you have connected over Tor.'in resp:
+		self.print_(R + "[!] Error: duckduckgo knows we are using tor." + W)
+	    else:				
+            	self.print_(R + "[!] Error: duckduckgo probably now is blocking our requests." + W)
+            self.print_(R + "[~] Finished now the duckduckgo Enumeration ..." + W)
+            return False
+        return True
+
+    def should_sleep(self):
+        return
+
+    def get_page(self, num):
+
+	if num < 1: 
+	    num = 30
+	else:
+	    num = num + 50
+	return num
+
+    def generate_query(self):
+        if self.subdomains:
+            fmt = 'site:{domain} -www.{domain} -{found}'
+            found = ' -'.join(self.subdomains[:self.MAX_DOMAINS - 2])
+            query = fmt.format(domain=self.domain, found=found)
+        else:
+            query = "site:{domain} -www.{domain}".format(domain=self.domain)
+        return query
+
+#----------------end duckduckgo----------------
 
 class YahooEnum(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
@@ -903,7 +963,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'virustotal': Virustotal,
                          'threatcrowd': ThreatCrowd,
                          'ssl': CrtSearch,
-                         'passivedns': PassiveDNS
+                         'passivedns': PassiveDNS,
+			             'duckduckgo': DuckgoEnum
                          }
 
     chosenEnums = []
@@ -912,7 +973,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
             NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
-            CrtSearch, PassiveDNS
+            CrtSearch, PassiveDNS,DuckgoEnum
         ]
     else:
         engines = engines.split(',')
