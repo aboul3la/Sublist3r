@@ -23,6 +23,7 @@ import random
 import multiprocessing
 import threading
 import socket
+import time
 from collections import Counter
 
 # external modules
@@ -117,8 +118,10 @@ def parse_args():
                         default=30)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save just domain names to specified text file')
-    parser.add_argument('-a', '--analysis', help='Do analysis of the results and save to specified text file')
-    parser.add_argument('--debug', default=False, help='Enable verbose debug output', action="store_true")
+    parser.add_argument('-a', '--analyze', default=False, help='Do reverse DNS analysis and output results', action="store_true")
+    parser.add_argument('--saverdns', help='Save reverse DNS analysis to specified file')
+    parser.add_argument('--inputfile', help='Read domains from specified file (perhaps from other tool) and use instead of searching engines. Use with -a to analyze domains')
+    parser.add_argument('--debug', default=False, help='Enable technical debug output', action="store_true")
     return parser.parse_args()
 
 
@@ -1121,19 +1124,26 @@ if __name__ == "__main__":
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
-    # Line added here
-    analysis = args.analysis
+    inputfile = args.inputfile
+    analyze = args.analyze
+    analysisfile = args.saverdns
     debug = args.debug
     if (debug):
         print("Debugging output enabled for analysis module")
     if verbose or verbose is None:
         verbose = True
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce,
+    if (inputfile != None):
+	print(B + "[-] Reading subdomains from " + inputfile + W)
+	f = open(inputfile, 'r')
+	res = f.readlines()
+	f.close()
+    else:
+	res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce,
                engines=engines)
 
     # Code added here
-    if (analysis):
+    if (analyze):
         # res is the list of subdomains e.g. www.example.com, mail.example.com, etc
         resolvers = ['8.8.8.8', '8.8.4.4', '9.9.9.9', '75.75.75.75', '1.1.1.1', '1.0.0.1']
         server = 0
@@ -1159,6 +1169,7 @@ if __name__ == "__main__":
                 count = count + 1
                 if (count % 30) == 0:
                     print(str(count) + '/' + total)
+		time.sleep(0.2) # This helps the script catch the Ctrl-C cancel without looping up to the next subdomain
             except KeyboardInterrupt:
                 print(R + '\n[-] User exit' + W)
                 exit()
@@ -1176,7 +1187,8 @@ if __name__ == "__main__":
         print("\n")
         for x in range(0, len(cnames)):
             print(G + cnames[x] + W)
-
-        # print ""
-        # save the analysis to a file. Merge the arrays into one list for easier reading
-        write_file(analysis, ahosts + ["\n"] + cnames)
+	
+	if (analysisfile!=None):
+        	# save the analysis to a file. Merge the arrays into one list for easier reading
+        	write_file(analysisfile, ahosts + ["\n"] + cnames)
+		print(B + "Saved reverse DNS analysis to " + analysisfile + W)
