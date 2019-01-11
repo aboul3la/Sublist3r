@@ -1,10 +1,10 @@
-## Turbolist3r - Beta
+## Turbolist3r
 
-Turbolist3r is a fork of the [sublist3r](https://github.com/aboul3la/sublist3r) subdomain discovery tool. In addition to all original OSINT capabilties of sublist3r, turbolist3r automates some of the results analysis, with a focus on subdomain takeover.
+Turbolist3r is a fork of the [sublist3r](https://github.com/aboul3la/sublist3r) subdomain discovery tool. In addition to the original OSINT capabilties of sublist3r, turbolist3r automates some analysis of the results, with a focus on subdomain takeover.
 
 Turbolist3r queries public DNS servers for each discovered subdomain. If the subdomain exists (i.e. the resolver replied with an address), the answer is categorized as CNAME or A record. By examining A records, it is possible to discover potential penetration testing targets for a given domain. Likewise, the process of looking for subdomain takeovers is simple; view the discovered CNAME records and investigate any that point to applicable cloud services.
 
-This is an early release and may contain bugs or other irregularities.
+Please do not use for illegal purposes.
 
 ## Screenshots
 
@@ -24,18 +24,24 @@ Short Form    | Long Form     | Description
 -e            | --engines     | Specify a comma-separated list of search engines
 -o            | --output      | Save discovered domain names to specified text file
 -h            | --help        | show the help message and exit
--a            | --analysis    | Do analysis of the results and save to specified text file
+-a            | --analyze     | Do reverse DNS analysis and output results
+(none)        | --saverdns    | Save reverse DNS analysis to specified file
+(none)        | --inputfile   | Read domains from specified file, and use them for analysis
 (none)        | --debug       | Print debug information during the analysis module (-a). Prints mostly raw DNS data, familarity with the DIG Linux DNS utility and it's output is helpful to interpret the debug output
 
 ### Examples
 
-* To enumerate subdomains of a specific domain, perform turbolist3r analysis, and save the analysis to a file:
-
-``python turbolist3r.py -d example.com -a analysis_file.txt``
-
 * To list all the basic options and switches use -h switch:
 
 ```python turbolist3r.py -h```
+
+* To enumerate subdomains of a specific domain, perform advanced analysis, and save the analysis to a file:
+
+``python turbolist3r.py -d example.com -a --saverdns analysis_file.txt``
+
+* Read subdomains from a file and perform advanced analysis on them:
+
+``python turbolist3r.py -d example.com -a --inputfile subdomains.txt``
 
 * To enumerate subdomains of specific domain:
 
