@@ -1056,7 +1056,7 @@ def lookup(guess, name_server):
         exit()
     except:
         # probably socket timed out
-        print("ERROR - possible socket timeout when trying " + guess)
+        print("ERROR - possible socket timeout when trying " + guess + ' at server ' + name_server)
         pass
     if response:
         if debug:
@@ -1108,7 +1108,7 @@ def lookup(guess, name_server):
                     record_type = 'A'
                     record_value = str(r.rdata)
         else:
-            print("ERROR - returned stats " + rcode + " when trying " + guess)
+            print("ERROR - returned stats " + rcode + " when trying " + guess + ' at server ' + name_server)
     return record_type, record_value
 
 
@@ -1145,7 +1145,7 @@ if __name__ == "__main__":
     # Code added here
     if (analyze):
         # res is the list of subdomains e.g. www.example.com, mail.example.com, etc
-        resolvers = ['8.8.8.8', '8.8.4.4', '9.9.9.9', '75.75.75.75', '1.1.1.1', '1.0.0.1']
+        resolvers = ['8.8.8.8', '8.8.4.4', '9.9.9.9', '1.1.1.1', '1.0.0.1']
         server = 0
         count = 0
         total = str(len(res))
