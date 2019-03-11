@@ -1145,7 +1145,7 @@ if __name__ == "__main__":
     # Code added here
     if (analyze):
         # res is the list of subdomains e.g. www.example.com, mail.example.com, etc
-        resolvers = ['8.8.8.8', '8.8.4.4', '9.9.9.9', '75.75.75.75', '1.1.1.1', '1.0.0.1']
+        resolvers = ['8.8.8.8', '8.8.4.4', '9.9.9.9', '1.1.1.1', '1.0.0.1']
         server = 0
         count = 0
         total = str(len(res))
