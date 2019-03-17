@@ -94,7 +94,6 @@ def banner():
 
           # Based on Sublist3r by Ahmed Aboul-Ela - @aboul3la
           # Forked by Carl Pearson - github.com/fleetcaptain
-          # v1.0
 	""" % (R, W, Y))
 
 
@@ -572,7 +571,7 @@ class NetcraftEnum(enumratorBaseThreaded):
 		cookies = dict()
 		cookies_list = cookie[0:cookie.find(';')].split("=")
 		cookies[cookies_list[0]] = cookies_list[1]
-		cookies['netcraft_js_verification_response'] = hashlib.sha1(urllib.unquote(cookies_list[1])).hexdigest()
+		cookies['netcraft_js_verification_response'] = hashlib.sha1((urllib.unquote(cookies_list[1])).encode('utf-8')).hexdigest()
 		return cookies
 
 	def get_cookies(self, headers):
