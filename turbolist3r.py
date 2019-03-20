@@ -1055,7 +1055,7 @@ def lookup(guess, name_server):
 		exit()
 	except:
 		# probably socket timed out
-		print("ERROR - possible socket timeout when trying " + guess + ' at server ' + name_server)
+		print(R + "ERROR - possible socket timeout when trying " + guess + ' at server ' + name_server + W)
 		pass
 	if response:
 		if debug:
