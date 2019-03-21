@@ -1030,8 +1030,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
 
 # Method code added
-cnames = ['== CNAME records ==']
-ahosts = ['== A records ==']
+cnames = ['\033[94m== CNAME records ==\033[0m']
+ahosts = ['\033[94m== A records ==\033[0m']
 
 
 def lookup(guess, name_server):
@@ -1055,7 +1055,7 @@ def lookup(guess, name_server):
 		exit()
 	except:
 		# probably socket timed out
-		print("ERROR - possible socket timeout when trying " + guess + ' at server ' + name_server)
+		print(R + "ERROR - possible socket timeout when trying " + guess + ' at server ' + name_server + W)
 		pass
 	if response:
 		if debug:
