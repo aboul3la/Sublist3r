@@ -25,6 +25,12 @@ import threading
 import socket
 import time
 from collections import Counter
+from prettytable import PrettyTable
+
+
+
+
+
 
 # external modules
 # from subbrute import subbrute
@@ -1030,8 +1036,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
 
 # Method code added
-cnames = ['\033[94m== CNAME records ==\033[0m']
-ahosts = ['\033[94m== A records ==\033[0m']
+cnames = '\033[94m== CNAME records ==\033[0m'
+ahosts = '\033[94m== A records ==\033[0m'
 
 
 def lookup(guess, name_server):
@@ -1141,7 +1147,13 @@ if __name__ == "__main__":
 		res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce,engines=engines)
 
 	# Code added here
+		
+
+	# Code added here
 	if (analyze):
+		cnametable = PrettyTable(["Name", "Records"])
+		atable = PrettyTable(["Name", "Records"])
+
 		# res is the list of subdomains e.g. www.example.com, mail.example.com, etc
 		resolvers = ['8.8.8.8', '8.8.4.4', '9.9.9.9', '1.1.1.1', '1.0.0.1']
 		server = 0
@@ -1156,9 +1168,14 @@ if __name__ == "__main__":
 				# if the query did not return an error, then add result to appropriate array
 				if rtype != "ERROR":
 					if rtype == "CNAME":
-						cnames.append(name + " -->-- " + record)
+						#cnames.append(name + " -->-- " + record)
+						i = [name,record]
+						cnametable.add_row(i)
+
 					elif rtype == "A":
-						ahosts.append(name + " -->-- " + record)
+						#ahosts.append(name + " -->-- " + record)
+						i = [name,record]
+						atable.add_row(i)
 				# round robin the resolvers
 				server = server + 1
 				server = server % len(resolvers)
@@ -1176,17 +1193,20 @@ if __name__ == "__main__":
 				# Known errors: subdomain sample starting with a dot, ex .domain.com
 				continue
 
-		ahosts.sort()
-		cnames.sort()
 
+		print cnames
+		print cnametable
+
+		print ahosts
+		print atable
 		# output analysis results to console
-		for x in range(0, len(ahosts)):
-			print(G + ahosts[x] + W)
-		print("\n")
-		for x in range(0, len(cnames)):
-			print(G + cnames[x] + W)
+		
 	
 	if (analysisfile!=None):
 		# save the analysis to a file. Merge the arrays into one list for easier reading
-		write_file(analysisfile, ahosts + ["\n"] + cnames)
-		print(B + "Saved reverse DNS analysis to " + analysisfile + W)
+		result = ahosts + "\n" + str(atable) + "\n" + cnames + "\n" + str(cnametable) + "\n"
+
+		file = open(analysisfile,"w")
+		file.write(result)
+		file.close()
+		print(B + "Saved reverse DNS analysis to " + R + analysisfile + W)
