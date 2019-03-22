@@ -26,6 +26,7 @@ import socket
 import time
 from collections import Counter
 from prettytable import PrettyTable
+
 # external modules
 # from subbrute import subbrute
 import dns.resolver
@@ -1146,7 +1147,12 @@ if __name__ == "__main__":
 	# Code added here
 	if (analyze):
 		cnametable = PrettyTable(["Name", "Records"])
+		cnametable.align["Name"] = "l"
+		cnametable.align["Records"] = "l"
+
 		atable = PrettyTable(["Name", "Records"])
+		atable.align["Name"] = "l"
+		atable.align["Records"] = "l"
 
 		# res is the list of subdomains e.g. www.example.com, mail.example.com, etc
 		resolvers = ['8.8.8.8', '8.8.4.4', '9.9.9.9', '1.1.1.1', '1.0.0.1']
@@ -1168,6 +1174,7 @@ if __name__ == "__main__":
 					elif rtype == "A":
 						i = [name,record]
 						atable.add_row(i)
+
 				# round robin the resolvers
 				server = server + 1
 				server = server % len(resolvers)
@@ -1185,6 +1192,7 @@ if __name__ == "__main__":
 				# Known errors: subdomain sample starting with a dot, ex .domain.com
 				continue
 
+
 		print cnames
 		print cnametable
 
@@ -1192,6 +1200,7 @@ if __name__ == "__main__":
 		print atable
 		# output analysis results to console
 		
+	
 	if (analysisfile!=None):
 		# save the analysis to a file. Merge the arrays into one list for easier reading
 		result = ahosts + "\n" + str(atable) + "\n" + cnames + "\n" + str(cnametable) + "\n"
