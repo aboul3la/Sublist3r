@@ -44,7 +44,7 @@ Short Form    | Long Form     | Description
 
 ``python turbolist3r.py -d example.com -a --inputfile subdomains.txt``
 
-* Read subdomains from a file and perform advanced analysis on them:
+* Using -r to populate DNS resolvers from a file:
 
 ``python turbolist3r.py -d example.com -a --inputfile subdomains.txt -r dns_servers.txt``
 
