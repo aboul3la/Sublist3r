@@ -83,6 +83,10 @@ else:
 	R = '\033[91m'  # red
 	W = '\033[0m'  # white
 
+# array of characters that can appear in an IP address
+resolver_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'] 
+
+
 
 def banner():
 	print("""%s
@@ -95,6 +99,21 @@ def banner():
           # Based on Sublist3r by Ahmed Aboul-Ela - @aboul3la
           # Forked by Carl Pearson - github.com/fleetcaptain
 	""" % (R, W, Y))
+
+
+
+# given a string, parse and check if it is an IP address
+def is_ip(s):
+	a = s.split('.')
+	if len(a) != 4:
+		return False
+	for x in a:
+		if not x.isdigit():
+			return False
+		i = int(x)
+		if i < 0 or i > 255:
+			return False
+	return True
 
 
 def parser_error(errmsg):
@@ -122,6 +141,7 @@ def parse_args():
 	parser.add_argument('--saverdns', help='Save reverse DNS analysis to specified file')
 	parser.add_argument('--inputfile', help='Read domains from specified file (perhaps from other tool) and use instead of searching engines. Use with -a to analyze domains')
 	parser.add_argument('--debug', default=False, help='Enable technical debug output', action="store_true")
+	parser.add_argument('-r', '--resolvers',  help='File with DNS servers to populate as resolvers, one per line')
 	return parser.parse_args()
 
 
@@ -1127,11 +1147,38 @@ if __name__ == "__main__":
 	analyze = args.analyze
 	analysisfile = args.saverdns
 	debug = args.debug
+	server_file = args.resolvers
 	if (debug):
 		print("Debugging output enabled for analysis module")
 	if verbose or verbose is None:
 		verbose = True
+
 	banner()
+
+
+	# Did the user specifiy a custom resolver file?
+	# If so, try to read it here, so if there is an error we don't waste
+	# running the rest of the script before erroring out
+	resolvers = []
+	if (server_file != None):
+		try:
+			f = open(server_file, 'r')
+			servers = f.readlines()
+		except Exception as e:
+			print("Error opening resolver file " + server_file)
+			print("Exception trace: " + str(e))
+			raise SystemExit
+		# Do some sanity checking on user supplied resolvers
+		for line in servers:
+			# strip newline from the end and any spaces or whatnot at the start
+			line = line.replace('\n', '').replace(' ', '').replace('\t', '')
+			if is_ip(line):
+				# this is probably an IP address
+				resolvers.append(line)
+	else:
+		# use a default list of resolvers
+		resolvers = ['8.8.8.8', '8.8.4.4', '9.9.9.9', '1.1.1.1', '1.0.0.1']	
+		
 	if (inputfile != None):
 		print(B + "[-] Reading subdomains from " + inputfile + W)
 		f = open(inputfile, 'r')
@@ -1143,7 +1190,9 @@ if __name__ == "__main__":
 	# Code added here
 	if (analyze):
 		# res is the list of subdomains e.g. www.example.com, mail.example.com, etc
-		resolvers = ['8.8.8.8', '8.8.4.4', '9.9.9.9', '1.1.1.1', '1.0.0.1']
+		print(B + "[-] Using DNS resolvers:" + W)
+		for r in resolvers:
+			print(B + r + W)
 		server = 0
 		count = 0
 		total = str(len(res))

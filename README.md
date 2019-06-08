@@ -28,6 +28,7 @@ Short Form    | Long Form     | Description
 (none)        | --saverdns    | Save reverse DNS analysis to specified file
 (none)        | --inputfile   | Read domains from specified file, and use them for analysis
 (none)        | --debug       | Print debug information during the analysis module (-a). Prints mostly raw DNS data, familarity with the DIG Linux DNS utility and it's output is helpful to interpret the debug output
+-r            | --resolvers   | File with DNS servers to populate as resolvers. File must have only one server IP address per line and only IP addresses are accepted
 
 ### Examples
 
@@ -42,6 +43,10 @@ Short Form    | Long Form     | Description
 * Read subdomains from a file and perform advanced analysis on them:
 
 ``python turbolist3r.py -d example.com -a --inputfile subdomains.txt``
+
+* Read subdomains from a file and perform advanced analysis on them:
+
+``python turbolist3r.py -d example.com -a --inputfile subdomains.txt -r dns_servers.txt``
 
 * To enumerate subdomains of specific domain:
 
