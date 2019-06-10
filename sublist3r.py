@@ -352,7 +352,7 @@ class YahooEnum(enumratorBaseThreaded):
         return links_list
 
     def should_sleep(self):
-        return
+        returnVir
 
     def get_page(self, num):
         return num + 10
@@ -669,7 +669,7 @@ class DNSdumpster(enumratorBaseThreaded):
 class Virustotal(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = 'https://www.virustotal.com/en/domain/{domain}/information/'
+        base_url = 'https://www.virustotal.com/gui/domain/{domain}/relations'
         self.engine_name = "Virustotal"
         self.lock = threading.Lock()
         self.q = q
