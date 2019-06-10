@@ -352,7 +352,7 @@ class YahooEnum(enumratorBaseThreaded):
         return links_list
 
     def should_sleep(self):
-        returnVir
+        return
 
     def get_page(self, num):
         return num + 10
