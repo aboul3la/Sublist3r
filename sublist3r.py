@@ -669,7 +669,7 @@ class DNSdumpster(enumratorBaseThreaded):
 class Virustotal(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = 'https://www.virustotal.com/en/domain/{domain}/information/'
+        base_url = 'https://www.virustotal.com/ui/domains/{domain}/subdomains?limit=40' #updated url
         self.engine_name = "Virustotal"
         self.lock = threading.Lock()
         self.q = q
@@ -694,13 +694,10 @@ class Virustotal(enumratorBaseThreaded):
         return self.subdomains
 
     def extract_domains(self, resp):
-        link_regx = re.compile('<div class="enum.*?">.*?<a target="_blank" href=".*?">(.*?)</a>', re.S)
         try:
-            links = link_regx.findall(resp)
-            for link in links:
-                subdomain = link.strip()
-                if not subdomain.endswith(self.domain):
-                    continue
+            data_subdomain = json.loads(resp) # Modified from HTML Parsing to Json
+            subdomains = [data_subdomain['data'][data]['id'] for data in range(len(data_subdomain['data']))]
+            for subdomain in subdomains:
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if self.verbose:
                         self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
