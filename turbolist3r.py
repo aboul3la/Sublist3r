@@ -4,10 +4,6 @@
 # By Carl Pearson - github.com/fleetcaptain
 # Based on Sublist3r code created by Ahmed Aboul-Ela - twitter.com/aboul3la
 #
-# Changes to Turbolist3r from Sublist3r:
-# - check subdomain for text "From http://PTRarchive.com: " and remove it (otherwise it ends up in the output and can impede automated analysis with other tools)
-# - added functionality to query found subdomains, record answer, and catagorize as A or CNAME record. Speeds up subdomain takeover analysis as CNAME records and the services they point to are collected and displayed
-#
 # TODO - merge Sublist3r dns requests with dnslib to avoid duplication of dns libraries
 #
 
@@ -27,7 +23,10 @@ import time
 from collections import Counter
 
 # external modules
-# from subbrute import subbrute
+try:
+	from subbrute import subbrute
+except:
+	print "Failed to import subbrute, you will not be able to bruteforce"
 import dns.resolver
 import requests
 # import dnslib, which provides better features compared to dns.resolver for finding subdomains
