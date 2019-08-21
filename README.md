@@ -12,7 +12,7 @@ Sublist3r is a python tool designed to enumerate subdomains of websites using OS
 ## Installation in Debian distros
 
 ```
-cd /usr/share && git clone https://github.com/aboul3la/Sublist3r.git && cd /usr/share/Sublist3r && chmod +x *.* && sudo pip install ebcdic && sudo pip3 install ebcdic && sudo pip install -r requirements.txt && python setup.py install
+cd /usr/share && git clone https://github.com/aboul3la/Sublist3r.git && cd /usr/share/Sublist3r && chmod +x *.* && sudo pip install ebcdic && sudo pip3 install ebcdic && sudo pip install -r requirements.txt && python setup.py install && cd && sublist3r
 ```
 
 ## Recommended Python Version:
