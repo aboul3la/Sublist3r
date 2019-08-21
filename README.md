@@ -18,7 +18,7 @@ cd /usr/share && git clone https://github.com/aboul3la/Sublist3r.git && cd /usr/
 ## Usage in Debian Distros 
 
 ```
-sublist3r -h
+sublist3r -b -d yourdomain.com -t 37 -v -o /root/sublist3r_yourdomain_com
 ```
 
 ## Recommended Python Version:
