@@ -26,7 +26,7 @@ from collections import Counter
 try:
 	from subbrute import subbrute
 except:
-	print "Failed to import subbrute, you will not be able to bruteforce"
+	print("Failed to import subbrute, you will not be able to bruteforce")
 import dns.resolver
 import requests
 # import dnslib, which provides better features compared to dns.resolver for finding subdomains
