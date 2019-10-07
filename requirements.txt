@@ -1,4 +1,3 @@
 dnslib
 argparse
-dnspython
 requests
