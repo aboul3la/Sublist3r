@@ -73,7 +73,7 @@ Short Form    | Long Form     | Description
 
 Note that turbolist3r has not been tested on Windows.
 
-Turbolist3r depends on the `dnslib`, `requests`, `dnspython`, and `argparse` python modules.
+Turbolist3r depends on the `dnslib`, `requests`, and `argparse` python modules.
 
 #### dnslib Module
 
@@ -97,18 +97,6 @@ sudo yum install python-requests
 - Install using pip on Linux:
 ```
 sudo pip install requests
-```
-
-#### dnspython Module (http://www.dnspython.org/)
-
-- Install for Ubuntu/Debian:
-```
-sudo apt-get install python-dnspython
-```
-
-- Install using pip:
-```
-sudo pip install dnspython
 ```
 
 #### argparse Module
