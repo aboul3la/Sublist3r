@@ -70,14 +70,7 @@ Short Form    | Long Form     | Description
 
 
 ## Dependencies:
-
-Note that turbolist3r has not been tested on Windows.
-
-<<<<<<< HEAD
-Turbolist3r depends on the `dnslib`, `requests`, and `argparse` python modules.
-=======
-Turbolist3r depends on the `dnslib`, `requests`, `dnspython`, and `argparse` python modules. The `subbrute` module is required for bruteforce capability, but Turbolist3r should run without it as long as you don't invoke bruteforce. Submit a PR or contact me if you have issues.
->>>>>>> 84d82d9019bc65d836e14ce8d8959fd1deafd1de
+Turbolist3r depends on the `dnslib`, `requests`, and `argparse` python modules. The `subbrute` module is required for bruteforce capability, but Turbolist3r should run without it as long as you don't invoke bruteforce. Submit a PR or contact me if you have issues.
 
 #### dnslib Module
 
