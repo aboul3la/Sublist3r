@@ -66,6 +66,10 @@ else:
     R = '\033[91m'  # red
     W = '\033[0m'   # white
 
+def no_color():
+    global G, Y, B, R, W
+    G = Y = B = R = W = ''
+
 
 def banner():
     print("""%s
@@ -98,6 +102,7 @@ def parse_args():
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
+    parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
     return parser.parse_args()
 
 
@@ -987,6 +992,8 @@ def interactive():
     engines = args.engines
     if verbose or verbose is None:
         verbose = True
+    if args.no_color:
+        no_color()
     banner()
     res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
 
