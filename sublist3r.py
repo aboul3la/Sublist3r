@@ -971,7 +971,22 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         if ports:
             if not silent:
                 print(G + "[-] Start port scan now for the following ports: %s%s" % (Y, ports) + W)
-            ports = ports.split(',')
+            # ports = ports.split(',')
+            ports=re.split(r'[,;\|]',ports)
+            daX=[]
+            aX=[]
+            try:
+                for x in ports:
+                    if '-' in x or '~' in x:
+                        daX.append(x)
+                        x1=re.split(r'[\-~]',x)
+                        aX=aX+range(x1[0],x1[1])
+                for x in daX:
+                    ports.remove(x)
+                ports=ports+aX
+            except Exception as e:
+                # print(e)
+                pass
             pscan = portscan(subdomains, ports)
             pscan.run()
 
