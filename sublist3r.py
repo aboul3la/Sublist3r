@@ -15,6 +15,7 @@ import multiprocessing
 import threading
 import socket
 import json
+import execjs
 from collections import Counter
 
 # external modules
@@ -727,21 +728,77 @@ class ThreatCrowd(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
         base_url = 'https://www.threatcrowd.org/searchApi/v2/domain/report/?domain={domain}'
+        self.init_url = "https://www.threatcrowd.org"
         self.engine_name = "ThreatCrowd"
         self.lock = threading.Lock()
         self.q = q
         super(ThreatCrowd, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
+    def init_req(self):
+        try:
+            resp = self.session.get(self.init_url, headers=self.headers, timeout=self.timeout)
+        except Exception:
+            resp = None
+        return self.get_response(resp)
+
+    def get_key(self, text):
+        try:
+            pattern = re.compile('setTimeout\(function\(\)\{(.*?)f.action \+= location.hash;', re.S)
+            code = pattern.findall(text)
+            code = re.sub('\s+(t = document.*?);\s+;', '', code[0], flags=re.S)
+            code = re.sub('a.value', 'value', code)
+            code = re.sub('t.length', '19', code)
+            code = 'function key(){' + code.strip() + ';return value;}'
+            result = execjs.compile(code)
+            key = result.call('key')
+            return key
+        except Exception:
+            return None
+
+    def get_params(self, text):
+        try:
+            final_dict = {}
+            pattern = re.compile('<form id="challenge-form" action="(.*)" method="POST"', re.S)
+            final_dict["url_suffix"] = pattern.findall(text)[0]
+            pattern = re.compile('<input type="hidden" name="r" value="(.*)"></input>', re.S)
+            final_dict["first_param"] = pattern.findall(text)[0]
+            pattern = re.compile('<input type="hidden" name="jschl_vc" value="(.*)"/>')
+            final_dict["second_param"] = pattern.findall(text)[0]
+            pattern = re.compile('<input type="hidden" name="pass" value="(.*)"/>') 
+            final_dict["third_param"] = pattern.findall(text)[0]
+            return final_dict
+        except Exception:
+            return None
+
+    def get_cookie(self, key, params):
+        url = self.init_url + params["url_suffix"]
+        post_params = {}
+        post_params["jschl_answer"] = key
+        post_params["r"] = params['first_param']
+        post_params["jschl_vc"] = params['second_param']
+        post_params["pass"] = params['third_param']
+        try:
+            time.sleep(5)
+            response = self.session.post(url,
+                                        headers=self.headers,
+                                        data=post_params,
+                                        timeout=self.timeout)
+        except Exception:
+            pass
+
     def req(self, url):
         try:
             resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception:
             resp = None
-
         return self.get_response(resp)
 
     def enumerate(self):
+        init_html = self.init_req()
+        key = self.get_key(init_html)
+        params = self.get_params(init_html)
+        self.get_cookie(key, params)
         url = self.base_url.format(domain=self.domain)
         resp = self.req(url)
         self.extract_domains(resp)
