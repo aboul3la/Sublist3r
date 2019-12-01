@@ -109,7 +109,7 @@ def parse_args():
 def write_file(filename, subdomains):
     # saving subdomains results to output file
     print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R, filename, W))
-    with open(str(filename), 'wt') as f:
+    with open(str(filename), 'a+') as f:
         for subdomain in subdomains:
             f.write(subdomain + os.linesep)
 
@@ -637,7 +637,11 @@ class DNSdumpster(enumratorBaseThreaded):
 
     def get_csrftoken(self, resp):
         csrf_regex = re.compile('<input type="hidden" name="csrfmiddlewaretoken" value="(.*?)">', re.S)
-        token = csrf_regex.findall(resp)[0]
+        token = csrf_regex.findall(resp)
+        if token and 0 < len(token):
+            token=token[0]
+        else:
+            token=""
         return token.strip()
 
     def enumerate(self):
@@ -1001,6 +1005,8 @@ def interactive():
     domain = args.domain
     threads = args.threads
     savefile = args.output
+    if None == savefile and domain:
+        savefile=domain + ".txt"
     ports = args.ports
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
