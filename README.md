@@ -29,6 +29,7 @@ Short Form    | Long Form     | Description
 (none)        | --inputfile   | Read domains from specified file, and use them for analysis
 (none)        | --debug       | Print debug information during the analysis module (-a). Prints mostly raw DNS data, familarity with the DIG Linux DNS utility and it's output is helpful to interpret the debug output
 -r            | --resolvers   | File with DNS servers to populate as resolvers. File must have only one server IP address per line and only IP addresses are accepted
+-q            | --quiet       | Only print found domains and/or CNAME mappings. Note errors may be printed as well
 
 ### Examples
 

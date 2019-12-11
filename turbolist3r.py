@@ -24,7 +24,8 @@ from collections import Counter
 try:
     from subbrute import subbrute
 except:
-    print("Failed to import subbrute, you will not be able to bruteforce")
+    pass
+    #print("Failed to import subbrute, you will not be able to bruteforce")
 import requests
 
 # import dnslib, which provides better features compared to dns.resolver for finding subdomains
@@ -1209,7 +1210,8 @@ if __name__ == "__main__":
     RESOLVER_COUNT = len(resolvers)
  
     if (inputfile != None):
-        print(B + "[-] Reading subdomains from " + inputfile + W)
+        if not silent:
+        	print(B + "[-] Reading subdomains from " + inputfile + W)
         f = open(inputfile, 'r')
         res = f.readlines()
         f.close()
@@ -1219,14 +1221,16 @@ if __name__ == "__main__":
     # Code added here
     if (analyze):
         # res is the list of subdomains e.g. www.example.com, mail.example.com, etc
-        print(B + "[-] Using DNS resolvers:" + W)
-        for r in resolvers:
-            print(B + r + W)
+        if not silent:
+            print(B + "[-] Using DNS resolvers:" + W)
+            for r in resolvers:
+                print(B + r + W)
         server = 0
         count = 0
         total = str(len(res))
-        print("")
-        print(B + "[-] Beginning analysis of " + total + " subdomains..." + W)
+        if not silent:
+            print("")
+            print(B + "[-] Beginning analysis of " + total + " subdomains..." + W)
         for subdomain in res:
             try:
                 name = subdomain.replace('\n', '').replace('\r', '')
@@ -1243,8 +1247,9 @@ if __name__ == "__main__":
 
                 # update user on our progress - every 30 hosts
                 count = count + 1
-                if (count % 30) == 0:
-                    print(str(count) + '/' + total)
+                if not silent:
+                    if (count % 30) == 0:
+                        print(str(count) + '/' + total)
                 time.sleep(0.2) # This helps the script catch the Ctrl-C cancel without looping up to the next subdomain
             except KeyboardInterrupt:
                 print(R + '\n[-] User exit' + W)
@@ -1267,4 +1272,5 @@ if __name__ == "__main__":
     if (analysisfile!=None):
         # save the analysis to a file. Merge the arrays into one list for easier reading
         write_file(analysisfile, ahosts + ["\n"] + cnames)
-        print(B + "Saved reverse DNS analysis to " + analysisfile + W)
+        if not silent:
+            print(B + "Saved reverse DNS analysis to " + analysisfile + W)
