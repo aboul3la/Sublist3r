@@ -141,6 +141,7 @@ def parse_args():
     parser.add_argument('--inputfile', help='Read domains from specified file (perhaps from other tool) and use instead of searching engines. Use with -a to analyze domains')
     parser.add_argument('--debug', default=False, help='Enable technical debug output', action="store_true")
     parser.add_argument('-r', '--resolvers',  help='File with DNS servers to populate as resolvers, one per line')
+    parser.add_argument('-q', '--quiet', help='Show only result', default=False, action='store_true')
     return parser.parse_args()
 
 
@@ -962,7 +963,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines, quiet):
     bruteforce_list = set()
     search_list = set()
 
@@ -1062,7 +1063,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
             pscan = portscan(subdomains, ports)
             pscan.run()
 
-        elif not silent:
+        elif not silent or quiet:
             for subdomain in subdomains:
                 # Code modified - remove 'From http://PTRarchive.com: ' which shows up in some results
                 subdomain = subdomain.replace("From http://PTRarchive.com: ", "")
@@ -1169,13 +1170,18 @@ if __name__ == "__main__":
     analysisfile = args.saverdns
     debug = args.debug
     server_file = args.resolvers
+    quiet = args.quiet
+
     if (debug):
         print("Debugging output enabled for analysis module")
     if verbose or verbose is None:
         verbose = True
 
-    banner()
-
+    if quiet:
+        silent = True
+    else:
+        silent = False
+        banner()
 
     # Did the user specifiy a custom resolver file?
     # If so, try to read it here, so if there is an error we don't waste
@@ -1208,7 +1214,7 @@ if __name__ == "__main__":
         res = f.readlines()
         f.close()
     else:
-        res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce,engines=engines)
+        res = main(domain, threads, savefile, ports, silent, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines, quiet=quiet)
 
     # Code added here
     if (analyze):
