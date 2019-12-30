@@ -873,11 +873,11 @@ class portscan():
         if len(openports) > 0:
             print("%s%s%s - %sFound open ports:%s %s%s%s" % (G, host, W, R, W, Y, ', '.join(openports), W))
             if scrape:
-                print(G + " - Scraping indexes..." + W)
+                print(G + "[-] Scraping indexes..." + W)
                 valid_urls = get_valid_urls(host, openports, True)
                 for valid_url in valid_urls:
                     scrape_url(valid_url)
-                    print(Y + " - Saved " + valid_url + W)
+                    print(Y + "[-] Saved " + valid_url + W)
 
 
     def run(self):
