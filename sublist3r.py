@@ -16,7 +16,8 @@ import threading
 import socket
 import json
 from collections import Counter
-
+from scraper.scraper import scrape_url
+from scraper.scraper import get_valid_urls
 # external modules
 from subbrute import subbrute
 import dns.resolver
@@ -97,12 +98,13 @@ def parse_args():
     parser._optionals.title = "OPTIONS"
     parser.add_argument('-d', '--domain', help="Domain name to enumerate it's subdomains", required=True)
     parser.add_argument('-b', '--bruteforce', help='Enable the subbrute bruteforce module', nargs='?', default=False)
-    parser.add_argument('-p', '--ports', help='Scan the found subdomains against specified tcp ports')
+    parser.add_argument('-p', '--ports', help='Scan the found subdomains against specified tcp ports', default="80,443")
     parser.add_argument('-v', '--verbose', help='Enable Verbosity and display results in realtime', nargs='?', default=False)
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
+    parser.add_argument('-s', '--scrape', help='Output the contents of the indeces', default=True, action='store_true')
     return parser.parse_args()
 
 
@@ -847,13 +849,14 @@ class PassiveDNS(enumratorBaseThreaded):
 
 
 class portscan():
-    def __init__(self, subdomains, ports):
+    def __init__(self, subdomains, ports, scrape):
+        self.scrape = scrape
         self.subdomains = subdomains
         self.ports = ports
         self.threads = 20
         self.lock = threading.BoundedSemaphore(value=self.threads)
 
-    def port_scan(self, host, ports):
+    def port_scan(self, host, ports, scrape):
         openports = []
         self.lock.acquire()
         for port in ports:
@@ -869,14 +872,21 @@ class portscan():
         self.lock.release()
         if len(openports) > 0:
             print("%s%s%s - %sFound open ports:%s %s%s%s" % (G, host, W, R, W, Y, ', '.join(openports), W))
+            if scrape:
+                print(G + " - Scraping indexes..." + W)
+                valid_urls = get_valid_urls(host, openports, True)
+                for valid_url in valid_urls:
+                    scrape_url(valid_url)
+                    print(Y + " - Saved " + valid_url + W)
+
 
     def run(self):
         for subdomain in self.subdomains:
-            t = threading.Thread(target=self.port_scan, args=(subdomain, self.ports))
+            t = threading.Thread(target=self.port_scan, args=(subdomain, self.ports, self.scrape))
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines, scrape):
     bruteforce_list = set()
     search_list = set()
 
@@ -972,7 +982,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
             if not silent:
                 print(G + "[-] Start port scan now for the following ports: %s%s" % (Y, ports) + W)
             ports = ports.split(',')
-            pscan = portscan(subdomains, ports)
+            pscan = portscan(subdomains, ports, scrape)
             pscan.run()
 
         elif not silent:
@@ -990,12 +1000,13 @@ def interactive():
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    scrape = args.scrape
     if verbose or verbose is None:
         verbose = True
     if args.no_color:
         no_color()
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines, scrape=scrape)
 
 if __name__ == "__main__":
     interactive()

@@ -1,3 +1,6 @@
 argparse
 dnspython
 requests
+pyopenssl
+bs4
+cryptography
