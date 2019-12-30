@@ -10,7 +10,7 @@ An external library scrapper, uses BeautifulSoup 4 to download any url obtained 
 
 ![Sublist3r](http://www.secgeek.net/images/Sublist3r.png "Sublist3r in action")
 
-![Sublist3r](http://www.secgeek.net/images/Sublist3r.png "Scraping output")
+![Sublist3r](https://raw.githubusercontent.com/alex91ar/Sublist3r-Blitzkrieg/scraper/sub-blitz.png "Scraping output")
 
 
 ## Installation
