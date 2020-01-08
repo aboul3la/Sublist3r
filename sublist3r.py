@@ -3,25 +3,25 @@
 # Sublist3r v1.0
 # By Ahmed Aboul-Ela - twitter.com/aboul3la
 
+import argparse
+import hashlib
+import json
+import multiprocessing
+import os
+import random
 # modules in standard library
 import re
-import sys
-import os
-import argparse
-import time
-import hashlib
-import random
-import multiprocessing
-import threading
 import socket
-import json
+import sys
+import threading
+import time
 from collections import Counter
 
-# external modules
-from subbrute import subbrute
 import dns.resolver
 import requests
 
+# external modules
+from subbrute import subbrute
 # Python 2.x and 3.x compatiablity
 if sys.version > '3':
     import urllib.parse as urlparse
@@ -50,7 +50,8 @@ if is_windows:
     R = '\033[91m'  # red
     W = '\033[0m'   # white
     try:
-        import win_unicode_console , colorama
+        import win_unicode_console
+        import colorama
         win_unicode_console.enable()
         colorama.init()
         #Now the unicode will work ^_^
@@ -140,11 +141,18 @@ def subdomain_sorting_key(hostname):
     return parts, 0
 
 
+def get_response(response):
+    if response is None:
+        return 0
+    return response.text if hasattr(response, "text") else response.content
+
+
 class enumratorBase(object):
     def __init__(self, base_url, engine_name, domain, subdomains=None, silent=False, verbose=True):
         subdomains = subdomains or []
         self.domain = urlparse.urlparse(domain).netloc
         self.session = requests.Session()
+        self.proxies = {"http": "http://127.0.0.1:6666", "https": "http://127.0.0.1:6666", }
         self.subdomains = []
         self.timeout = 25
         self.base_url = base_url
@@ -152,7 +160,8 @@ class enumratorBase(object):
         self.silent = silent
         self.verbose = verbose
         self.headers = {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) \
+                            Chrome/58.0.3029.110 Safari/537.36',
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
               'Accept-Language': 'en-US,en;q=0.8',
               'Accept-Encoding': 'gzip',
@@ -173,15 +182,10 @@ class enumratorBase(object):
 
         url = self.base_url.format(query=query, page_no=page_no)
         try:
-            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout, proxies=self.proxies)
         except Exception:
             resp = None
-        return self.get_response(resp)
-
-    def get_response(self, response):
-        if response is None:
-            return 0
-        return response.text if hasattr(response, "text") else response.content
+        return get_response(resp)
 
     def check_max_subdomains(self, count):
         if self.MAX_DOMAINS == 0:
@@ -387,6 +391,7 @@ class AskEnum(enumratorBaseThreaded):
         links_list = list()
         link_regx = re.compile('<p class="web-result-url">(.*?)</p>')
         try:
+            links_list = []
             links_list = link_regx.findall(resp)
             for link in links_list:
                 if not link.startswith('http'):
@@ -567,7 +572,7 @@ class NetcraftEnum(enumratorBaseThreaded):
         cookies = self.get_cookies(resp.headers)
         url = self.base_url.format(domain=self.domain)
         while True:
-            resp = self.get_response(self.req(url, cookies))
+            resp = get_response(self.req(url, cookies))
             self.extract_domains(resp)
             if 'Next page' not in resp:
                 return self.subdomains
@@ -633,7 +638,7 @@ class DNSdumpster(enumratorBaseThreaded):
         except Exception as e:
             self.print_(e)
             resp = None
-        return self.get_response(resp)
+        return get_response(resp)
 
     def get_csrftoken(self, resp):
         csrf_regex = re.compile('<input type="hidden" name="csrfmiddlewaretoken" value="(.*?)">', re.S)
@@ -690,7 +695,7 @@ class Virustotal(enumratorBaseThreaded):
             self.print_(e)
             resp = None
 
-        return self.get_response(resp)
+        return get_response(resp)
 
     # once the send_req is rewritten we don't need to call this function, the stock one should be ok
     def enumerate(self):
@@ -739,7 +744,7 @@ class ThreatCrowd(enumratorBaseThreaded):
         except Exception:
             resp = None
 
-        return self.get_response(resp)
+        return get_response(resp)
 
     def enumerate(self):
         url = self.base_url.format(domain=self.domain)
@@ -778,7 +783,7 @@ class CrtSearch(enumratorBaseThreaded):
         except Exception:
             resp = None
 
-        return self.get_response(resp)
+        return get_response(resp)
 
     def enumerate(self):
         url = self.base_url.format(domain=self.domain)
@@ -807,6 +812,66 @@ class CrtSearch(enumratorBaseThreaded):
             pass
 
 
+class GoogleTER(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        base_url = 'https://www.google.com/transparencyreport/jsonp/ct/search?domain= \
+                   {domain}&incl_exp=false&incl_sub=true&c='
+        self.engine_name = "GoogleTER"
+        self.lock = threading.Lock()
+        self.q = q
+        self.Token = ""
+        super(GoogleTER, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        return
+
+    def req(self, url):
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 \
+                          Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-GB,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+        }
+
+        try:
+            resp = self.session.get(url, headers=headers, timeout=self.timeout, proxies=self.proxies)
+        except Exception as e:
+            self.print_(e)
+            resp = None
+        return get_response(resp)
+
+    def enumerate(self):
+        url = self.base_url.format(domain=self.domain)
+        while True:
+            resp = self.req(url)
+            if not type(resp) == type(1):
+                self.extract_domains(resp)
+                if "nextPageToken" not in resp:
+                    return self.subdomains
+                url = self.base_url.format(domain=self.domain) + "&token=" + self.Token.replace("=", "%3D")
+
+    def extract_domains(self, resp):
+        _jsonp_begin = r'/* API response */('
+        _jsonp_end = r'));'
+        try:
+
+            googleresult = json.loads(resp[len(_jsonp_begin):-len(_jsonp_end)])
+            for subs in googleresult["results"]:
+                
+                if self.domain in googleresult:
+                    continue
+                subdomain = subs["subject"]
+                if subdomain.startswith("*."):
+                    subdomain = subdomain.replace("*.", "")
+                if subdomain not in self.subdomains and subdomain != self.domain and subdomain.endswith(self.domain):
+                    if self.verbose:
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                    self.subdomains.append(subdomain.strip())
+            self.Token = googleresult["nextPageToken"]
+        except Exception:
+            pass
+
+
 class PassiveDNS(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
@@ -823,7 +888,7 @@ class PassiveDNS(enumratorBaseThreaded):
         except Exception as e:
             resp = None
 
-        return self.get_response(resp)
+        return get_response(resp)
 
     def enumerate(self):
         url = self.base_url.format(domain=self.domain)
@@ -845,6 +910,121 @@ class PassiveDNS(enumratorBaseThreaded):
         except Exception as e:
             pass
 
+
+class HackerTarget(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        base_url = 'https://api.hackertarget.com/hostsearch/?q={domain}'
+        self.engine_name = "HackerTarget"
+        self.lock = threading.Lock()
+        self.q = q
+        super(HackerTarget, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        return
+
+    def req(self, url):
+        try:
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+        except Exception as e:
+            resp = None
+
+        return get_response(resp)
+
+    def enumerate(self):
+        url = self.base_url.format(domain=self.domain)
+        resp = self.req(url)
+        if not resp:
+            return self.subdomains
+
+        self.extract_domains(resp)
+        return self.subdomains
+
+    def extract_domains(self, resp):
+        try:
+            for subdomain in resp.split('\n'):
+                subdomain = subdomain.split(',')[0]
+                if subdomain not in self.subdomains and subdomain != self.domain:
+                    if self.verbose:
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                    self.subdomains.append(subdomain.strip())
+        except Exception as e:
+            pass
+
+
+class DnsDB(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        base_url = 'http://www.dnsdb.org/f/{domain}.dnsdb.org/'
+        self.engine_name = "DnsDB"
+        self.lock = threading.Lock()
+        self.q = q
+        super(DnsDB, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        return
+
+    def req(self, url):
+        try:
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+        except Exception as e:
+            resp = None
+
+        return get_response(resp)
+
+    def enumerate(self):
+        url = self.base_url.format(domain=self.domain)
+        resp = self.req(url)
+        if not resp:
+            return self.subdomains
+
+        self.extract_domains(resp)
+        return self.subdomains
+
+    def extract_domains(self, resp):
+        try:
+            subdomains = re.findall(r"(?<=href=\").+?(?=\")|(?<=href=\').+?(?=\')", resp)
+            for subdomain in subdomains:
+                subdomain = subdomain.replace('http://', '').replace('.dnsdb.org/', '')
+                if subdomain not in self.subdomains and subdomain != self.domain:
+                    if self.verbose:
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                    self.subdomains.append(subdomain.strip())
+        except Exception as e:
+            pass
+
+class ChaXunDotLa(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        base_url = 'http://api.chaxun.la/toolsAPI/getDomain/?0.008538380996345518&callback=&k={domain}&page=1&order=default&sort=desc&action=moreson&_='
+        self.engine_name = "ChaXunDotLa"
+        self.lock = threading.Lock()
+        self.q = q
+        super(ChaXunDotLa, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        return
+
+    def req(self, url):
+        try:
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+        except Exception as e:
+            resp = None
+        return get_response(resp)
+
+    def enumerate(self):
+        url = self.base_url.format(domain=self.domain)
+        resp = self.req(url)
+        if not resp:
+            return self.subdomains
+
+        self.extract_domains(resp)
+        return self.subdomains
+
+    def extract_domains(self, resp):
+        try:
+            for data in json.loads(resp)['data']:
+                subdomain = data['domain']
+                if subdomain not in self.subdomains and subdomain != self.domain:
+                    if self.verbose:
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                    self.subdomains.append(subdomain.strip())
+        except Exception as e:
+            pass
 
 class portscan():
     def __init__(self, subdomains, ports):
@@ -917,7 +1097,11 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'virustotal': Virustotal,
                          'threatcrowd': ThreatCrowd,
                          'ssl': CrtSearch,
-                         'passivedns': PassiveDNS
+                         'passivedns': PassiveDNS,
+                         'googleter': GoogleTER,
+                         'hackertarget': HackerTarget,
+                         'dnsdb': DnsDB,
+                         'chaxundotla': ChaXunDotLa
                          }
 
     chosenEnums = []
@@ -926,7 +1110,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
             NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
-            CrtSearch, PassiveDNS
+            CrtSearch, PassiveDNS, GoogleTER, HackerTarget, DnsDB,
+            ChaXunDotLa
         ]
     else:
         engines = engines.split(',')
