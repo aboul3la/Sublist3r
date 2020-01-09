@@ -772,13 +772,13 @@ class ThreatCrowd(enumratorBaseThreaded):
             return None
 
     def get_cookie(self, key, params):
-        url = self.init_url + params["url_suffix"]
-        post_params = {}
-        post_params["jschl_answer"] = key
-        post_params["r"] = params['first_param']
-        post_params["jschl_vc"] = params['second_param']
-        post_params["pass"] = params['third_param']
         try:
+            url = self.init_url + params["url_suffix"]
+            post_params = {}
+            post_params["jschl_answer"] = key
+            post_params["r"] = params['first_param']
+            post_params["jschl_vc"] = params['second_param']
+            post_params["pass"] = params['third_param']
             time.sleep(5)
             response = self.session.post(url,
                                         headers=self.headers,
