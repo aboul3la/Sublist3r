@@ -923,11 +923,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     chosenEnums = []
 
     if engines is None:
-        chosenEnums = [
-            BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
-            NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
-            CrtSearch, PassiveDNS
-        ]
+        chosenEnums = enumratorBaseThreaded.__subclasses__()
     else:
         engines = engines.split(',')
         for engine in engines:
