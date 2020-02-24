@@ -798,6 +798,12 @@ class CrtSearch(enumratorBaseThreaded):
 
                 if '@' in subdomain:
                     subdomain = subdomain[subdomain.find('@')+1:]
+                    
+                if '<BR>' in subdomain:
+                    sub = subdomain.split('<BR>')
+                    for i in sub:
+                        if i not in self.subdomain and i != self.domain:
+                            self.subdomains.append(i)
 
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if self.verbose:
