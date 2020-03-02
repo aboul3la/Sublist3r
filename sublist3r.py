@@ -799,6 +799,9 @@ class CrtSearch(enumratorBaseThreaded):
                 if '@' in subdomain:
                     subdomain = subdomain[subdomain.find('@')+1:]
 
+                if "<BR>" in subdomain:
+                    subdomain = subdomain.replace("<BR>","\r\n")
+                    
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if self.verbose:
                         self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
