@@ -152,11 +152,11 @@ class enumratorBase(object):
         self.silent = silent
         self.verbose = verbose
         self.headers = {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-              'Accept-Language': 'en-US,en;q=0.8',
-              'Accept-Encoding': 'gzip',
-          }
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'Accept-Encoding': 'gzip',
+        }
         self.print_banner()
 
     def print_(self, text):
@@ -792,18 +792,26 @@ class CrtSearch(enumratorBaseThreaded):
         try:
             links = link_regx.findall(resp)
             for link in links:
-                subdomain = link.strip()
-                if not subdomain.endswith(self.domain) or '*' in subdomain:
-                    continue
+                link = link.strip()
+                subdomains = []
+                if '<BR>' in link:
+                    subdomains = link.split('<BR>')
+                else:
+                    subdomains.append(link)
 
-                if '@' in subdomain:
-                    subdomain = subdomain[subdomain.find('@')+1:]
+                for subdomain in subdomains:
+                    if not subdomain.endswith(self.domain) or '*' in subdomain:
+                        continue
 
-                if subdomain not in self.subdomains and subdomain != self.domain:
-                    if self.verbose:
-                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
-                    self.subdomains.append(subdomain.strip())
+                    if '@' in subdomain:
+                        subdomain = subdomain[subdomain.find('@')+1:]
+
+                    if subdomain not in self.subdomains and subdomain != self.domain:
+                        if self.verbose:
+                            self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                        self.subdomains.append(subdomain.strip())
         except Exception as e:
+            print(e)
             pass
 
 
