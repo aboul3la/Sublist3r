@@ -538,12 +538,15 @@ class NetcraftEnum(enumratorBaseThreaded):
             self.print_(e)
             resp = None
         return resp
+    
+    def should_sleep(self):
+        time.sleep(random.randint(1, 2))
+        return    
 
     def get_next(self, resp):
-        link_regx = re.compile('<A href="(.*?)"><b>Next page</b></a>')
+        link_regx = re.compile('<a.*?href="(.*?)">Next Page')
         link = link_regx.findall(resp)
-        link = re.sub('host=.*?%s' % self.domain, 'host=%s' % self.domain, link[0])
-        url = 'http://searchdns.netcraft.com' + link
+        url = 'http://searchdns.netcraft.com' + link[0]
         return url
 
     def create_cookies(self, cookie):
@@ -569,14 +572,15 @@ class NetcraftEnum(enumratorBaseThreaded):
         while True:
             resp = self.get_response(self.req(url, cookies))
             self.extract_domains(resp)
-            if 'Next page' not in resp:
+            if 'Next Page' not in resp:
                 return self.subdomains
                 break
             url = self.get_next(resp)
+            self.should_sleep()
 
     def extract_domains(self, resp):
         links_list = list()
-        link_regx = re.compile('<a href="http://toolbar.netcraft.com/site_report\?url=(.*)">')
+        link_regx = re.compile('<a class="results-table__host" href="(.*?)"')
         try:
             links_list = link_regx.findall(resp)
             for link in links_list:
