@@ -22,11 +22,10 @@ from subbrute import subbrute
 import dns.resolver
 import requests
 
-# Python 2.x and 3.x compatiablity
-if sys.version > '3':
+try:  # Python 3
     import urllib.parse as urlparse
     import urllib.parse as urllib
-else:
+except ImportError:  # Python 2
     import urlparse
     import urllib
 
@@ -35,8 +34,13 @@ else:
 try:
     import requests.packages.urllib3
     requests.packages.urllib3.disable_warnings()
-except:
+except ImportError:
     pass
+
+try:
+    basestring  # Python 2
+except NameError:
+    basestring = str  # Python 3
 
 # Check if we are running this on windows platform
 is_windows = sys.platform.startswith('win')
@@ -301,7 +305,7 @@ class GoogleEnum(enumratorBaseThreaded):
         return links_list
 
     def check_response_errors(self, resp):
-        if (type(resp) is str or type(resp) is unicode) and 'Our systems have detected unusual traffic' in resp:
+        if isinstance(resp, basestring) and 'Our systems have detected unusual traffic' in resp:
             self.print_(R + "[!] Error: Google probably now is blocking our requests" + W)
             self.print_(R + "[~] Finished now the Google Enumeration ..." + W)
             return False
