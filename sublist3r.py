@@ -912,7 +912,7 @@ class takeoverscan:
         self.lock.release()
     def run(self):
         for host in self.subdomains:
-            #this is the stupidest shit Python
+            #args has to be a tuple, otherwise threading will attempt to unpack the string into bytes. Badness ensues.
             t = threading.Thread(target=self.check_takeover, args=(host,))
             t.start()
 
