@@ -894,13 +894,17 @@ class takeoverscan:
         self.subdomains = subdomains
         self.threads = 20
         self.lock = threading.BoundedSemaphore(value=self.threads)
+
+    def is_bad_redirect(self,target,response):
+        return False == regex.search(target,response.headers['location'])
+
     
     def check_takeover(self, subdomain):
         self.lock.acquire()
         try:
-            response = requests.get("https://" + subdomain,timeout=30.0)
-            if 300 < response.status_code < 400:
-                print("%s%s%s - %sREDIRECT:%s %s%s%s" % (G, subdomain, W, R, W, Y, response.status_code, W))
+            response = requests.get("https://" + subdomain,timeout=30.0, allow_redirects=False)
+            if response.is_redirect and self.is_bad_redirect(subdomain,response):
+                print("%s%s%s - %sREDIRECT:%s %s%s%s" % (G, subdomain, W, R, W, Y, response.headers['location'], W))
         except Exception as err:
             ssl_mismatch = regex.search("hostname '(?P<subdomain>\S+)' doesn't match either of (?P<domains>[^\"]*)",str(err))
             if ssl_mismatch:
