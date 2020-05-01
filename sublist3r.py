@@ -973,6 +973,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
     if subdomains:
         subdomains = sorted(subdomains, key=subdomain_sorting_key)
+        subdomains = [x.replace('<BR>','\n') for x in subdomains]
 
         if savefile:
             write_file(savefile, subdomains)
