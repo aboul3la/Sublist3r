@@ -860,7 +860,7 @@ class PassiveDNS(enumratorBaseThreaded):
 class RapidDNS(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = "https://rapiddns.io/subdomain/{domain}"
+        base_url = "https://rapiddns.io/subdomain/{domain}?full=1"
         self.engine_name = "RapidDNS"
         super(RapidDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         self.q = q
