@@ -538,10 +538,10 @@ class NetcraftEnum(enumratorBaseThreaded):
             self.print_(e)
             resp = None
         return resp
-    
+
     def should_sleep(self):
         time.sleep(random.randint(1, 2))
-        return    
+        return
 
     def get_next(self, resp):
         link_regx = re.compile('<a.*?href="(.*?)">Next Page')
@@ -857,6 +857,42 @@ class PassiveDNS(enumratorBaseThreaded):
         except Exception as e:
             pass
 
+class RapidDNS(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        base_url = "https://rapiddns.io/subdomain/{domain}"
+        self.engine_name = "RapidDNS"
+        super(RapidDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        self.q = q
+        return
+
+    def req(self, url):
+        try:
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+        except Exception:
+            resp = None
+
+        return self.get_response(resp)
+
+    def enumerate(self):
+        url = self.base_url.format(domain=self.domain)
+        resp = self.req(url)
+        if resp:
+            self.extract_domains(resp)
+        return self.subdomains
+
+    def extract_domains(self, resp):
+        link_regx = re.compile('<td><a href=".*?" target="_blank">(.*?)</a></td>')
+        try:
+            subdomains = link_regx.findall(resp)
+            for subdomain in subdomains:
+                if subdomain not in self.subdomains and subdomain != self.domain:
+                    if self.verbose:
+                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                    self.subdomains.append(subdomain.strip())
+        except Exception as e:
+            print(e)
+            pass
 
 class portscan():
     def __init__(self, subdomains, ports):
@@ -929,7 +965,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'virustotal': Virustotal,
                          'threatcrowd': ThreatCrowd,
                          'ssl': CrtSearch,
-                         'passivedns': PassiveDNS
+                         'passivedns': PassiveDNS,
+                         'rapiddns': RapidDNS
                          }
 
     chosenEnums = []
@@ -938,7 +975,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
             NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
-            CrtSearch, PassiveDNS
+            CrtSearch, PassiveDNS, RapidDNS
         ]
     else:
         engines = engines.split(',')
