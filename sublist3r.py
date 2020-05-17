@@ -16,6 +16,7 @@ import threading
 import socket
 import json
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 
 # external modules
 from subbrute import subbrute
@@ -863,11 +864,10 @@ class portscan():
         self.subdomains = subdomains
         self.ports = ports
         self.threads = 20
-        self.lock = threading.BoundedSemaphore(value=self.threads)
+        self.pool = ThreadPoolExecutor(max_workers=self.threads)
 
     def port_scan(self, host, ports):
         openports = []
-        self.lock.acquire()
         for port in ports:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -878,14 +878,12 @@ class portscan():
                 s.close()
             except Exception:
                 pass
-        self.lock.release()
         if len(openports) > 0:
             print("%s%s%s - %sFound open ports:%s %s%s%s" % (G, host, W, R, W, Y, ', '.join(openports), W))
 
     def run(self):
         for subdomain in self.subdomains:
-            t = threading.Thread(target=self.port_scan, args=(subdomain, self.ports))
-            t.start()
+            self.pool.submit(self.port_scan, subdomain, self.ports)
 
 
 def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
