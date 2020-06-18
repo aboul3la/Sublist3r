@@ -174,6 +174,12 @@ class enumratorBase(object):
         url = self.base_url.format(query=query, page_no=page_no)
         try:
             resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+        except requests.exceptions.ConnectionError:
+            print("%sError while connecting to: %s%s" % (R, url, W))
+            resp = None
+        except requests.exceptions.BaseHTTPError:
+            print("%s Error failed to establish new connection: %s%s" % (R, url, W))
+            resp = None
         except Exception:
             resp = None
         return self.get_response(resp)
@@ -534,6 +540,12 @@ class NetcraftEnum(enumratorBaseThreaded):
         cookies = cookies or {}
         try:
             resp = self.session.get(url, headers=self.headers, timeout=self.timeout, cookies=cookies)
+        except requests.exceptions.ConnectionError:
+            print("%sError while connecting to: %s%s" % (R, url, W))
+            resp = None
+        except requests.exceptions.BaseHTTPError:
+            print("%s Error failed to establish new connection: %s%s" % (R, url, W))
+            resp = None
         except Exception as e:
             self.print_(e)
             resp = None
@@ -567,7 +579,7 @@ class NetcraftEnum(enumratorBaseThreaded):
     def enumerate(self):
         start_url = self.base_url.format(domain='example.com')
         resp = self.req(start_url)
-        cookies = self.get_cookies(resp.headers)
+        cookies = self.get_cookies(resp.headers if hasattr(resp, 'headers') else dict())
         url = self.base_url.format(domain=self.domain)
         while True:
             resp = self.get_response(self.req(url, cookies))
@@ -634,6 +646,12 @@ class DNSdumpster(enumratorBaseThreaded):
                 resp = self.session.get(url, headers=headers, timeout=self.timeout)
             else:
                 resp = self.session.post(url, data=params, headers=headers, timeout=self.timeout)
+        except requests.exceptions.ConnectionError:
+            print("%sError while connecting to: %s%s" % (R, url, W))
+            resp = None
+        except requests.exceptions.BaseHTTPError:
+            print("%s Error failed to establish new connection: %s%s" % (R, url, W))
+            resp = None
         except Exception as e:
             self.print_(e)
             resp = None
@@ -690,6 +708,12 @@ class Virustotal(enumratorBaseThreaded):
     def send_req(self, url):
         try:
             resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+        except requests.exceptions.ConnectionError:
+            print("%sError while connecting to: %s%s" % (R, url, W))
+            resp = None
+        except requests.exceptions.BaseHTTPError:
+            print("%s Error failed to establish new connection: %s%s" % (R, url, W))
+            resp = None
         except Exception as e:
             self.print_(e)
             resp = None
