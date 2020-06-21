@@ -257,11 +257,10 @@ class enumratorBase(object):
 
 
 class enumratorBaseThreaded(multiprocessing.Process, enumratorBase):
-    def __init__(self, base_url, engine_name, domain, subdomains=None, q=None, lock=threading.Lock(), silent=False, verbose=True):
+    def __init__(self, base_url, engine_name, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
         enumratorBase.__init__(self, base_url, engine_name, domain, subdomains, silent=silent, verbose=verbose)
         multiprocessing.Process.__init__(self)
-        self.lock = lock
         self.q = q
         return
 
@@ -525,7 +524,6 @@ class NetcraftEnum(enumratorBaseThreaded):
         subdomains = subdomains or []
         self.base_url = 'https://searchdns.netcraft.com/?restriction=site+ends+with&host={domain}'
         self.engine_name = "Netcraft"
-        self.lock = threading.Lock()
         super(NetcraftEnum, self).__init__(self.base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         self.q = q
         return
@@ -538,10 +536,10 @@ class NetcraftEnum(enumratorBaseThreaded):
             self.print_(e)
             resp = None
         return resp
-    
+
     def should_sleep(self):
         time.sleep(random.randint(1, 2))
-        return    
+        return
 
     def get_next(self, resp):
         link_regx = re.compile('<a.*?href="(.*?)">Next Page')
@@ -602,9 +600,8 @@ class DNSdumpster(enumratorBaseThreaded):
         base_url = 'https://dnsdumpster.com/'
         self.live_subdomains = []
         self.engine_name = "DNSdumpster"
-        self.threads = 70
-        self.lock = threading.BoundedSemaphore(value=self.threads)
         self.q = q
+        self.lock = None
         super(DNSdumpster, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
 
@@ -645,6 +642,7 @@ class DNSdumpster(enumratorBaseThreaded):
         return token.strip()
 
     def enumerate(self):
+        self.lock = threading.BoundedSemaphore(value=70)
         resp = self.req('GET', self.base_url)
         token = self.get_csrftoken(resp)
         params = {'csrfmiddlewaretoken': token, 'targetip': self.domain}
@@ -680,7 +678,6 @@ class Virustotal(enumratorBaseThreaded):
         subdomains = subdomains or []
         base_url = 'https://www.virustotal.com/ui/domains/{domain}/subdomains'
         self.engine_name = "Virustotal"
-        self.lock = threading.Lock()
         self.q = q
         super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         self.url = self.base_url.format(domain=self.domain)
@@ -732,7 +729,6 @@ class ThreatCrowd(enumratorBaseThreaded):
         subdomains = subdomains or []
         base_url = 'https://www.threatcrowd.org/searchApi/v2/domain/report/?domain={domain}'
         self.engine_name = "ThreatCrowd"
-        self.lock = threading.Lock()
         self.q = q
         super(ThreatCrowd, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
@@ -771,7 +767,6 @@ class CrtSearch(enumratorBaseThreaded):
         subdomains = subdomains or []
         base_url = 'https://crt.sh/?q=%25.{domain}'
         self.engine_name = "SSL Certificates"
-        self.lock = threading.Lock()
         self.q = q
         super(CrtSearch, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
@@ -818,13 +813,11 @@ class CrtSearch(enumratorBaseThreaded):
             print(e)
             pass
 
-
 class PassiveDNS(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
         base_url = 'https://api.sublist3r.com/search.php?domain={domain}'
         self.engine_name = "PassiveDNS"
-        self.lock = threading.Lock()
         self.q = q
         super(PassiveDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         return
@@ -862,8 +855,7 @@ class portscan():
     def __init__(self, subdomains, ports):
         self.subdomains = subdomains
         self.ports = ports
-        self.threads = 20
-        self.lock = threading.BoundedSemaphore(value=self.threads)
+        self.lock = None
 
     def port_scan(self, host, ports):
         openports = []
@@ -883,6 +875,7 @@ class portscan():
             print("%s%s%s - %sFound open ports:%s %s%s%s" % (G, host, W, R, W, Y, ', '.join(openports), W))
 
     def run(self):
+        self.lock = threading.BoundedSemaphore(value=20)
         for subdomain in self.subdomains:
             t = threading.Thread(target=self.port_scan, args=(subdomain, self.ports))
             t.start()
