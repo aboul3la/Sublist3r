@@ -1,4 +1,4 @@
-# Run WebSploit with 'Docker'
+# Run Sublist3r with 'Docker'
 
 ![docker](https://img.shields.io/badge/Docker-v19.03.12-blue?style=plastic&logo=docker)
 ![Maintainer](https://img.shields.io/badge/Maintainer-Equinockx-success?style=plastic&logo=terraform)
