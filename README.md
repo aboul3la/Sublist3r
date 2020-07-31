@@ -164,6 +164,18 @@ Example to enumerate subdomains of Yahoo.com:
 import sublist3r 
 subdomains = sublist3r.main('yahoo.com', 40, 'yahoo_subdomains.txt', ports= None, silent=False, verbose= False, enable_bruteforce= False, engines=None)
 ```
+## Usage mode with docker
+
+**LOOK ALL DOCUMENTATION IN Docker/README.md**
+
+```bash
+docker exec -ti sublister python2 sublist3r.py -h
+```
+example:
+
+```bash
+docker exec -ti sublister python2 sublist3r.py -d microsoft.com
+```
 
 ## License
 
@@ -174,6 +186,7 @@ Sublist3r is licensed under the GNU GPL license. take a look at the [LICENSE](ht
 
 * [TheRook](https://github.com/TheRook) - The bruteforce module was based on his script **subbrute**. 
 * [Bitquark](https://github.com/bitquark) - The Subbrute's wordlist was based on his research **dnspop**. 
+* [Equinockx](https://github.com/MoisesTapia) - Build the Dockerfile.
 
 ## Thanks
 
