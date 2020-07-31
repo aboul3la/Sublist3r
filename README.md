@@ -186,6 +186,7 @@ Sublist3r is licensed under the GNU GPL license. take a look at the [LICENSE](ht
 
 * [TheRook](https://github.com/TheRook) - The bruteforce module was based on his script **subbrute**. 
 * [Bitquark](https://github.com/bitquark) - The Subbrute's wordlist was based on his research **dnspop**. 
+* [Equinockx](https://github.com/MoisesTapia) - Build the Dockerfile.
 
 ## Thanks
 
