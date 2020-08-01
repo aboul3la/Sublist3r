@@ -111,7 +111,7 @@ def write_file(filename, subdomains):
     print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R, filename, W))
     with open(str(filename), 'wt') as f:
         for subdomain in subdomains:
-            f.write(subdomain + os.linesep)
+            f.write(subdomain.encode('utf-8') + os.linesep)
 
 
 def subdomain_sorting_key(hostname):
@@ -284,6 +284,7 @@ class GoogleEnum(enumratorBaseThreaded):
     def extract_domains(self, resp):
         links_list = list()
         link_regx = re.compile('<cite.*?>(.*?)<\/cite>')
+	links_list = []
         try:
             links_list = link_regx.findall(resp)
             for link in links_list:
@@ -385,6 +386,7 @@ class AskEnum(enumratorBaseThreaded):
     def extract_domains(self, resp):
         links_list = list()
         link_regx = re.compile('<p class="web-result-url">(.*?)</p>')
+	links_list = []
         try:
             links_list = link_regx.findall(resp)
             for link in links_list:
@@ -475,6 +477,7 @@ class BaiduEnum(enumratorBaseThreaded):
         links = list()
         found_newdomain = False
         subdomain_list = []
+	links = []
         link_regx = re.compile('<a.*?class="c-showurl".*?>(.*?)</a>')
         try:
             links = link_regx.findall(resp)
