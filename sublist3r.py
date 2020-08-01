@@ -236,7 +236,7 @@ class enumratorBase(object):
                 return self.subdomains
             resp = self.send_req(query, page_no)
 
-            # check if there is any error occured
+            # check if there is any error occurred
             if not self.check_response_errors(resp):
                 return self.subdomains
             links = self.extract_domains(resp)
