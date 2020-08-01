@@ -328,6 +328,7 @@ class YahooEnum(enumratorBaseThreaded):
         self.MAX_DOMAINS = 10
         self.MAX_PAGES = 0
         super(YahooEnum, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        del self.headers['Accept']
         self.q = q
         return
 
@@ -374,7 +375,7 @@ class YahooEnum(enumratorBaseThreaded):
 class AskEnum(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = 'http://www.ask.com/web?q={query}&page={page_no}&qid=8D6EE6BF52E0C04527E51F64F22C4534&o=0&l=dir&qsrc=998&qo=pagination'
+        base_url = 'https://www.ask.com/web?q={query}&page={page_no}&qid=8D6EE6BF52E0C04527E51F64F22C4534&o=0&l=dir&qsrc=998&qo=pagination'
         self.engine_name = "Ask"
         self.MAX_DOMAINS = 11
         self.MAX_PAGES = 0
@@ -384,7 +385,7 @@ class AskEnum(enumratorBaseThreaded):
 
     def extract_domains(self, resp):
         links_list = list()
-        link_regx = re.compile('<p class="web-result-url">(.*?)</p>')
+        link_regx = re.compile('<p class="PartialSearchResults-item-url">(.*?)</p>')
         try:
             links_list = link_regx.findall(resp)
             for link in links_list:
