@@ -103,6 +103,7 @@ def parse_args():
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
+    parser.add_argument('-q', '--quiet', help='Show only result', default=False, action='store_true')
     return parser.parse_args()
 
 
@@ -881,7 +882,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines, quiet):
     bruteforce_list = set()
     search_list = set()
 
@@ -980,7 +981,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
             pscan = portscan(subdomains, ports)
             pscan.run()
 
-        elif not silent:
+        elif not silent or quiet:
             for subdomain in subdomains:
                 print(G + subdomain + W)
     return subdomains
@@ -995,12 +996,20 @@ def interactive():
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    quiet = args.quiet
+
     if verbose or verbose is None:
         verbose = True
     if args.no_color:
         no_color()
-    banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+
+    if quiet:
+        silent = True
+    else:
+        silent = False
+        banner()
+
+    res = main(domain, threads, savefile, ports, silent, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines, quiet=quiet)
 
 if __name__ == "__main__":
     interactive()
