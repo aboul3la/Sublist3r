@@ -15,6 +15,7 @@ import multiprocessing
 import threading
 import socket
 import json
+import regex
 from collections import Counter
 
 # external modules
@@ -103,6 +104,7 @@ def parse_args():
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
+    parser.add_argument('-k', '--takeover', help='Scan for potential subdomain takeovers', nargs='?', default=False)
     return parser.parse_args()
 
 
@@ -880,8 +882,34 @@ class portscan():
             t = threading.Thread(target=self.port_scan, args=(subdomain, self.ports))
             t.start()
 
+class takeoverscan:
+    def __init__(self,subdomains):
+        self.subdomains = subdomains
+        self.threads = 20
+        self.lock = threading.BoundedSemaphore(value=self.threads)
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+    def is_bad_redirect(self,target,response):
+        return False == regex.search(target,response.headers['location'])
+
+    
+    def check_takeover(self, subdomain):
+        self.lock.acquire()
+        try:
+            response = requests.get("https://" + subdomain,timeout=30.0, allow_redirects=False)
+            if response.is_redirect and self.is_bad_redirect(subdomain,response):
+                print("%s%s%s - %sREDIRECT:%s %s%s%s" % (G, subdomain, W, R, W, Y, response.headers['location'], W))
+        except Exception as err:
+            ssl_mismatch = regex.search("hostname '(?P<subdomain>\S+)' doesn't match either of (?P<domains>[^\"]*)",str(err))
+            if ssl_mismatch:
+                print("%s%s%s - %sSSL_MISMATCH:%s %s%s%s" % (G, subdomain, W, R, W, Y, ssl_mismatch.group('domains'), W))
+        self.lock.release()
+    def run(self):
+        for host in self.subdomains:
+            #args has to be a tuple, otherwise threading will attempt to unpack the string into bytes. Badness ensues.
+            t = threading.Thread(target=self.check_takeover, args=(host,))
+            t.start()
+
+def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines, takeover):
     bruteforce_list = set()
     search_list = set()
 
@@ -979,12 +1007,20 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
             ports = ports.split(',')
             pscan = portscan(subdomains, ports)
             pscan.run()
+        
+        if takeover:
+            if not silent:
+                print(G + "[-] Start subdomain takeover scan:" + W)
+            tscan = takeoverscan(subdomains)
+            tscan.run()
 
         elif not silent:
             for subdomain in subdomains:
                 print(G + subdomain + W)
     return subdomains
 
+
+    
 
 def interactive():
     args = parse_args()
@@ -995,12 +1031,15 @@ def interactive():
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    takeover = args.takeover
     if verbose or verbose is None:
         verbose = True
+    if takeover or takeover is None:
+        takeover = True
     if args.no_color:
         no_color()
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines, takeover=takeover)
 
 if __name__ == "__main__":
     interactive()
