@@ -56,6 +56,11 @@ sudo apt-get install python-requests
 sudo yum install python-requests
 ```
 
+- Install for openSUSE/SUSE:
+```
+sudo zypper install python2-requests python3-requests
+```
+
 - Install using pip on Linux:
 ```
 sudo pip install requests
@@ -71,6 +76,11 @@ c:\python27\python.exe -m pip install dnspython
 - Install for Ubuntu/Debian:
 ```
 sudo apt-get install python-dnspython
+```
+
+- Install for openSUSE/SUSE:
+```
+sudo zypper install python2-dnspython python3-dnspython
 ```
 
 - Install using pip:
@@ -89,6 +99,11 @@ sudo apt-get install python-argparse
 ```
 sudo yum install python-argparse
 ``` 
+
+- Install for openSUSE/SUSE:
+```
+sudo zypper install python2-configargparse python3-configargparse
+```
 
 - Install using pip:
 ```
