@@ -165,6 +165,44 @@ import sublist3r
 subdomains = sublist3r.main('yahoo.com', 40, 'yahoo_subdomains.txt', ports= None, silent=False, verbose= False, enable_bruteforce= False, engines=None)
 ```
 
+## Dockerfile
+To build dockerfile use the following command:
+```bash
+docker build -t Sublist3r .
+```
+
+To enumerate subdomains of specific domain only run container with domain name, the '-d' option set by default.
+Pass another options after domain name in quotation or double quotation.
+``docker run --rm  sublist3r example.com "Another options" ``
+
+#### Examples
+
+* To list all the basic options and switches use -h switch:
+
+```docker run --rm  sublist3r -h```
+
+* To enumerate subdomains of specific domain:
+
+``docker run --rm  sublist3r example.com``
+
+* To enumerate subdomains of specific domain and show only subdomains which have open ports 80 and 443 :
+
+``docker run --rm  sublist3r example.com "-p 80,443"``
+
+* To enumerate subdomains of specific domain and show the results in realtime:
+
+``docker run --rm  sublist3r example.com "-v"``
+
+* To enumerate subdomains and enable the bruteforce module:
+
+``docker run --rm  sublist3r example.com "-b"``
+
+* To enumerate subdomains and use specific engines such Google, Yahoo and Virustotal engines
+
+``docker run --rm  sublist3r example.com "-e google,yahoo,virustotal" ``
+
+
+
 ## License
 
 Sublist3r is licensed under the GNU GPL license. take a look at the [LICENSE](https://github.com/aboul3la/Sublist3r/blob/master/LICENSE) for more information.
