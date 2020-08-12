@@ -108,7 +108,7 @@ Short Form    | Long Form     | Description
 -b            | --bruteforce  | Enable the subbrute bruteforce module
 -p            | --ports       | Scan the found subdomains against specific tcp ports
 -v            | --verbose     | Enable the verbose mode and display results in realtime
--t            | --threads     | Number of threads to use for subbrute bruteforce
+-t            | --threads     | Number of threads to use for subbrute bruteforce (default 30)
 -e            | --engines     | Specify a comma-separated list of search engines
 -o            | --output      | Save the results to text file
 -h            | --help        | show the help message and exit
@@ -180,4 +180,4 @@ Sublist3r is licensed under the GNU GPL license. take a look at the [LICENSE](ht
 * Special Thanks to [Ibrahim Mosaad](https://twitter.com/ibrahim_mosaad) for his great contributions that helped in improving the tool.
 
 ## Version
-**Current version is 1.0**
+**Current version is 1.1**
