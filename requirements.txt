@@ -1,3 +1,4 @@
 argparse
 dnspython
 requests
+certifi
