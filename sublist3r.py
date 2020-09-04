@@ -18,7 +18,10 @@ import json
 from collections import Counter
 
 # external modules
-from subbrute import subbrute
+if __name__ == "__main__":
+    from subbrute import subbrute
+else:
+    from .subbrute import subbrute
 import dns.resolver
 import requests
 
