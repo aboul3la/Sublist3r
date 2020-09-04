@@ -18,7 +18,7 @@ import json
 from collections import Counter
 
 # external modules
-from subbrute import subbrute
+from .subbrute import subbrute
 import dns.resolver
 import requests
 
