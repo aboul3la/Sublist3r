@@ -103,6 +103,7 @@ def parse_args():
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
+    parser.add_argument('-j', '--json', help='Save the result in json object')
     return parser.parse_args()
 
 
@@ -112,6 +113,22 @@ def write_file(filename, subdomains):
     with open(str(filename), 'wt') as f:
         for subdomain in subdomains:
             f.write(subdomain + os.linesep)
+
+def write_json(filename, subdomains):
+    # saving subdomains results to output file
+    print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R, filename, W))
+    i=0    
+    json_data = ""
+    for subdomain in subdomains:
+        if subdomains.index(subdomain) == 0:
+            json_data = json_data + '{\n\t"'+str(i)+'": "'+subdomain+'",\n\t'
+        elif subdomains.index(subdomain) == len(subdomains)-1:
+            json_data = json_data + '"'+str(i)+'": "'+subdomain+'"\n}'
+        else:
+            json_data = json_data + '"'+str(i)+'": "'+subdomain+'",\n\t'
+        i=i+1
+    with open(str(filename), 'wt') as f:
+        f.write(json_data)
 
 
 def subdomain_sorting_key(hostname):
@@ -881,7 +898,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile, saveJson, ports, silent, verbose, enable_bruteforce, engines):
     bruteforce_list = set()
     search_list = set()
 
@@ -969,6 +986,9 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
         if savefile:
             write_file(savefile, subdomains)
+        
+        if saveJson:
+            write_json(saveJson, subdomains)
 
         if not silent:
             print(Y + "[-] Total Unique Subdomains Found: %s" % len(subdomains) + W)
@@ -995,12 +1015,13 @@ def interactive():
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    saveJson = args.json
     if verbose or verbose is None:
         verbose = True
     if args.no_color:
         no_color()
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    res = main(domain, threads, savefile, saveJson, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
 
 if __name__ == "__main__":
     interactive()
