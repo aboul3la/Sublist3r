@@ -22,7 +22,7 @@ from subbrute import subbrute
 import dns.resolver
 import requests
 
-# Python 2.x and 3.x compatiablity
+# Python 2.x and 3.x compatibility
 if sys.version > '3':
     import urllib.parse as urlparse
     import urllib.parse as urllib
@@ -195,26 +195,26 @@ class enumratorBase(object):
 
     # override
     def extract_domains(self, resp):
-        """ chlid class should override this function """
+        """ child class should override this function """
         return
 
     # override
     def check_response_errors(self, resp):
-        """ chlid class should override this function
+        """ child class should override this function
         The function should return True if there are no errors and False otherwise
         """
         return True
 
     def should_sleep(self):
-        """Some enumrators require sleeping to avoid bot detections like Google enumerator"""
+        """Some enumerators require sleeping to avoid bot detections like Google enumerator"""
         return
 
     def generate_query(self):
-        """ chlid class should override this function """
+        """ child class should override this function """
         return
 
     def get_page(self, num):
-        """ chlid class that user different pagnation counter should override this function """
+        """ child class that user different pagination counter should override this function """
         return num + 10
 
     def enumerate(self, altquery=False):
@@ -236,7 +236,7 @@ class enumratorBase(object):
                 return self.subdomains
             resp = self.send_req(query, page_no)
 
-            # check if there is any error occured
+            # check if there is any error occurred
             if not self.check_response_errors(resp):
                 return self.subdomains
             links = self.extract_domains(resp)
