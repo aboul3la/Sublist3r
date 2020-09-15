@@ -572,7 +572,6 @@ class NetcraftEnum(enumratorBaseThreaded):
             self.extract_domains(resp)
             if 'Next Page' not in resp:
                 return self.subdomains
-                break
             url = self.get_next(resp)
             self.should_sleep()
 
