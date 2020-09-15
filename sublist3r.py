@@ -624,7 +624,7 @@ class DNSdumpster(enumratorBaseThreaded):
     def req(self, req_method, url, params=None):
         params = params or {}
         headers = dict(self.headers)
-        headers['Referer'] = 'https://dnsdumpster.com'
+        headers['Referrer'] = 'https://dnsdumpster.com'
         try:
             if req_method == 'GET':
                 resp = self.session.get(url, headers=headers, timeout=self.timeout)
