@@ -112,6 +112,7 @@ Short Form    | Long Form     | Description
 -e            | --engines     | Specify a comma-separated list of search engines
 -o            | --output      | Save the results to text file
 -h            | --help        | show the help message and exit
+-q	      | --quiet       | No output to console
 
 ### Examples
 
@@ -138,7 +139,6 @@ Short Form    | Long Form     | Description
 * To enumerate subdomains and use specific engines such Google, Yahoo and Virustotal engines
 
 ``python sublist3r.py -e google,yahoo,virustotal -d example.com``
-
 
 ## Using Sublist3r as a module in your python scripts
 

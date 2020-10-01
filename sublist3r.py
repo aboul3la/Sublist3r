@@ -73,10 +73,10 @@ def no_color():
 
 def banner():
     print("""%s
-                 ____        _     _ _     _   _____
+                 ____        _     _ _     _   ____
                 / ___| _   _| |__ | (_)___| |_|___ / _ __
                 \___ \| | | | '_ \| | / __| __| |_ \| '__|
-                 ___) | |_| | |_) | | \__ \ |_ ___) | |
+                 __ ) | |_| | |_) | | \__ \ |_ ___) | |
                 |____/ \__,_|_.__/|_|_|___/\__|____/|_|%s%s
 
                 # Coded By Ahmed Aboul-Ela - @aboul3la
@@ -103,12 +103,14 @@ def parse_args():
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
+    parser.add_argument('-q', '--quiet', help='No output to console', default=False, action='store_true')
     return parser.parse_args()
 
 
-def write_file(filename, subdomains):
+def write_file(filename, subdomains, silent):
     # saving subdomains results to output file
-    print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R, filename, W))
+    if not silent:
+        print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R, filename, W))
     with open(str(filename), 'wt') as f:
         for subdomain in subdomains:
             f.write(subdomain + os.linesep)
@@ -141,7 +143,7 @@ def subdomain_sorting_key(hostname):
 
 
 class enumratorBase(object):
-    def __init__(self, base_url, engine_name, domain, subdomains=None, silent=False, verbose=True):
+    def __init__(self, base_url, engine_name, domain, subdomains=None, silent=True, verbose=True):
         subdomains = subdomains or []
         self.domain = urlparse.urlparse(domain).netloc
         self.session = requests.Session()
@@ -852,12 +854,13 @@ class PassiveDNS(enumratorBaseThreaded):
 
 
 class portscan():
-    def __init__(self, subdomains, ports):
+    def __init__(self, subdomains, ports, silent):
         self.subdomains = subdomains
         self.ports = ports
+        self.silent = silent
         self.lock = None
 
-    def port_scan(self, host, ports):
+    def port_scan(self, host, ports, silent):
         openports = []
         self.lock.acquire()
         for port in ports:
@@ -872,12 +875,13 @@ class portscan():
                 pass
         self.lock.release()
         if len(openports) > 0:
-            print("%s%s%s - %sFound open ports:%s %s%s%s" % (G, host, W, R, W, Y, ', '.join(openports), W))
+            if not silent:
+                print("%s%s%s - %sFound open ports:%s %s%s%s" % (G, host, W, R, W, Y, ', '.join(openports), W))
 
     def run(self):
         self.lock = threading.BoundedSemaphore(value=20)
         for subdomain in self.subdomains:
-            t = threading.Thread(target=self.port_scan, args=(subdomain, self.ports))
+            t = threading.Thread(target=self.port_scan, args=(subdomain, self.ports, self.silent))
             t.start()
 
 
@@ -968,7 +972,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         subdomains = sorted(subdomains, key=subdomain_sorting_key)
 
         if savefile:
-            write_file(savefile, subdomains)
+            write_file(savefile, subdomains, silent)
 
         if not silent:
             print(Y + "[-] Total Unique Subdomains Found: %s" % len(subdomains) + W)
@@ -977,7 +981,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
             if not silent:
                 print(G + "[-] Start port scan now for the following ports: %s%s" % (Y, ports) + W)
             ports = ports.split(',')
-            pscan = portscan(subdomains, ports)
+            pscan = portscan(subdomains, ports, silent)
             pscan.run()
 
         elif not silent:
@@ -995,12 +999,14 @@ def interactive():
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    silent = args.quiet
     if verbose or verbose is None:
         verbose = True
     if args.no_color:
         no_color()
-    banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    if not silent:
+        banner()
+    res = main(domain, threads, savefile, ports, silent, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
 
 if __name__ == "__main__":
     interactive()
