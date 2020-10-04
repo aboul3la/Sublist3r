@@ -860,9 +860,11 @@ class portscan():
     def port_scan(self, host, ports):
         openports = []
         self.lock.acquire()
+
         for port in ports:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 s.settimeout(2)
                 result = s.connect_ex((host, int(port)))
                 if result == 0:
@@ -870,6 +872,7 @@ class portscan():
                 s.close()
             except Exception:
                 pass
+
         self.lock.release()
         if len(openports) > 0:
             print("%s%s%s - %sFound open ports:%s %s%s%s" % (G, host, W, R, W, Y, ', '.join(openports), W))
