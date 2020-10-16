@@ -1,8 +1,8 @@
 ## About Sublist3r 
 
-Sublist3r is a python tool designed to enumerate subdomains of websites using OSINT. It helps penetration testers and bug hunters collect and gather subdomains for the domain they are targeting. Sublist3r enumerates subdomains using many search engines such as Google, Yahoo, Bing, Baidu and Ask. Sublist3r also enumerates subdomains using Netcraft, Virustotal, ThreatCrowd, DNSdumpster and ReverseDNS.
+Sublist3r is a python tool designed to enumerate subdomains of websites using OSINT. It helps penetration testers and bug hunters collect and gather subdomains for the domain they are targeting. Sublist3r enumerates subdomains using many search engines such as Google, Yahoo, Bing, Baidu and Ask. Sublist3r also enumerates subdomains using Netcraft, Virustotal, ThreatCrowd, DNSdumpster, and ReverseDNS.
 
-[subbrute](https://github.com/TheRook/subbrute) was integrated with Sublist3r to increase the possibility of finding more subdomains using bruteforce with an improved wordlist. The credit goes to TheRook who is the author of subbrute.
+[subbrute](https://github.com/TheRook/subbrute) was integrated with Sublist3r to increase the possibility of finding more subdomains using Bruteforce with an improved wordlist. The credit goes to TheRook who is the author of the subbrute.
 
 ## Screenshots
 
@@ -24,7 +24,7 @@ Sublist3r currently supports **Python 2** and **Python 3**.
 
 ## Dependencies:
 
-Sublist3r depends on the `requests`, `dnspython` and `argparse` python modules.
+Sublist3r depends on the `requests`, `dnspython`, and `argparse` python modules.
 
 These dependencies can be installed using the requirements file:
 
@@ -105,12 +105,12 @@ c:\python27\python.exe -m pip install win_unicode_console colorama
 Short Form    | Long Form     | Description
 ------------- | ------------- |-------------
 -d            | --domain      | Domain name to enumerate subdomains of
--b            | --bruteforce  | Enable the subbrute bruteforce module
--p            | --ports       | Scan the found subdomains against specific tcp ports
+-b            | --Bruteforce  | Enable the subbrute Bruteforce module
+-p            | --ports       | Scan the found subdomains against specific TCP ports
 -v            | --verbose     | Enable the verbose mode and display results in realtime
--t            | --threads     | Number of threads to use for subbrute bruteforce
+-t            | --threads     | Number of threads to use for subbrute Bruteforce
 -e            | --engines     | Specify a comma-separated list of search engines
--o            | --output      | Save the results to text file
+-o            | --output      | Save the results to a text file
 -h            | --help        | show the help message and exit
 
 ### Examples
@@ -123,21 +123,21 @@ Short Form    | Long Form     | Description
 
 ``python sublist3r.py -d example.com``
 
-* To enumerate subdomains of specific domain and show only subdomains which have open ports 80 and 443 :
+* To enumerate subdomains of a specific domain and show only subdomains which have open ports 80 and 443 :
 
 ``python sublist3r.py -d example.com -p 80,443``
 
-* To enumerate subdomains of specific domain and show the results in realtime:
+* To enumerate subdomains of a specific domain and show the results in realtime:
 
 ``python sublist3r.py -v -d example.com``
 
-* To enumerate subdomains and enable the bruteforce module:
+* To enumerate subdomains and enable the brute force module:
 
 ``python sublist3r.py -b -d example.com``
 
-* To enumerate subdomains and use specific engines such Google, Yahoo and Virustotal engines
+* To enumerate subdomains and use specific engines such as Google, Yahoo, and Virustotal engines
 
-``python sublist3r.py -e google,yahoo,virustotal -d example.com``
+``python sublist3r.py -e google, yahoo,virustotal -d example.com``
 
 
 ## Using Sublist3r as a module in your python scripts
@@ -152,11 +152,11 @@ The main function will return a set of unique subdomains found by Sublist3r
 
 **Function Usage:**
 * **domain**: The domain you want to enumerate subdomains of.
-* **savefile**: save the output into text file.
-* **ports**: specify a comma-sperated list of the tcp ports to scan.
+* **savefile**: save the output into a text file.
+* **ports**: specify a comma-separated list of the TCP ports to scan.
 * **silent**: set sublist3r to work in silent mode during the execution (helpful when you don't need a lot of noise).
-* **verbose**: display the found subdomains in real time.
-* **enable_bruteforce**: enable the bruteforce module.
+* **verbose**: display the found subdomains in real-time.
+* **enable_bruteforce**: enable the brute force module.
 * **engines**: (Optional) to choose specific engines.
 
 Example to enumerate subdomains of Yahoo.com:
@@ -172,7 +172,7 @@ Sublist3r is licensed under the GNU GPL license. take a look at the [LICENSE](ht
 
 ## Credits
 
-* [TheRook](https://github.com/TheRook) - The bruteforce module was based on his script **subbrute**. 
+* [TheRook](https://github.com/TheRook) - The Bruteforce module was based on his script **subbrute**. 
 * [Bitquark](https://github.com/bitquark) - The Subbrute's wordlist was based on his research **dnspop**. 
 
 ## Thanks
