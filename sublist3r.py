@@ -676,7 +676,7 @@ class DNSdumpster(enumratorBaseThreaded):
 class Virustotal(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = 'https://www.virustotal.com/api/v3/domains/{domain}'
+        base_url = 'https://www.virustotal.com/api/v3/domains/{domain}/subdomains'
         self.engine_name = "Virustotal"
         self.apikey = os.getenv('VT_APIKEY', None)
         self.q = q
@@ -715,14 +715,15 @@ class Virustotal(enumratorBaseThreaded):
     def extract_domains(self, resp):
         #resp is already parsed as json
         try:
-            for i in resp['data']['attributes']['last_dns_records']:
-                subdomain = i['value']
-                if not subdomain.endswith(self.domain):
-                    continue
-                if subdomain not in self.subdomains and subdomain != self.domain:
-                    if self.verbose:
-                        self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
-                    self.subdomains.append(subdomain.strip())
+            for i in resp['data']:
+                if i['type'] == 'domain':
+                    subdomain = i['id']
+                    if not subdomain.endswith(self.domain):
+                        continue
+                    if subdomain not in self.subdomains and subdomain != self.domain:
+                        if self.verbose:
+                            self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                        self.subdomains.append(subdomain.strip())
         except Exception:
             pass
 
