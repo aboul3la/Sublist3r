@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
-# Sublist3r v1.0
-# By Ahmed Aboul-Ela - twitter.com/aboul3la
+# Sublist3r2 v1.0
+
 
 # modules in standard library
 import re
@@ -18,9 +18,9 @@ import json
 from collections import Counter
 
 # external modules
-from subbrute import subbrute
 import dns.resolver
 import requests
+from aiodnsbrute.cli import aioDNSBrute 
 
 # Python 2.x and 3.x compatiablity
 if sys.version > '3':
@@ -73,13 +73,12 @@ def no_color():
 
 def banner():
     print("""%s
-                 ____        _     _ _     _   _____
-                / ___| _   _| |__ | (_)___| |_|___ / _ __
-                \___ \| | | | '_ \| | / __| __| |_ \| '__|
-                 ___) | |_| | |_) | | \__ \ |_ ___) | |
-                |____/ \__,_|_.__/|_|_|___/\__|____/|_|%s%s
+         ____        _     _ _     _   _____      _ ____
+        / ___| _   _| |__ | (_)___| |_|___ / _ __\ __  |    Sublist3r2 v1.0
+        \___ \| | | | '_ \| | / __| __| |_ \| '__|  / /     a dnsenum tool originally by @aboul3la
+         ___) | |_| | |_) | | \__ \ |_ ___) | |    / /_     maintained by Ronin Nakomoto
+        |____/ \__,_|_.__/|_|_|___/\__|____/|_|   /____|%s%s    https://github.com/RoninNakomoto/Sublist3r2
 
-                # Coded By Ahmed Aboul-Ela - @aboul3la
     """ % (R, W, Y))
 
 
@@ -99,7 +98,7 @@ def parse_args():
     parser.add_argument('-b', '--bruteforce', help='Enable the subbrute bruteforce module', nargs='?', default=False)
     parser.add_argument('-p', '--ports', help='Scan the found subdomains against specified tcp ports')
     parser.add_argument('-v', '--verbose', help='Enable Verbosity and display results in realtime', nargs='?', default=False)
-    parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
+    parser.add_argument('-t', '--threads', help='Number of threads to use for aiodnsbrute bruteforce', type=int, default=7000)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
@@ -611,7 +610,7 @@ class DNSdumpster(enumratorBaseThreaded):
         Resolver.nameservers = ['8.8.8.8', '8.8.4.4']
         self.lock.acquire()
         try:
-            ip = Resolver.query(host, 'A')[0].to_text()
+            ip = Resolver.resolve(host, 'A')[0].to_text()
             if ip:
                 if self.verbose:
                     self.print_("%s%s: %s%s" % (R, self.engine_name, W, host))
@@ -676,8 +675,15 @@ class DNSdumpster(enumratorBaseThreaded):
 class Virustotal(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = 'https://www.virustotal.com/ui/domains/{domain}/subdomains'
+        base_url = 'https://www.virustotal.com/api/v3/domains/{domain}/subdomains'
         self.engine_name = "Virustotal"
+        if os.getenv("VT_APIKEY") is None:
+                 VT_APIKEY=input(B + "[+] Enter VirusTotal API key, press Enter for none: " + W)
+                 VT_APIKEY=VT_APIKEY.strip()
+                 if VT_APIKEY != "":
+                     os.environ["VT_APIKEY"]=(VT_APIKEY)
+        os.environ["VT_APIKEY"]=(VT_APIKEY)
+        self.apikey = os.getenv('VT_APIKEY', None)
         self.q = q
         super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         self.url = self.base_url.format(domain=self.domain)
@@ -686,26 +692,33 @@ class Virustotal(enumratorBaseThreaded):
     # the main send_req need to be rewritten
     def send_req(self, url):
         try:
+            self.headers.update({'X-ApiKey':self.apikey})
             resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception as e:
             self.print_(e)
             resp = None
-
         return self.get_response(resp)
 
     # once the send_req is rewritten we don't need to call this function, the stock one should be ok
     def enumerate(self):
-        while self.url != '':
-            resp = self.send_req(self.url)
-            resp = json.loads(resp)
-            if 'error' in resp:
-                self.print_(R + "[!] Error: Virustotal probably now is blocking our requests" + W)
-                break
-            if 'links' in resp and 'next' in resp['links']:
-                self.url = resp['links']['next']
-            else:
-                self.url = ''
-            self.extract_domains(resp)
+        if self.apikey:
+            while self.url != '':
+                #try:
+                resp = self.send_req(self.url)
+                resp = json.loads(resp)
+                if 'error' in resp:
+                    self.print_(R + "Error Code: {}".format(resp['error']["code"]) +W)
+                    self.print_(R + "Virus Total Server Message: {}".format(resp['error']["message"]) + W)
+                    break
+                if 'links' in resp and 'next' in resp['links']:
+                    self.url = resp['links']['next']
+                else:
+                    self.url = ''
+                self.extract_domains(resp)
+        else:
+            self.print_(R + "[!] Error: VirusTotal API key environment variable not found. Skipping" + W)
+            self.print_(R + "[!] set VT_APIKEY to your virus total API key using:   export VT_APIKEY=Your_VT_API_KEY_VALUE" + W)
+            self.print_(B + "[!] To get a VT APIKEY, register at https://www.virustotal.com/gui/join-us" +W)
         return self.subdomains
 
     def extract_domains(self, resp):
@@ -952,16 +965,22 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
     if enable_bruteforce:
         if not silent:
-            print(G + "[-] Starting bruteforce module now using subbrute.." + W)
+            print(G + "[-] Starting bruteforce module now using aiodnsbrute.." + W)
         record_type = False
         path_to_file = os.path.dirname(os.path.realpath(__file__))
-        subs = os.path.join(path_to_file, 'subbrute', 'names.txt')
-        resolvers = os.path.join(path_to_file, 'subbrute', 'resolvers.txt')
-        process_count = threads
-        output = False
-        json_output = False
-        bruteforce_list = subbrute.print_target(parsed_domain.netloc, record_type, subs, resolvers, process_count, output, json_output, search_list, verbose)
-
+        subs = os.path.join(path_to_file, 'aiodnsbrute', 'subdomains-top1million-110000.txt')
+        resolvers = os.path.join(path_to_file, 'aiodnsbrute', 'resolvers.txt')
+        #resolvers=None
+        #resolvers=f"{os.path.dirname(os.path.realpath(__file__))}/aiodnsbrute/resolvers.txt"
+        wildcard=True
+        verify=True
+        query=True
+        #resolvers = os.path.join(path_to_file, 'subbrute', 'resolvers.txt')
+        thread_count = threads
+        #output = False
+        #json_output = False
+        #bruteforce_list = subbrute.print_target(parsed_domain.netloc, record_type, subs, resolvers, process_count, output, json_output, search_list, verbose)
+        bruteforce_list = aioDNSBrute.bruteforce_domain(parsed_domain.netloc, resolvers, subs, wildcard, verify, search_list, thread_count, query)
     subdomains = search_list.union(bruteforce_list)
 
     if subdomains:
