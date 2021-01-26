@@ -31,13 +31,13 @@ The installation steps assume you will keep your python virtual envs in a folder
 
 ```
 1- $ git clone https://github.com/RoninNakomoto/Sublist3r2.git // Download tool from github
-2- $ python3 -m venv ~/environments/sublist3r      // create a python version 3 virtual environment for sublist3r
-3- $ source ~/environments/sublist3r/bin/activate  // activate sublist3r python environment. 
-4- $ python -m pip install --upgrade pip              // update pip inside virtual env.
-5- $ cd ~/sublist3r/                                         // switch to your sublist3r download folder.
-6- $ pip install -r requirements.txt                    // install sublist3r module dependencies.
-7- $ python sublist3r.py -d domain.com               // run sublist3r.py from within activated environment
-8- $ deactivate                                            // deactivate environment once done runnning the script.
+2- $ python3 -m venv ~/environments/sublist3r                  // create a python version 3 virtual environment for sublist3r
+3- $ source ~/environments/sublist3r/bin/activate              // activate sublist3r python environment. 
+4- $ python -m pip install --upgrade pip                       // update pip inside virtual env.
+5- $ cd ~/sublist3r/                                           // switch to your sublist3r download folder.
+6- $ pip install -r requirements.txt                           // install sublist3r module dependencies.
+7- $ python sublist3r.py -d domain.com                         // run sublist3r.py from within activated environment
+8- $ deactivate                                                // deactivate environment once done runnning the script.
 note: do not use sudo.
 ```
 
@@ -90,8 +90,9 @@ Sublist3r is licensed under the GNU GPL license. take a look at the [LICENSE](ht
 
 ## Credits
 
-* [aboul3la](https://github.com/aboul3la/) - author of the original sublist3r tool. **subbrute**. 
-* [blark](https://github.com/blark/) - author of aiodns asynchronous bruteforce tool/module **dnspop**. 
+* [aboul3la](https://github.com/aboul3la/) - author of the original sublist3r tool. **sublist3r**. 
+* [blark](https://github.com/blark/) - author of aiodns asynchronous bruteforce tool/module **aiodnsbrute**. 
+* [danielmiessler](https://github.com/danielmiessler/) - default bruteforce woordlist based on his SecLists release. **SecLists*
 
 
 ## Version
