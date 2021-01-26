@@ -9,7 +9,7 @@ Sublist3r2 is an improved and bug-free working version of Sublist3r, the origina
 ### Compatibility notes:
 Sublist3r2 currently supports python3 on linux dists. Python3.6+ is the recommended version. </br>
 Other operating systems (macos, windows) will be supported in later releases. </br>
-BruteForcing is now multiple times faster than in the original tool and uses aiodnsbrute instead of subbrute.</br>
+BruteForcing is now multiple times faster than in the original tool and uses aiodnsbrute instead of subbrute. Tool bruteforces ~150K subdomains at default threads count (7000) within 15 minutes.</br>
 
 
 
@@ -46,10 +46,10 @@ note: do not use sudo.
 Short Form    | Long Form     | Description
 ------------- | ------------- |-------------
 -d            | --domain      | Domain name to use for subdomain enumeration
--b            | --bruteforce  | Turn-on aiodns bruteforce mode
+-b            | --bruteforce  | Turn-on aiodnsbrute bruteforce mode
 -p            | --ports       | Check/Filter subdomain results for open tcp ports (provide comma separated ports)
 -v            | --verbose     | Enable verbose mode and display results in realtime
--t            | --threads     | Number of threads to use for aiodns bruteforce
+-t            | --threads     | Number of threads to use for aiodnsbrute bruteforce
 -e            | --engines     | Specify a comma-separated list of search engines
 -o            | --output      | Save results to text file
 -h            | --help        | show the help message and exit
