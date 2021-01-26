@@ -92,7 +92,7 @@ Sublist3r is licensed under the GNU GPL license. take a look at the [LICENSE](ht
 
 * [aboul3la](https://github.com/aboul3la/) - author of the original sublist3r tool. **sublist3r**. 
 * [blark](https://github.com/blark/) - author of aiodns asynchronous bruteforce tool/module **aiodnsbrute**. 
-* [danielmiessler](https://github.com/danielmiessler/) - default bruteforce woordlist based on his SecLists release. **SecLists*
+* [danielmiessler](https://github.com/danielmiessler/) - default bruteforce woordlist based on his SecLists release. **SecLists**
 
 
 ## Version
