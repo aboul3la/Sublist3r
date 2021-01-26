@@ -970,16 +970,10 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         path_to_file = os.path.dirname(os.path.realpath(__file__))
         subs = os.path.join(path_to_file, 'aiodnsbrute', 'subdomains-top1million-110000.txt')
         resolvers = os.path.join(path_to_file, 'aiodnsbrute', 'resolvers.txt')
-        #resolvers=None
-        #resolvers=f"{os.path.dirname(os.path.realpath(__file__))}/aiodnsbrute/resolvers.txt"
         wildcard=True
         verify=True
         query=True
-        #resolvers = os.path.join(path_to_file, 'subbrute', 'resolvers.txt')
         thread_count = threads
-        #output = False
-        #json_output = False
-        #bruteforce_list = subbrute.print_target(parsed_domain.netloc, record_type, subs, resolvers, process_count, output, json_output, search_list, verbose)
         bruteforce_list = aioDNSBrute.bruteforce_domain(parsed_domain.netloc, resolvers, subs, wildcard, verify, search_list, thread_count, query)
     subdomains = search_list.union(bruteforce_list)
 
