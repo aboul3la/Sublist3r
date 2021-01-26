@@ -75,7 +75,7 @@ def banner():
     print("""%s
          ____        _     _ _     _   _____      _ ____
         / ___| _   _| |__ | (_)___| |_|___ / _ __\ __  |    Sublist3r2 v1.0
-        \___ \| | | | '_ \| | / __| __| |_ \| '__|  / /     a dnsenum tool originally by @aboul3la
+        \___ \| | | | '_ \| | / __| __| |_ \| '__|  / /     a subdomains enum tool originally by @aboul3la
          ___) | |_| | |_) | | \__ \ |_ ___) | |    / /_     maintained by Ronin Nakomoto
         |____/ \__,_|_.__/|_|_|___/\__|____/|_|   /____|%s%s    https://github.com/RoninNakomoto/Sublist3r2
 
