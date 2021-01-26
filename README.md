@@ -2,14 +2,18 @@
 
 Sublist3r2 is an improved and bug-free working version of Sublist3r, the original dns enumeration tool but with a much faster bruteforcing routine.
 
-#### Package Description (from original tool page):
-*Sublist3r is a python tool designed to enumerate subdomains of websites using OSINT. It helps penetration testers and bug hunters collect and gather subdomains for the domain they are targeting. Sublist3r enumerates subdomains using many search engines such as Google, Yahoo, Bing, Baidu and Ask. Sublist3r also enumerates subdomains using Netcraft, Virustotal, ThreatCrowd, DNSdumpster and ReverseDNS.*
+#### Package Description:
+*Sublist3r is a python tool designed to enumerate subdomains of websites using OSINT. It helps penetration testers and bug hunters collect and gather subdomains for the domain they are targeting. Sublist3r enumerates subdomains using many search engines such as Google, Yahoo, Bing, Baidu and Ask. Sublist3r also enumerates subdomains using Netcraft, Virustotal, ThreatCrowd, DNSdumpster and ReverseDNS. **(from original page)** *
 "
 
 ### Compatibility notes:
-This particular release is specific for python3 based linux installations. </br>
+This particular release is compatible with linux python3 (>3.6) installations only. </br>
 Other operating systems (macos, windows) will be supported in later releases. </br>
 BruteForcing is now multiple times faster than in the original tool and uses aiodnsbrute instead of subbrute.</br>
+
+
+
+
 
 ## Screenshots
 
@@ -17,6 +21,25 @@ BruteForcing is now multiple times faster than in the original tool and uses aio
 
 
 ## Installation
+
+Under linux, use a python3 virtual environment specific to sublist3r. </br>
+
+You will be running the tool within this virtual python environment and not the system wide python installation. All python commands you run once the virtual environment is activated are specific to the virtual environment. Changes you make to a virtual environment, including installing dependencies only affect the virtual environment and do not affect the system wide installation of Python which usually ends up breaking python.
+
+Assuming you are going to keep your python virtual environments in a directory called environments under your home directory, please proceed as follows to install virtual environments , required depencies to run the tool:
+
+```
+1- $ git clone https://github.com/RoninNakomoto/Sublist3r2.git // Download tool from github
+2- $ python3 -m venv ~/environments/sublist3r      // create a python version 3 virtual environment for sublist3r
+3- $ source ~/environments/sublist3r/bin/activate  // activate sublist3r python environment. 
+4- $ python -m pip install --upgrade pip              // update pip inside virtual env.
+5- $ cd ~/sublist3r/                                         // switch to your sublist3r download folder.
+6- $ pip install -r requirements.txt                    // install sublist3r module dependencies.
+7- $ python sublist3r.py -d domain.com               // run sublist3r.py from within activated environment
+8- $ deactivate                                            // deactivate environment once done runnning the script.
+note: do not use sudo.
+```
+
 
 ```
 git clone https://github.com/aboul3la/Sublist3r.git
