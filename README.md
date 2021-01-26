@@ -58,27 +58,27 @@ Short Form    | Long Form     | Description
 
 * To list all the basic options and switches use -h switch:
 
-```python sublist3r.py -h```
+```./sublist3r2.py -h```
 
 * To perform basic enumeration of specified domain:
 
-``python sublist3r.py -d example.com``
+``./sublist3r2.py -d example.com``
 
 * To check and filter subdomains for results with open ports 80 and 443 :
 
-``python sublist3r.py -d example.com -p 80,443``
+``./sublist3r2.py -d example.com -p 80,443``
 
 * To enumerate subdomains of specific domain and show the results in realtime:
 
-``python sublist3r.py -v -d example.com``
+``./sublist3r2.py -v -d example.com``
 
 * To enable bruteforce mode against specified domain:
 
-``python sublist3r.py -b -d example.com``
+``./sublist3r2.py -b -d example.com``
 
 * To enumerate subdomains and use specific engines such as Google, Yahoo and Virustotal engines
 
-``python sublist3r.py -e google,yahoo,virustotal -d example.com``
+``./sublist3r2.py -e google,yahoo,virustotal -d example.com``
 
 
 
