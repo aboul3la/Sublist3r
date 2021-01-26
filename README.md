@@ -13,7 +13,7 @@ BruteForcing is now multiple times faster than in the original tool and uses aio
 
 ## Screenshots
 
-https://freeimage.host/i/ffJOH7
+<a href="https://freeimage.host/i/ffJOH7"><img src="https://iili.io/ffJOH7.md.png" alt="ffJOH7.md.png" border="0"></a>
 
 
 ## Installation
