@@ -13,7 +13,7 @@ BruteForcing is now multiple times faster than in the original tool and uses aio
 
 ## Screenshots
 
-![Sublist3r2](https://freeimage.host/i/ffJOH7 "Sublist3r2 in action")
+https://freeimage.host/i/ffJOH7
 
 
 ## Installation
