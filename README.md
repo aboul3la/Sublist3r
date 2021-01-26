@@ -1,16 +1,17 @@
 ## About Sublist3r2 
 
-Sublist3r2 is an improved and bug-free working version of Sublist3r, the original subdomains enumeration tool but with a much faster bruteforcing routine.
+Sublist3r2 is an improved and bug-free working version of Sublist3r, the original subdomains enumeration tool but with a much faster bruteforcing routine.</br>
+Sublist3r2 uses aiodnsbrute instead of subbrute used in original package.</br>
+Capable of bruteforcing 150K subdomains, at default thread count of 7000, within 15 minutes. </br>
 
 #### Package Description:
 *Sublist3r is a python tool designed to enumerate subdomains of websites using OSINT. It helps penetration testers and bug hunters collect and gather subdomains for the domain they are targeting. Sublist3r enumerates subdomains using many search engines such as Google, Yahoo, Bing, Baidu and Ask. Sublist3r also enumerates subdomains using Netcraft, Virustotal, ThreatCrowd, DNSdumpster and ReverseDNS. (from original author page)*
 "
 
 ### Compatibility notes:
+
 Sublist3r2 currently supports python3 on linux dists. Python3.6+ is the recommended version. </br>
 Other operating systems (macos, windows) will be supported in later releases. </br>
-BruteForcing is now multiple times faster than in the original tool and uses aiodnsbrute instead of subbrute. Tool bruteforces ~150K subdomains at default threads count (7000) within 15 minutes.</br>
-
 
 
 ## Screenshots
