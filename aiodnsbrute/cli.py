@@ -108,7 +108,7 @@ class aioDNSBrute(object):
                 row = f"{n:<30}\t{ips}"
             # store the result
             if set(ips) != set(self.ignore_hosts):
-                self.logger.success(row)
+                #self.logger.success(row)
                 dns_lookup_result = {"domain": name, "ip": ips}
                 if self.lookup_type == "gethostbyname" and cname:
                     dns_lookup_result["cname"] = r.name
