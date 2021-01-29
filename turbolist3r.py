@@ -1051,6 +1051,30 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     if subdomains:
         subdomains = sorted(subdomains, key=subdomain_sorting_key)
 
+        # clean up any records that have embedded line breaks
+        # the more appropriate thing to do is figure out which data source is doing this and update the corresponding collector code
+        # but this is the quick fix for now
+        temp_subdomains = []
+        new_subdomains = []
+        # for each record, check to make sure it doesn't have <br> in it
+        for record in subdomains:
+            record = record.lower()
+            if ('<br>' in record):
+                # line breaks, split and add each one to temp_subdomains array
+                temp_records = record.split('<br>')
+                for temp_record in temp_records:
+                    temp_subdomains.append(temp_record)
+            else:
+                # no issues noted with this record, add to new_subdomains array
+                new_subdomains.append(record)
+        # merge temp_subdomains and new_subdomains
+        for tr in temp_subdomains:
+            new_subdomains.append(tr)
+        # finally, replace subdomains with the cleaned up new_subdomains array
+        # deduplicate the list while we're at it
+        subdomains = list(dict.fromkeys(new_subdomains))
+        
+
         if savefile:
             write_file(savefile, subdomains)
 
@@ -1217,8 +1241,7 @@ if __name__ == "__main__":
         f.close()
     else:
         res = main(domain, threads, savefile, ports, silent, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines, quiet=quiet)
-
-    # Code added here
+     
     if (analyze):
         # res is the list of subdomains e.g. www.example.com, mail.example.com, etc
         if not silent:
