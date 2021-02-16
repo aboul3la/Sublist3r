@@ -985,6 +985,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                 print(G + subdomain + W)
     return subdomains
 
+def sublist(domain, threads=40, ports=None, savefile=None, silent=True, verbose=False, enable_bruteforce=False, engines=None):
+    return main(domain, threads=threads, ports=ports, savefile=savefile, silent=silent, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
 
 def interactive():
     args = parse_args()
