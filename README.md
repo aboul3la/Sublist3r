@@ -35,7 +35,7 @@ The installation steps assume you will keep your python virtual envs in a folder
 4- $ python -m pip install --upgrade pip                       // update pip inside virtual env.
 5- $ cd ~/sublist3r/                                           // switch to your sublist3r download folder.
 6- $ pip install -r requirements.txt                           // install sublist3r module dependencies.
-7- $ python sublist3r.py -d domain.com                         // run sublist3r.py from within activated environment
+7- $ python sublist3r2.py -d domain.com                         // run sublist3r.py from within activated environment
 8- $ deactivate                                                // deactivate environment once done runnning the script.
 note: do not use sudo. **Activate/deactivate virtual env. before/after each use**
 ```
