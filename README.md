@@ -117,27 +117,27 @@ Short Form    | Long Form     | Description
 
 * To list all the basic options and switches use -h switch:
 
-```python sublist3r.py -h```
+```python3 sublist3r.py -h```
 
 * To enumerate subdomains of specific domain:
 
-``python sublist3r.py -d example.com``
+``python3 sublist3r.py -d example.com``
 
 * To enumerate subdomains of specific domain and show only subdomains which have open ports 80 and 443 :
 
-``python sublist3r.py -d example.com -p 80,443``
+``python3 sublist3r.py -d example.com -p 80,443``
 
 * To enumerate subdomains of specific domain and show the results in realtime:
 
-``python sublist3r.py -v -d example.com``
+``python3 sublist3r.py -v -d example.com``
 
 * To enumerate subdomains and enable the bruteforce module:
 
-``python sublist3r.py -b -d example.com``
+``python3 sublist3r.py -b -d example.com``
 
 * To enumerate subdomains and use specific engines such Google, Yahoo and Virustotal engines
 
-``python sublist3r.py -e google,yahoo,virustotal -d example.com``
+``python3 sublist3r.py -e google,yahoo,virustotal -d example.com``
 
 
 ## Using Sublist3r as a module in your python scripts
