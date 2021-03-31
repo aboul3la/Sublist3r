@@ -153,7 +153,7 @@ The main function will return a set of unique subdomains found by Sublist3r
 **Function Usage:**
 * **domain**: The domain you want to enumerate subdomains of.
 * **savefile**: save the output into text file.
-* **ports**: specify a comma-sperated list of the tcp ports to scan.
+* **ports**: specify a comma-seperated list of the tcp ports to scan.
 * **silent**: set sublist3r to work in silent mode during the execution (helpful when you don't need a lot of noise).
 * **verbose**: display the found subdomains in real time.
 * **enable_bruteforce**: enable the bruteforce module.
