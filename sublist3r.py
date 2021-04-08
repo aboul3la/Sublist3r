@@ -374,7 +374,7 @@ class YahooEnum(enumratorBaseThreaded):
 class AskEnum(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = 'http://www.ask.com/web?q={query}&page={page_no}&qid=8D6EE6BF52E0C04527E51F64F22C4534&o=0&l=dir&qsrc=998&qo=pagination'
+        base_url = 'https://www.ask.com/web?q={query}&page={page_no}&qid=8D6EE6BF52E0C04527E51F64F22C4534&o=0&l=dir&qsrc=998&qo=pagination'
         self.engine_name = "Ask"
         self.MAX_DOMAINS = 11
         self.MAX_PAGES = 0
@@ -544,7 +544,7 @@ class NetcraftEnum(enumratorBaseThreaded):
     def get_next(self, resp):
         link_regx = re.compile('<a.*?href="(.*?)">Next Page')
         link = link_regx.findall(resp)
-        url = 'http://searchdns.netcraft.com' + link[0]
+        url = 'https://searchdns.netcraft.com' + link[0]
         return url
 
     def create_cookies(self, cookie):
