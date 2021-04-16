@@ -1,12 +1,29 @@
-FROM python:alpine3.13
+FROM python:buster
 
-RUN mkdir /app
-WORKDIR /app
-COPY . /app
+LABEL version="0.0.1-dev" \
+	author="RoninNakomoto (https://github/com/RoninNakomoto)" \
+	docker_build="docker build -t sublister ." \
+	docker_run_basic="docker run --rm sublister -h"
 
-RUN /usr/local/bin/python -m pip install --upgrade pip
-RUN /usr/local/bin/python --version
+RUN mkdir /Sublister2
 
-RUN pip3 install --no-cache-dir -r requirements.txt
-RUN chmod +x ./*.py
-ENTRYPOINT [ "/app/sublist3r2.py" ]
+COPY [".", "/Sublist3r2"]
+
+ENV PATH=${PATH}:/Sublist3r2
+
+RUN apt-get update && \
+	apt-get install -y build-essential libffi-dev libgit2-dev && \
+	pip install -r /Sublist3r2/requirements.txt && \
+	addgroup Sublist3r2 --force-badname && \
+	useradd -g Sublist3r2 -d /Sublist3r2 -s /bin/sh Sublist3r2 && \
+	chown -R Sublist3r2:Sublist3r2 /Sublist3r2 && \
+	export RANDOM_PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c44) && \
+	echo "root:$RANDOM_PASSWORD" | chpasswd && \
+	unset RANDOM_PASSWORD && \
+	passwd -l root
+
+USER Sublist3r2
+
+ENTRYPOINT ["sublist3r2.py"] 
+
+CMD ["-h"]
