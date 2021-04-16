@@ -611,7 +611,10 @@ class DNSdumpster(enumratorBaseThreaded):
         Resolver.nameservers = ['8.8.8.8', '8.8.4.4']
         self.lock.acquire()
         try:
-            ip = Resolver.query(host, 'A')[0].to_text()
+            #ip = Resolver.query(host, 'A')[0].to_text()
+            my_resolver = dns.resolver.Resolver.resolve()
+            ip = my_resolver.resolve(host, "A").to_text()
+           
             if ip:
                 if self.verbose:
                     self.print_("%s%s: %s%s" % (R, self.engine_name, W, host))
