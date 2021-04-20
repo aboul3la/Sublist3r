@@ -5,6 +5,7 @@
 
 # modules in standard library
 import re
+import dns
 import sys
 import os
 import argparse
@@ -608,10 +609,10 @@ class DNSdumpster(enumratorBaseThreaded):
     def check_host(self, host):
         is_valid = False
         Resolver = dns.resolver.Resolver()
-        Resolver.nameservers = ['8.8.8.8', '8.8.4.4']
+        Resolver.nameservers = ['8.8.8.8', '8.8.4.4'] # 8.8.8.8 you can change to 1.1.1.1
         self.lock.acquire()
         try:
-            ip = Resolver.query(host, 'A')[0].to_text()
+            ip = dns.resolver.Resolver.resolve(host, 'A')[0].to_text()
             if ip:
                 if self.verbose:
                     self.print_("%s%s: %s%s" % (R, self.engine_name, W, host))
