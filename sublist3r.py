@@ -768,8 +768,11 @@ class CrtSearch(enumratorBaseThreaded):
         base_url = 'https://crt.sh/?q=%25.{domain}'
         self.engine_name = "SSL Certificates"
         self.q = q
-        super(CrtSearch, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
-        return
+        results = super(CrtSearch, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        if "<BR>" in str(results):
+            results = re.split('<BR>', results)
+            return results
+        return results
 
     def req(self, url):
         try:
