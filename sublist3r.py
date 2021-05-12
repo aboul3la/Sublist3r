@@ -565,10 +565,12 @@ class NetcraftEnum(enumratorBaseThreaded):
     def enumerate(self):
         start_url = self.base_url.format(domain='example.com')
         resp = self.req(start_url)
-        cookies = self.get_cookies(resp.headers)
+        cookies = self.get_cookies(resp.headers) if resp else {}
         url = self.base_url.format(domain=self.domain)
         while True:
             resp = self.get_response(self.req(url, cookies))
+            if resp == 0:
+                return self.subdomains
             self.extract_domains(resp)
             if 'Next Page' not in resp:
                 return self.subdomains
