@@ -12,7 +12,7 @@ Subenum is a opiniated fork of Sublist3r which is a python tool designed to enum
 ## Installation
 
 ```
-git clone https://github.com/aboul3la/Sublist3r.git
+git clone https://github.com/throwawayresearchaccount2021/subenum.git
 ```
 
 ## Recommended Python Version:
