@@ -1,7 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 # Sublist3r v1.0
-# By Ahmed Aboul-Ela - twitter.com/aboul3la
 
 # modules in standard library
 import re
@@ -73,14 +72,15 @@ def no_color():
 
 def banner():
     print("""%s
-                 ____        _     _ _     _   _____
-                / ___| _   _| |__ | (_)___| |_|___ / _ __
-                \___ \| | | | '_ \| | / __| __| |_ \| '__|
-                 ___) | |_| | |_) | | \__ \ |_ ___) | |
-                |____/ \__,_|_.__/|_|_|___/\__|____/|_|%s%s
-
-                # Coded By Ahmed Aboul-Ela - @aboul3la
-    """ % (R, W, Y))
+                :'######::'##::::'##:'########::'########:'##::: ##:'##::::'##:'##::::'##:
+                '##... ##: ##:::: ##: ##.... ##: ##.....:: ###:: ##: ##:::: ##: ###::'###:
+                 ##:::..:: ##:::: ##: ##:::: ##: ##::::::: ####: ##: ##:::: ##: ####'####:
+                . ######:: ##:::: ##: ########:: ######::: ## ## ##: ##:::: ##: ## ### ##:
+                :..... ##: ##:::: ##: ##.... ##: ##...:::: ##. ####: ##:::: ##: ##. #: ##:
+                '##::: ##: ##:::: ##: ##:::: ##: ##::::::: ##:. ###: ##:::: ##: ##:.:: ##:
+                . ######::. #######:: ########:: ########: ##::. ##:. #######:: ##:::: ##:
+                :......::::.......:::........:::........::..::::..:::.......:::..:::::..::
+                %s%s """ % (R, W, Y))
 
 
 def parser_error(errmsg):
@@ -676,7 +676,7 @@ class DNSdumpster(enumratorBaseThreaded):
 class Virustotal(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = 'https://www.virustotal.com/ui/domains/{domain}/subdomains'
+        base_url = 'https://www.virustotal.com/gui/domain/{{domain}}/details'
         self.engine_name = "Virustotal"
         self.q = q
         super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
@@ -768,8 +768,11 @@ class CrtSearch(enumratorBaseThreaded):
         base_url = 'https://crt.sh/?q=%25.{domain}'
         self.engine_name = "SSL Certificates"
         self.q = q
-        super(CrtSearch, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
-        return
+        results = super(CrtSearch, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        if "<BR>" in str(results):
+            results = re.split('<BR>', results)
+            return results
+        return results
 
     def req(self, url):
         try:
@@ -930,7 +933,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     if engines is None:
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
-            NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
+            NetcraftEnum, DNSdumpster, ThreatCrowd,
             CrtSearch, PassiveDNS
         ]
     else:
