@@ -678,10 +678,12 @@ class Virustotal(enumratorBaseThreaded):
         base_url = 'https://www.virustotal.com/api/v3/domains/{domain}/subdomains'
         self.engine_name = "Virustotal"
         if os.getenv("VT_APIKEY") is None:
-                 VT_APIKEY=input(B + "[+] Enter VirusTotal API key, press Enter for none: " + W)
-                 VT_APIKEY=VT_APIKEY.strip()
-                 if VT_APIKEY != "":
-                     os.environ["VT_APIKEY"]=(VT_APIKEY)
+            VT_APIKEY=input(B + "[+] Enter VirusTotal API key, press Enter for none: " + W)
+            VT_APIKEY=VT_APIKEY.strip()
+            if VT_APIKEY != "":
+                os.environ["VT_APIKEY"]=(VT_APIKEY)
+        else:
+            VT_APIKEY = os.getenv("VT_APIKEY")
         os.environ["VT_APIKEY"]=(VT_APIKEY)
         self.apikey = os.getenv('VT_APIKEY', None)
         self.q = q
