@@ -35,7 +35,7 @@ else:
 try:
     import requests.packages.urllib3
     requests.packages.urllib3.disable_warnings()
-except:
+except ImportError:
     pass
 
 # Check if we are running this on windows platform
@@ -54,7 +54,7 @@ if is_windows:
         win_unicode_console.enable()
         colorama.init()
         #Now the unicode will work ^_^
-    except:
+    except ImportError:
         print("[!] Error: Coloring libraries not installed, no coloring will be used [Check the readme]")
         G = Y = B = R = W = G = Y = B = R = W = ''
 
