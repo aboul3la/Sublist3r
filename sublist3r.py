@@ -1005,7 +1005,7 @@ def interactive():
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
-    vito_apikey = args.vito_apikey
+    vito_apikey = args.virustotal_apikey
     if verbose or verbose is None:
         verbose = True
     if args.no_color:
