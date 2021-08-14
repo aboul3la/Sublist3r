@@ -41,6 +41,9 @@ except:
 # Check if we are running this on windows platform
 is_windows = sys.platform.startswith('win')
 
+# API Keys
+vito_apikey = None
+
 # Console Colors
 if is_windows:
     # Windows deserves coloring too :D
@@ -103,6 +106,7 @@ def parse_args():
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
+    parser.add_argument('-vito_apikey', '--virustotal_apikey', help='Virustotal API Key')
     return parser.parse_args()
 
 
@@ -685,6 +689,10 @@ class Virustotal(enumratorBaseThreaded):
 
     # the main send_req need to be rewritten
     def send_req(self, url):
+        global vito_apikey
+
+        headers = dict(self.headers)
+        headers['x-apikey'] = vito_apikey
         try:
             resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception as e:
@@ -987,6 +995,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
 
 def interactive():
+    global vito_apikey
+
     args = parse_args()
     domain = args.domain
     threads = args.threads
@@ -995,6 +1005,7 @@ def interactive():
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    vito_apikey = args.virustotal_apikey
     if verbose or verbose is None:
         verbose = True
     if args.no_color:
