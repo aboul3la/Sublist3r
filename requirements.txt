@@ -1,4 +1,8 @@
 argparse
 dnspython
 requests
-aiodnsbrute
+asyncio
+uvloop
+tqdm
+aiodns
+click

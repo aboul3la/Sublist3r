@@ -20,7 +20,10 @@ from collections import Counter
 # External imports
 import dns.resolver
 import requests
-from aiodnsbrute.cli import aioDNSBrute
+from sublist3r2.aiodnsbrute.cli import aioDNSBrute
+
+# Version info
+__version__ = '1.0.1'
 
 # Check if we are running this on windows platform
 is_windows = sys.platform.startswith('win')
@@ -58,12 +61,12 @@ def no_color():
 def banner():
     print("""%s
          ____        _     _ _     _   _____     ______
-        / ___| _   _| |__ | (_)___| |_|___ / _ __\ __  |    Sublist3r2 v1.0
+        / ___| _   _| |__ | (_)___| |_|___ / _ __\ __  |    Sublist3r2 v%s
         \___ \| | | | '_ \| | / __| __| |_ \| '__|  / /     a subdomains enum tool originally by @aboul3la
          ___) | |_| | |_) | | \__ \ |_ ___) | |    / /_     maintained by Ronin Nakomoto
         |____/ \__,_|_.__/|_|_|___/\__|____/|_|   /____|%s    https://github.com/RoninNakomoto/Sublist3r2
 
-    """ % (R, Y))
+    """ % (R, __version__, Y))
 
 
 def parser_error(errmsg):
@@ -992,14 +995,14 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         if not silent:
             print(G + "[-] Starting bruteforce module now using aiodnsbrute.." + W)
         path_to_file = os.path.dirname(os.path.realpath(__file__))
-        subs = os.path.join(path_to_file, 'data', 'subdomains-top1million-110000.txt')
-        resolvers = os.path.join(path_to_file, 'data', 'resolvers.txt')
+        subs = os.path.join(path_to_file, 'aiodnsbrute', 'subdomains-top1million-110000.txt')
+        resolvers = os.path.join(path_to_file, 'aiodnsbrute', 'resolvers.txt')
         wildcard = True
         verify = True
         query = True
         thread_count = threads
         bruteforce_list = aioDNSBrute.bruteforce_domain(
-            parsed_domain.netloc, resolvers, subs, wildcard, verify, search_list, thread_count, query
+            parsed_domain.netloc, resolvers, subs, wildcard, verify, thread_count, query
         )
     subdomains = search_list.union(bruteforce_list)
 

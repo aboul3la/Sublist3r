@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def read(fname: str) -> str:
@@ -9,8 +9,8 @@ def read(fname: str) -> str:
 
 
 setup(
-    name='Sublist3r2',
-    version='1.0.0',
+    name='sublist3r2',
+    version='1.0.1',
     python_requires='>=3.6',
     description='Subdomains enumeration tool for penetration testers',
     long_description=read('README.md'),
@@ -18,11 +18,8 @@ setup(
     keywords='subdomain dns detection',
     url='https://github.com/RoninNakomoto/Sublist3r2',
     license='GPL-2.0',
-    py_modules=['sublist3r2'],
+    packages=find_packages(),
     include_package_data=True,
-    package_data={
-        '': ['data/*.txt'],
-    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
@@ -39,7 +36,11 @@ setup(
         'argparse',
         'dnspython',
         'requests',
-        'aiodnsbrute',
+        'asyncio',
+        'uvloop',
+        'tqdm',
+        'aiodns',
+        'click',
     ],
     entry_points={
         'console_scripts': [
