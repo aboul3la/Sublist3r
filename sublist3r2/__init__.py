@@ -2,7 +2,7 @@
 # coding: utf-8
 # Sublist3r2 v1.0
 
-# Builtin imports
+# Builtin modules
 import argparse
 import hashlib
 import json
@@ -17,7 +17,7 @@ import time
 import urllib.parse as urlparse
 from collections import Counter
 
-# External imports
+# External modules
 import dns.resolver
 import requests
 from sublist3r2.aiodnsbrute.cli import aioDNSBrute
