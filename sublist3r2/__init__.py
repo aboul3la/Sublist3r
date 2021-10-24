@@ -66,7 +66,7 @@ def banner():
          ___) | |_| | |_) | | \__ \ |_ ___) | |    / /_     maintained by Ronin Nakomoto
         |____/ \__,_|_.__/|_|_|___/\__|____/|_|   /____|%s    https://github.com/RoninNakomoto/Sublist3r2
 
-    """ % (R, __version__, Y))
+    """ % (R, __version__, Y))  # noqa
 
 
 def parser_error(errmsg):
