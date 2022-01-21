@@ -676,11 +676,17 @@ class DNSdumpster(enumratorBaseThreaded):
 class Virustotal(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = 'https://www.virustotal.com/ui/domains/{domain}/subdomains'
+        base_url = 'https://www.virustotal.com/ui/domains/{domain}/subdomains?relationships=resolutions'
         self.engine_name = "Virustotal"
         self.q = q
         super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         self.url = self.base_url.format(domain=self.domain)
+
+        # Virustotal requires specific headers to bypass the bot detection:
+        self.headers["X-Tool"] = "vt-ui-main"
+        self.headers["X-VT-Anti-Abuse-Header"] = "hm"  # as of 1/20/2022, the content of this header doesn't matter, just its presence
+        self.headers["Accept-Ianguage"] = self.headers["Accept-Language"]  # this header being present is required to prevent a captcha
+
         return
 
     # the main send_req need to be rewritten
