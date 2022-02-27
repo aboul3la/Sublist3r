@@ -9,7 +9,7 @@ import click
 import socket
 import sys
 from tqdm import tqdm
-from aiodnsbrute.logger import ConsoleLogger
+from sublist3r2.aiodnsbrute.logger import ConsoleLogger
 
 
 class aioDNSBrute(object):
@@ -74,7 +74,7 @@ class aioDNSBrute(object):
             if err_number == 4:
                 # This is domain name not found, ignore it
                 pass
-           # elif err_number == 12:
+            #elif err_number == 12:
                 # Timeout from DNS server
                 #self.logger.warn(f"Timeout for {name}")
             elif err_number == 1:
@@ -118,7 +118,6 @@ class aioDNSBrute(object):
         self.tasks.remove(future)
         if self.verbosity >= 1:
             self.pbar.update()
-       
 
     async def _queue_lookups(self, wordlist, domain):
         """Takes a list of words and adds them to the async loop also passing the original
@@ -137,19 +136,19 @@ class aioDNSBrute(object):
             self.tasks.append(task)
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
-    def bruteforce_domain(target, resolvers=None, wordlist="subdomains-top1million-110000.txt", wildcard=True, verify=True, found_subdomains=[], thread_count=7000, query=True):
+    def bruteforce_domain(target, resolvers=None, wordlist="subdomains-top1million-110000.txt", wildcard=True, verify=True, thread_count=7000, query=True):
         subdomains_list = []
         names_list = []
-        verbosity=1
+        verbosity = 1
         if resolvers:
-              resolverfile = open(resolvers,'r')
-              lines = resolverfile.read().splitlines()
-              resolvers = [x.strip() for x in lines if (x and not x.startswith("#"))]
+            resolverfile = open(resolvers, 'r')
+            lines = resolverfile.read().splitlines()
+            resolvers = [x.strip() for x in lines if (x and not x.startswith("#"))]
         bf = aioDNSBrute(verbosity=verbosity, max_tasks=thread_count)
         subdomains_list = bf.run(wordlist, target, resolvers, wildcard, verify, query)
         resolverfile.close()
         for r in range(1, len(subdomains_list)):  
-              names_list.append(subdomains_list[r]['domain'])
+            names_list.append(subdomains_list[r]['domain'])
 
         return names_list
 

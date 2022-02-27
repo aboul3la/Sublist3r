@@ -13,7 +13,7 @@ ENV PATH=${PATH}:/Sublist3r2
 
 RUN apt-get update && \
 	apt-get install -y build-essential libffi-dev libgit2-dev && \
-	pip install -r /Sublist3r2/requirements.txt && \
+	pip install /Sublist3r2 && \
 	addgroup Sublist3r2 --force-badname && \
 	useradd -g Sublist3r2 -d /Sublist3r2 -s /bin/sh Sublist3r2 && \
 	chown -R Sublist3r2:Sublist3r2 /Sublist3r2 && \
@@ -24,6 +24,6 @@ RUN apt-get update && \
 
 USER Sublist3r2
 
-ENTRYPOINT ["sublist3r2.py"] 
+ENTRYPOINT ["sublist3r2"] 
 
 CMD ["-h"]

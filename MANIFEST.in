@@ -1,2 +1,2 @@
 include LICENSE README.md
-include aiodnsbrute/*.txt
+include sublist3r2/aiodnsbrute/*.txt
