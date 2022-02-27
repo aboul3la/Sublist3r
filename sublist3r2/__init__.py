@@ -63,7 +63,7 @@ def banner():
          ____        _     _ _     _   _____     ______
         / ___| _   _| |__ | (_)___| |_|___ / _ __\ __  |    Sublist3r2 v%s
         \___ \| | | | '_ \| | / __| __| |_ \| '__|  / /     a subdomains enum tool originally by @aboul3la
-         ___) | |_| | |_) | | \__ \ |_ ___) | |    / /_     maintained by Ronin Nakomoto
+         ___) | |_| | |_) | | \__ \ |_ ___) | |    / /_     maintained by Ronin Nakomoto, crahan, its0x08
         |____/ \__,_|_.__/|_|_|___/\__|____/|_|   /____|%s    https://github.com/RoninNakomoto/Sublist3r2
 
     """ % (R, __version__, Y))  # noqa
