@@ -552,7 +552,8 @@ class NetcraftEnum(enumratorBaseThreaded):
         cookies_list = cookie[0:cookie.find(';')].split("=")
         cookies[cookies_list[0]] = cookies_list[1]
         # hashlib.sha1 requires utf-8 encoded str
-        cookies['netcraft_js_verification_response'] = hashlib.sha1(urllib.unquote(cookies_list[1]).encode('utf-8')).hexdigest()
+        # replacing sha1 with sha512 for better security purposes
+        cookies['netcraft_js_verification_response'] = hashlib.sha512(urllib.unquote(cookies_list[1]).encode('utf-8')).hexdigest()
         return cookies
 
     def get_cookies(self, headers):
