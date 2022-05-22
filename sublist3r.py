@@ -78,7 +78,6 @@ def banner():
                 \___ \| | | | '_ \| | / __| __| |_ \| '__|
                  ___) | |_| | |_) | | \__ \ |_ ___) | |
                 |____/ \__,_|_.__/|_|_|___/\__|____/|_|%s%s
-
                 # Coded By Ahmed Aboul-Ela - @aboul3la
     """ % (R, W, Y))
 
@@ -102,6 +101,7 @@ def parse_args():
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
+    parser.add_argument('-u', '--url', help='Save the results to  url')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
     return parser.parse_args()
 
@@ -109,18 +109,16 @@ def parse_args():
 def write_file(filename, subdomains):
     # saving subdomains results to output file
     print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R, filename, W))
-    with open(str(filename), 'a+') as f:
+    with open(str(filename), 'wt') as f:
         for subdomain in subdomains:
             f.write(subdomain + os.linesep)
 
 
 def subdomain_sorting_key(hostname):
     """Sorting key for subdomains
-
     This sorting key orders subdomains from the top-level domain at the right
     reading left, then moving '^' and 'www' to the top of their group. For
     example, the following list is sorted correctly:
-
     [
         'example.com',
         'www.example.com',
@@ -132,7 +130,6 @@ def subdomain_sorting_key(hostname):
         'www.example.net',
         'a.example.net',
     ]
-
     """
     parts = hostname.split('.')[::-1]
     if parts[-1] == 'www':
@@ -638,11 +635,7 @@ class DNSdumpster(enumratorBaseThreaded):
 
     def get_csrftoken(self, resp):
         csrf_regex = re.compile('<input type="hidden" name="csrfmiddlewaretoken" value="(.*?)">', re.S)
-        token = csrf_regex.findall(resp)
-        if token and 0 < len(token):
-            token=token[0]
-        else:
-            token=""
+        token = csrf_regex.findall(resp)[0]
         return token.strip()
 
     def enumerate(self):
@@ -885,7 +878,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile,url, ports, silent, verbose, enable_bruteforce, engines):
     bruteforce_list = set()
     search_list = set()
 
@@ -973,6 +966,14 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
         if savefile:
             write_file(savefile, subdomains)
+        
+        if url:
+            print({"domain":domain,"subdomains":subdomains})
+            requests.post(url, json={"domain":domain,"subdomains":subdomains},verify=False, headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
+                "content-type":"application/json",
+                "Connection": "close"
+            },timeout=None,allow_redirects=False)
 
         if not silent:
             print(Y + "[-] Total Unique Subdomains Found: %s" % len(subdomains) + W)
@@ -980,22 +981,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         if ports:
             if not silent:
                 print(G + "[-] Start port scan now for the following ports: %s%s" % (Y, ports) + W)
-            # ports = ports.split(',')
-            ports=re.split(r'[,;\|]',ports)
-            daX=[]
-            aX=[]
-            try:
-                for x in ports:
-                    if '-' in x or '~' in x:
-                        daX.append(x)
-                        x1=re.split(r'[\-~]',x)
-                        aX=aX+range(x1[0],x1[1])
-                for x in daX:
-                    ports.remove(x)
-                ports=ports+aX
-            except Exception as e:
-                # print(e)
-                pass
+            ports = ports.split(',')
             pscan = portscan(subdomains, ports)
             pscan.run()
 
@@ -1010,8 +996,7 @@ def interactive():
     domain = args.domain
     threads = args.threads
     savefile = args.output
-    if None == savefile and domain:
-        savefile=domain + ".txt"
+    url = args.url
     ports = args.ports
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
@@ -1021,7 +1006,7 @@ def interactive():
     if args.no_color:
         no_color()
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    res = main(domain, threads, savefile,url, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
 
 if __name__ == "__main__":
     interactive()
