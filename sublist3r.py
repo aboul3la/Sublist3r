@@ -968,7 +968,6 @@ def main(domain, threads, savefile,url, ports, silent, verbose, enable_bruteforc
             write_file(savefile, subdomains)
         
         if url:
-            print({"domain":domain,"subdomains":subdomains})
             requests.post(url, json={"domain":domain,"subdomains":subdomains},verify=False, headers={
                 "User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
                 "content-type":"application/json",
