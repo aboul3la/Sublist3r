@@ -78,7 +78,6 @@ def banner():
                 \___ \| | | | '_ \| | / __| __| |_ \| '__|
                  ___) | |_| | |_) | | \__ \ |_ ___) | |
                 |____/ \__,_|_.__/|_|_|___/\__|____/|_|%s%s
-
                 # Coded By Ahmed Aboul-Ela - @aboul3la
     """ % (R, W, Y))
 
@@ -102,6 +101,7 @@ def parse_args():
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
+    parser.add_argument('-u', '--url', help='Save the results to  url')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
     return parser.parse_args()
 
@@ -116,11 +116,9 @@ def write_file(filename, subdomains):
 
 def subdomain_sorting_key(hostname):
     """Sorting key for subdomains
-
     This sorting key orders subdomains from the top-level domain at the right
     reading left, then moving '^' and 'www' to the top of their group. For
     example, the following list is sorted correctly:
-
     [
         'example.com',
         'www.example.com',
@@ -132,7 +130,6 @@ def subdomain_sorting_key(hostname):
         'www.example.net',
         'a.example.net',
     ]
-
     """
     parts = hostname.split('.')[::-1]
     if parts[-1] == 'www':
@@ -881,7 +878,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile,url, ports, silent, verbose, enable_bruteforce, engines):
     bruteforce_list = set()
     search_list = set()
 
@@ -969,6 +966,13 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
         if savefile:
             write_file(savefile, subdomains)
+        
+        if url:
+            requests.post(url, json={"domain":domain,"subdomains":subdomains},verify=False, headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
+                "content-type":"application/json",
+                "Connection": "close"
+            },timeout=None,allow_redirects=False)
 
         if not silent:
             print(Y + "[-] Total Unique Subdomains Found: %s" % len(subdomains) + W)
@@ -991,6 +995,7 @@ def interactive():
     domain = args.domain
     threads = args.threads
     savefile = args.output
+    url = args.url
     ports = args.ports
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
@@ -1000,7 +1005,7 @@ def interactive():
     if args.no_color:
         no_color()
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    res = main(domain, threads, savefile,url, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
 
 if __name__ == "__main__":
     interactive()
