@@ -41,6 +41,8 @@ except:
 # Check if we are running this on windows platform
 is_windows = sys.platform.startswith('win')
 
+vt_apikey = None
+
 # Console Colors
 if is_windows:
     # Windows deserves coloring too :D
@@ -102,6 +104,7 @@ def parse_args():
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
+    parser.add_argument('-vt', '--virustotal_apikey', help='Virustotal API Key')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
     return parser.parse_args()
 
@@ -676,7 +679,7 @@ class DNSdumpster(enumratorBaseThreaded):
 class Virustotal(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = 'https://www.virustotal.com/ui/domains/{domain}/subdomains'
+        base_url = 'https://www.virustotal.com/api/v3/domains/{domain}/subdomains'
         self.engine_name = "Virustotal"
         self.q = q
         super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
@@ -686,7 +689,10 @@ class Virustotal(enumratorBaseThreaded):
     # the main send_req need to be rewritten
     def send_req(self, url):
         try:
-            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+            global vt_apikey
+            headers = dict(self.headers)
+            headers['x-apikey'] = vt_apikey
+            resp = self.session.get(url, headers=headers, timeout=self.timeout)
         except Exception as e:
             self.print_(e)
             resp = None
@@ -987,6 +993,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
 
 
 def interactive():
+    global vt_apikey
     args = parse_args()
     domain = args.domain
     threads = args.threads
@@ -995,6 +1002,7 @@ def interactive():
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    vt_apikey = args.virustotal_apikey
     if verbose or verbose is None:
         verbose = True
     if args.no_color:
