@@ -4,4 +4,4 @@ COPY . .
 
 RUN pip install -r requirements.txt
 
-ENTRYPOINT ["python3", "sublist3r.py"]
+ENTRYPOINT ["python", "sublist3r.py"]
