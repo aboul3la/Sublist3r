@@ -6,7 +6,8 @@ Sublist3r is a python tool designed to enumerate subdomains of websites using OS
 
 ## Screenshots
 
-![Sublist3r](http://www.secgeek.net/images/Sublist3r.png "Sublist3r in action")
+![image](https://user-images.githubusercontent.com/73774338/204882764-c2518be0-60da-4fd9-a77e-163413205db8.png)
+
 
 
 ## Installation
