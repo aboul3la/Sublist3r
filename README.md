@@ -108,6 +108,7 @@ Short Form    | Long Form     | Description
 -b            | --bruteforce  | Enable the subbrute bruteforce module
 -p            | --ports       | Scan the found subdomains against specific tcp ports
 -v            | --verbose     | Enable the verbose mode and display results in realtime
+-s            | --silent      | Disables verbosity and runs the script silently
 -t            | --threads     | Number of threads to use for subbrute bruteforce
 -e            | --engines     | Specify a comma-separated list of search engines
 -o            | --output      | Save the results to text file
