@@ -1,3 +1,7 @@
+# Project Status
+
+Please note I am not actively supporting this project. I may return to subdomain research at some point but my security interests lie elsewhere at the moment and my time is divided among other things. If you find an issue feel free to send a PR or fork it into your own project. Thanks. 
+
 ## Turbolist3r
 
 Turbolist3r is a fork of the [sublist3r](https://github.com/aboul3la/sublist3r) subdomain discovery tool. In addition to the original OSINT capabilties of sublist3r, turbolist3r automates some analysis of the results, with a focus on subdomain takeover.
