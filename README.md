@@ -117,11 +117,11 @@ Short Form    | Long Form     | Description
 
 * To list all the basic options and switches use -h switch:
 
-```python sublist3r.py -h```
+```python3 sublist3r.py -h```
 
 * To enumerate subdomains of specific domain:
 
-``python sublist3r.py -d example.com``
+``python3 sublist3r.py -d example.com``
 
 * To enumerate subdomains of specific domain and show only subdomains which have open ports 80 and 443 :
 
