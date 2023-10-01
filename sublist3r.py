@@ -867,7 +867,6 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'ask': AskEnum,
                          'netcraft': NetcraftEnum,
                          'dnsdumpster': DNSdumpster,
-                         'virustotal': Virustotal,
                          'threatcrowd': ThreatCrowd,
                          'ssl': CrtSearch,
                          'passivedns': PassiveDNS
@@ -878,7 +877,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     if engines is None:
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
-            NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
+            NetcraftEnum, DNSdumpster, ThreatCrowd,
             CrtSearch, PassiveDNS
         ]
     else:
