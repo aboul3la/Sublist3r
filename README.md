@@ -21,7 +21,7 @@ Sublist3r currently supports **Python 2** and **Python 3**.
 
 * The recommended version for Python 2 is **2.7.x**
 * The recommended version for Python 3 is **3.4.x**
-
+* Make sure you selected "Add to path" when installing python2/3
 ## Dependencies:
 
 Sublist3r depends on the `requests`, `dnspython` and `argparse` python modules.
@@ -30,7 +30,7 @@ These dependencies can be installed using the requirements file:
 
 - Installation on Windows:
 ```
-c:\python27\python.exe -m pip install -r requirements.txt
+python.exe -m pip install -r requirements.txt
 ```
 - Installation on Linux
 ```
