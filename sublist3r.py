@@ -103,6 +103,7 @@ def parse_args():
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
+    parser.add_argument('-a', '--api-key', help='Enter your API key', default=None)
     return parser.parse_args()
 
 
@@ -139,9 +140,14 @@ def subdomain_sorting_key(hostname):
         return parts[:-1], 1
     return parts, 0
 
+class ArgumentIsNoneError(Exception):
+    def __init__(self, argument_name):
+        self.argument_name = argument_name
+        self.message = f"Argument type None supplied for '{self.argument_name}'."
+        super().__init__(self.message)
 
 class enumratorBase(object):
-    def __init__(self, base_url, engine_name, domain, subdomains=None, silent=False, verbose=True):
+    def __init__(self, base_url, engine_name, domain, subdomains=None, apikey=None, silent=False, verbose=True):
         subdomains = subdomains or []
         self.domain = urlparse.urlparse(domain).netloc
         self.session = requests.Session()
@@ -157,6 +163,10 @@ class enumratorBase(object):
             'Accept-Language': 'en-US,en;q=0.8',
             'Accept-Encoding': 'gzip',
         }
+
+        if apikey is not None:
+            self.headers['x-apikey'] = apikey
+        
         self.print_banner()
 
     def print_(self, text):
@@ -257,9 +267,9 @@ class enumratorBase(object):
 
 
 class enumratorBaseThreaded(multiprocessing.Process, enumratorBase):
-    def __init__(self, base_url, engine_name, domain, subdomains=None, q=None, silent=False, verbose=True):
+    def __init__(self, base_url, engine_name, domain, subdomains=None, apikey=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        enumratorBase.__init__(self, base_url, engine_name, domain, subdomains, silent=silent, verbose=verbose)
+        enumratorBase.__init__(self, base_url, engine_name, domain, subdomains, apikey=apikey, silent=silent, verbose=verbose)
         multiprocessing.Process.__init__(self)
         self.q = q
         return
@@ -674,12 +684,16 @@ class DNSdumpster(enumratorBaseThreaded):
 
 
 class Virustotal(enumratorBaseThreaded):
-    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+    def __init__(self, domain, subdomains=None, apikey=None, q=None, silent=False, verbose=True):
+
+        if apikey is None:
+            raise ArgumentIsNoneError(apikey.__repr__())
+        
         subdomains = subdomains or []
-        base_url = 'https://www.virustotal.com/ui/domains/{domain}/subdomains'
+        base_url = 'https://www.virustotal.com/api/v3/domains/{domain}/subdomains'
         self.engine_name = "Virustotal"
         self.q = q
-        super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, apikey=apikey, q=q, silent=silent, verbose=verbose)
         self.url = self.base_url.format(domain=self.domain)
         return
 
@@ -881,7 +895,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines, apikey):
     bruteforce_list = set()
     search_list = set()
 
@@ -925,6 +939,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'passivedns': PassiveDNS
                          }
 
+    enums = []
     chosenEnums = []
 
     if engines is None:
@@ -940,7 +955,12 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                 chosenEnums.append(supported_engines[engine.lower()])
 
     # Start the engines enumeration
-    enums = [enum(domain, [], q=subdomains_queue, silent=silent, verbose=verbose) for enum in chosenEnums]
+    for enum in chosenEnums:
+        if 'Virustotal' in enum.__name__:
+            enums.append(enum(domain, [], apikey=apikey, q=subdomains_queue, silent=silent, verbose=verbose))
+        else:
+            enums.append(enum(domain, [], q=subdomains_queue, silent=silent, verbose=verbose))
+
     for enum in enums:
         enum.start()
     for enum in enums:
@@ -995,12 +1015,13 @@ def interactive():
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    apikey = args.api_key
     if verbose or verbose is None:
         verbose = True
     if args.no_color:
         no_color()
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines, apikey=apikey)
 
 if __name__ == "__main__":
     interactive()
