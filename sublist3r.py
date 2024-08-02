@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python4
 # coding: utf-8
 # Sublist3r v1.0
 # By Ahmed Aboul-Ela - twitter.com/aboul3la
-
+# And fmjal - github.com/fmjal
 # modules in standard library
 import re
 import sys
@@ -16,6 +16,7 @@ import threading
 import socket
 import json
 from collections import Counter
+from bs4 import BeautifulSoup
 
 # external modules
 from subbrute import subbrute
@@ -79,7 +80,9 @@ def banner():
                  ___) | |_| | |_) | | \__ \ |_ ___) | |
                 |____/ \__,_|_.__/|_|_|___/\__|____/|_|%s%s
 
-                # Coded By Ahmed Aboul-Ela - @aboul3la
+                # Coded By:
+                # - Ahmed Aboul-Ela - @aboul3la
+                # - fmjal - @fmjal
     """ % (R, W, Y))
 
 
@@ -103,6 +106,7 @@ def parse_args():
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
+    parser.add_argument("-s","--silent",default=False,action='store_true',help='Run without showing a banner or status updates')
     return parser.parse_args()
 
 
@@ -850,6 +854,84 @@ class PassiveDNS(enumratorBaseThreaded):
         except Exception as e:
             pass
 
+class HTEnum(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        base_url = 'https://api.hackertarget.com/hostsearch/?q={domain}'
+        self.engine_name = "HTEnum"
+        self.q = q
+        super(HTEnum, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        return
+
+    def req(self, url):
+        try:
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+        except Exception as e:
+            resp = None
+
+        return self.get_response(resp)
+
+    def get_response(self, resp):
+        if resp and resp.status_code == 200 and not resp.text.startswith("API Count"):
+            return resp.text
+        return None
+
+    def extract_domains(self, resp):
+        for line in resp.splitlines():
+            subdomain = line.split(',')[0]
+            if subdomain and subdomain not in self.subdomains:
+                self.subdomains.append(subdomain)
+
+    def enumerate(self):
+        url = self.base_url.format(domain=self.domain)
+        resp = self.req(url)
+        if not resp:
+            return self.subdomains
+
+        self.extract_domains(resp)
+        return self.subdomains
+
+class ShodanEnum(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        self.domain=domain
+        subdomains = subdomains or []
+        base_url = 'https://www.shodan.io/domain/{domain}'
+        self.engine_name = "Shodan"
+        self.q = q
+        super(ShodanEnum, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+
+    def req(self, url):
+        try:
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
+        except Exception as e:
+            resp = None
+
+        return self.get_response(resp)
+
+    def get_response(self, resp):
+        if resp and resp.status_code == 200:
+            return resp.text
+        return None
+
+    def extract_domains(self, resp):
+        soup = BeautifulSoup(resp, 'html.parser')
+        subdomains_list = soup.find('ul', id='subdomains')
+        if subdomains_list:
+            for li in subdomains_list.find_all('li'):
+                subdomain = li.get_text().strip()
+                if subdomain and subdomain not in self.subdomains:
+                    if subdomain != "*" and subdomain != "_dmarc":
+                        self.subdomains.append(f'{subdomain}.{self.domain}')
+
+    def enumerate(self):
+        url = self.base_url.format(domain=self.domain)
+        resp = self.req(url)
+        if not resp:
+            return self.subdomains
+
+        self.extract_domains(resp)
+        return self.subdomains
+
 
 class portscan():
     def __init__(self, subdomains, ports):
@@ -922,7 +1004,9 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'virustotal': Virustotal,
                          'threatcrowd': ThreatCrowd,
                          'ssl': CrtSearch,
-                         'passivedns': PassiveDNS
+                         'passivedns': PassiveDNS,
+                         "HTEnum":HTEnum,
+                         "Shodan":ShodanEnum
                          }
 
     chosenEnums = []
@@ -930,8 +1014,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     if engines is None:
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
-            NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
-            CrtSearch, PassiveDNS
+            NetcraftEnum, DNSdumpster, ThreatCrowd,
+            CrtSearch, PassiveDNS,HTEnum,ShodanEnum
         ]
     else:
         engines = engines.split(',')
@@ -980,9 +1064,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
             pscan = portscan(subdomains, ports)
             pscan.run()
 
-        elif not silent:
-            for subdomain in subdomains:
-                print(G + subdomain + W)
+        for subdomain in subdomains:
+            print(G + subdomain + W)
     return subdomains
 
 
@@ -995,12 +1078,14 @@ def interactive():
     enable_bruteforce = args.bruteforce
     verbose = args.verbose
     engines = args.engines
+    silent=args.silent
     if verbose or verbose is None:
         verbose = True
     if args.no_color:
         no_color()
-    banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    if not silent:
+        banner()
+    res = main(domain, threads, savefile, ports, silent=args.silent, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
 
 if __name__ == "__main__":
     interactive()

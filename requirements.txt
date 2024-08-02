@@ -1,3 +1,5 @@
 argparse
 dnspython
 requests
+bs4
+requests[socks]
