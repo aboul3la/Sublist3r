@@ -638,7 +638,11 @@ class DNSdumpster(enumratorBaseThreaded):
 
     def get_csrftoken(self, resp):
         csrf_regex = re.compile('<input type="hidden" name="csrfmiddlewaretoken" value="(.*?)">', re.S)
-        token = csrf_regex.findall(resp)[0]
+        tokens = csrf_regex.findall(resp)
+        if not tokens:
+            print("[-] DNSdumpster failed: CSRF token not found. Skipping...")
+            return []
+        token = tokens[0]
         return token.strip()
 
     def enumerate(self):
@@ -681,7 +685,31 @@ class Virustotal(enumratorBaseThreaded):
         self.q = q
         super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         self.url = self.base_url.format(domain=self.domain)
-        return
+
+    def enumerate(self):
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0',
+                'Accept': 'application/json',
+            }
+            response = requests.get(self.url, headers=headers, timeout=10)
+
+            if response.status_code != 200:
+                print(f"[-] Virustotal error: HTTP {response.status_code}. Skipping...")
+                return []
+
+            data = response.json()
+            subdomains = [entry['id'] for entry in data.get('data', [])]
+
+            if self.verbose:
+                print(f"[+] {self.engine_name} found {len(subdomains)} subdomains.")
+
+            return subdomains
+
+        except Exception as e:
+            print(f"[-] Virustotal exception: {str(e)}. Skipping...")
+            return []
+
 
     # the main send_req need to be rewritten
     def send_req(self, url):
