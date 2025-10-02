@@ -1,3 +1,3 @@
-argparse
-dnspython
-requests
+requests>=2.25.0
+dnspython>=2.0.0
+colorama>=0.4.4  # Optional, for colored output
