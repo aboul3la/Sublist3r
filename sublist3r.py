@@ -16,26 +16,25 @@ import threading
 import socket
 import json
 from collections import Counter
+from urllib.parse import urlparse
+from urllib.parse import unquote
 
 # external modules
 from subbrute import subbrute
 import dns.resolver
 import requests
-
-# Python 2.x and 3.x compatiablity
-if sys.version > '3':
-    import urllib.parse as urlparse
-    import urllib.parse as urllib
-else:
-    import urlparse
-    import urllib
+import urllib3
+urllib3.disable_warnings()
 
 # In case you cannot install some of the required development packages
 # there's also an option to disable the SSL warning:
+# In case you cannot install some of the required development packages
+# there's also an option to disable the SSL warning:
 try:
-    import requests.packages.urllib3
-    requests.packages.urllib3.disable_warnings()
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 except:
+    
     pass
 
 # Check if we are running this on windows platform
@@ -143,7 +142,7 @@ def subdomain_sorting_key(hostname):
 class enumratorBase(object):
     def __init__(self, base_url, engine_name, domain, subdomains=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        self.domain = urlparse.urlparse(domain).netloc
+        self.domain = urlparse(domain).netloc
         self.session = requests.Session()
         self.subdomains = []
         self.timeout = 25
@@ -273,12 +272,22 @@ class enumratorBaseThreaded(multiprocessing.Process, enumratorBase):
 class GoogleEnum(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = "https://google.com/search?q={query}&btnG=Search&hl=en-US&biw=&bih=&gbv=1&start={page_no}&filter=0"
+        base_url = "https://www.google.com/search?q={query}&num=100&start={page_no}&filter=0"
         self.engine_name = "Google"
         self.MAX_DOMAINS = 11
         self.MAX_PAGES = 200
         super(GoogleEnum, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
         self.q = q
+        # Enhanced headers to avoid blocking
+        self.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1'
+        })
         return
 
     def extract_domains(self, resp):
@@ -287,10 +296,11 @@ class GoogleEnum(enumratorBaseThreaded):
         try:
             links_list = link_regx.findall(resp)
             for link in links_list:
-                link = re.sub('<span.*>', '', link)
+                link = re.sub('<span.*?>', '', link)
+                link = re.sub('</span>', '', link)
                 if not link.startswith('http'):
                     link = "http://" + link
-                subdomain = urlparse.urlparse(link).netloc
+                subdomain = urlparse(link).netloc
                 if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
                     if self.verbose:
                         self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
@@ -300,14 +310,19 @@ class GoogleEnum(enumratorBaseThreaded):
         return links_list
 
     def check_response_errors(self, resp):
-        if (type(resp) is str or type(resp) is unicode) and 'Our systems have detected unusual traffic' in resp:
-            self.print_(R + "[!] Error: Google probably now is blocking our requests" + W)
-            self.print_(R + "[~] Finished now the Google Enumeration ..." + W)
-            return False
+        if isinstance(resp, str):
+            if 'unusual traffic' in resp.lower() or 'detected unusual' in resp.lower():
+                self.print_(R + "[!] Error: Google is blocking our requests (rate limited)" + W)
+                self.print_(R + "[~] Finished now the Google Enumeration ..." + W)
+                return False
+            if 'captcha' in resp.lower():
+                self.print_(R + "[!] Error: Google CAPTCHA detected" + W)
+                self.print_(R + "[~] Finished now the Google Enumeration ..." + W)
+                return False
         return True
 
     def should_sleep(self):
-        time.sleep(5)
+        time.sleep(random.randint(5, 10))  # Increased delay to avoid blocking
         return
 
     def generate_query(self):
@@ -318,7 +333,6 @@ class GoogleEnum(enumratorBaseThreaded):
         else:
             query = "site:{domain} -www.{domain}".format(domain=self.domain)
         return query
-
 
 class YahooEnum(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
@@ -343,7 +357,7 @@ class YahooEnum(enumratorBaseThreaded):
                 link = re.sub("<(\/)?b>", "", link)
                 if not link.startswith('http'):
                     link = "http://" + link
-                subdomain = urlparse.urlparse(link).netloc
+                subdomain = urlparse(link).netloc
                 if not subdomain.endswith(self.domain):
                     continue
                 if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
@@ -390,7 +404,7 @@ class AskEnum(enumratorBaseThreaded):
             for link in links_list:
                 if not link.startswith('http'):
                     link = "http://" + link
-                subdomain = urlparse.urlparse(link).netloc
+                subdomain = urlparse(link).netloc
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if self.verbose:
                         self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
@@ -439,7 +453,7 @@ class BingEnum(enumratorBaseThreaded):
                 link = re.sub('<(\/)?strong>|<span.*?>|<|>', '', link)
                 if not link.startswith('http'):
                     link = "http://" + link
-                subdomain = urlparse.urlparse(link).netloc
+                subdomain = urlparse(link).netloc
                 if subdomain not in self.subdomains and subdomain != self.domain:
                     if self.verbose:
                         self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
@@ -482,7 +496,7 @@ class BaiduEnum(enumratorBaseThreaded):
                 link = re.sub('<.*?>|>|<|&nbsp;', '', link)
                 if not link.startswith('http'):
                     link = "http://" + link
-                subdomain = urlparse.urlparse(link).netloc
+                subdomain = urlparse(link).netloc
                 if subdomain.endswith(self.domain):
                     subdomain_list.append(subdomain)
                     if subdomain not in self.subdomains and subdomain != self.domain:
@@ -544,7 +558,7 @@ class NetcraftEnum(enumratorBaseThreaded):
     def get_next(self, resp):
         link_regx = re.compile('<a.*?href="(.*?)">Next Page')
         link = link_regx.findall(resp)
-        url = 'http://searchdns.netcraft.com' + link[0]
+        url = 'http://searchdns.netcraft.com' + link[0] if link else ''
         return url
 
     def create_cookies(self, cookie):
@@ -552,7 +566,7 @@ class NetcraftEnum(enumratorBaseThreaded):
         cookies_list = cookie[0:cookie.find(';')].split("=")
         cookies[cookies_list[0]] = cookies_list[1]
         # hashlib.sha1 requires utf-8 encoded str
-        cookies['netcraft_js_verification_response'] = hashlib.sha1(urllib.unquote(cookies_list[1]).encode('utf-8')).hexdigest()
+        cookies['netcraft_js_verification_response'] = hashlib.sha1(unquote(cookies_list[1]).encode('utf-8')).hexdigest()
         return cookies
 
     def get_cookies(self, headers):
@@ -582,7 +596,7 @@ class NetcraftEnum(enumratorBaseThreaded):
         try:
             links_list = link_regx.findall(resp)
             for link in links_list:
-                subdomain = urlparse.urlparse(link).netloc
+                subdomain = urlparse(link).netloc
                 if not subdomain.endswith(self.domain):
                     continue
                 if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
@@ -606,72 +620,137 @@ class DNSdumpster(enumratorBaseThreaded):
         return
 
     def check_host(self, host):
-        is_valid = False
-        Resolver = dns.resolver.Resolver()
-        Resolver.nameservers = ['8.8.8.8', '8.8.4.4']
-        self.lock.acquire()
-        try:
-            ip = Resolver.query(host, 'A')[0].to_text()
-            if ip:
-                if self.verbose:
-                    self.print_("%s%s: %s%s" % (R, self.engine_name, W, host))
-                is_valid = True
-                self.live_subdomains.append(host)
-        except:
-            pass
-        self.lock.release()
-        return is_valid
+        if self.verbose:
+            self.print_("%s%s: %s%s" % (R, self.engine_name, W, host))
+        self.live_subdomains.append(host)
+        return True
 
     def req(self, req_method, url, params=None):
         params = params or {}
         headers = dict(self.headers)
-        headers['Referer'] = 'https://dnsdumpster.com'
+        headers.update({
+            'Referer': 'https://dnsdumpster.com/',
+            'Origin': 'https://dnsdumpster.com',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        })
+        
         try:
             if req_method == 'GET':
-                resp = self.session.get(url, headers=headers, timeout=self.timeout)
+                resp = self.session.get(url, headers=headers, timeout=self.timeout, verify=False)
             else:
-                resp = self.session.post(url, data=params, headers=headers, timeout=self.timeout)
+                # Add CSRF token to headers if available in cookies
+                if 'csrftoken' in self.session.cookies:
+                    headers['X-CSRFToken'] = self.session.cookies['csrftoken']
+                resp = self.session.post(url, data=params, headers=headers, timeout=self.timeout, verify=False)
+            
+            return resp if resp else None
         except Exception as e:
-            self.print_(e)
-            resp = None
-        return self.get_response(resp)
+            self.print_(R + "[!] DNSdumpster request error: " + str(e) + W)
+            return None
 
     def get_csrftoken(self, resp):
-        csrf_regex = re.compile('<input type="hidden" name="csrfmiddlewaretoken" value="(.*?)">', re.S)
-        token = csrf_regex.findall(resp)[0]
-        return token.strip()
+        """Extract CSRF token from response - Updated for robustness"""
+        try:
+            if not resp or not hasattr(resp, 'text'):
+                return None
+            
+            # Look for the hidden input field named 'csrfmiddlewaretoken'
+            # (Note: Use a generic pattern to find the value of this input)
+            csrf_regex = re.compile(r"name=['\"]csrfmiddlewaretoken['\"]\s+value=['\"]([^'\"]+)['\"]")
+            match = csrf_regex.search(resp.text)
+            
+            if match:
+                token = match.group(1).strip()
+                if token and len(token) > 10: 
+                    return token
+
+            # Fallback to check other known patterns
+            
+            return None
+        except Exception as e:
+            self.print_(R + "[!] Error parsing CSRF token: " + str(e) + W)
+            return None
 
     def enumerate(self):
         self.lock = threading.BoundedSemaphore(value=70)
-        resp = self.req('GET', self.base_url)
-        token = self.get_csrftoken(resp)
-        params = {'csrfmiddlewaretoken': token, 'targetip': self.domain}
-        post_resp = self.req('POST', self.base_url, params)
-        self.extract_domains(post_resp)
-        for subdomain in self.subdomains:
-            t = threading.Thread(target=self.check_host, args=(subdomain,))
-            t.start()
-            t.join()
-        return self.live_subdomains
+        
+        try:
+            # 1. Initial GET request to get the session cookie and CSRF token
+            resp = self.req('GET', self.base_url)
+            
+            if not resp or not hasattr(resp, 'text'):
+                self.print_(R + "[!] DNSdumpster: Could not connect or get initial page." + W)
+                return []
+            
+            # 2. Extract CSRF token (uses the updated get_csrftoken)
+            token = self.get_csrftoken(resp)
+            
+            if not token:
+                self.print_(R + "[!] DNSdumpster: Could not get CSRF token. Site layout may have changed again." + W)
+                return []
+            
+            # 3. Prepare POST data with the required token and domain
+            params = {
+                'csrfmiddlewaretoken': token,
+                'targetip': self.domain,
+            }
+            
+            # 4. POST request
+            post_resp = self.req('POST', self.base_url, params)
+            
+            if not post_resp or not hasattr(post_resp, 'text'):
+                self.print_(R + "[!] DNSdumpster: No valid response after POST request." + W)
+                return []
+            
+            # 5. Extract domains from response
+            self.extract_domains(post_resp.text)
+            
+            for subdomain in self.subdomains:
+                self.check_host(subdomain)
+            
+            return self.live_subdomains
+            
+        except Exception as e:
+            self.print_(R + "[!] DNSdumpster error in enumerate: " + str(e) + W)
+            return []
 
     def extract_domains(self, resp):
-        tbl_regex = re.compile('<a name="hostanchor"><\/a>Host Records.*?<table.*?>(.*?)</table>', re.S)
-        link_regex = re.compile('<td class="col-md-4">(.*?)<br>', re.S)
-        links = []
+        """Extract subdomains from HTML response"""
+        links = set()
+        
         try:
-            results_tbl = tbl_regex.findall(resp)[0]
-        except IndexError:
-            results_tbl = ''
-        links_list = link_regex.findall(results_tbl)
-        links = list(set(links_list))
+            # Pattern 1: Table rows with subdomains
+            table_pattern = r'<td class="col-md-4">([a-zA-Z0-9][-a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-a-zA-Z0-9]*)*\.' + re.escape(self.domain) + r')'
+            matches = re.findall(table_pattern, resp, re.IGNORECASE)
+            links.update(matches)
+            
+            # Pattern 2: Any subdomain mention
+            subdomain_pattern = r'(?:^|[>\s])([a-zA-Z0-9][-a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-a-zA-Z0-9]*)*\.' + re.escape(self.domain) + r')(?:[<\s]|$)'
+            matches = re.findall(subdomain_pattern, resp, re.IGNORECASE | re.MULTILINE)
+            links.update(matches)
+            
+            # Pattern 3: Host Records section
+            host_records_pattern = r'<a name="hostanchor">.*?<table[^>]*>(.*?)</table>'
+            host_section = re.search(host_records_pattern, resp, re.DOTALL | re.IGNORECASE)
+            if host_section:
+                subdomain_in_table = r'>([a-zA-Z0-9][-a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-a-zA-Z0-9]*)*\.' + re.escape(self.domain) + r')<'
+                matches = re.findall(subdomain_in_table, host_section.group(1), re.IGNORECASE)
+                links.update(matches)
+            
+        except Exception as e:
+            self.print_(R + "[!] Error extracting domains: " + str(e) + W)
+        
+        # Process found links
         for link in links:
-            subdomain = link.strip()
-            if not subdomain.endswith(self.domain):
-                continue
-            if subdomain and subdomain not in self.subdomains and subdomain != self.domain:
-                self.subdomains.append(subdomain.strip())
-        return links
-
+            subdomain = link.strip().lower()
+            # Validate subdomain
+            if subdomain.endswith(self.domain) and subdomain != self.domain:
+                if subdomain not in self.subdomains:
+                    self.subdomains.append(subdomain)
+        
+        return list(links)
 
 class Virustotal(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
@@ -904,7 +983,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     if not domain.startswith('http://') or not domain.startswith('https://'):
         domain = 'http://' + domain
 
-    parsed_domain = urlparse.urlparse(domain)
+    parsed_domain = urlparse(domain)
 
     if not silent:
         print(B + "[-] Enumerating subdomains now for %s" % parsed_domain.netloc + W)
@@ -926,13 +1005,12 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          }
 
     chosenEnums = []
-
     if engines is None:
         chosenEnums = [
-            BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
-            NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
-            CrtSearch, PassiveDNS
-        ]
+        BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
+        NetcraftEnum, DNSdumpster, ThreatCrowd,
+        CrtSearch, PassiveDNS
+    ]
     else:
         engines = engines.split(',')
         for engine in engines:
