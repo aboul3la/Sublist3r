@@ -185,7 +185,7 @@ class enumratorBase(object):
 
     def get_response(self, response):
         if response is None:
-            return 0
+            return '' # return empty string if there was an error instead of 0
         return response.text if hasattr(response, "text") else response.content
 
     def check_max_subdomains(self, count):
@@ -396,7 +396,7 @@ class AskEnum(enumratorBaseThreaded):
 
     def extract_domains(self, resp):
         links_list = list()
-        link_regx = re.compile('<p class="web-result-url">(.*?)</p>')
+        link_regx = re.compile('<p class="PartialSearchResults-item-url">(.*?)</p>') #error fixed
         try:
             links_list = link_regx.findall(resp)
             for link in links_list:
@@ -670,6 +670,8 @@ class DNSdumpster(enumratorBaseThreaded):
         return self.live_subdomains
 
     def extract_domains(self, resp):
+        if not isinstance(resp, str):
+            return []
         tbl_regex = re.compile(r'<a name="hostanchor"><\/a>Host Records.*?<table.*?>(.*?)</table>', re.S)
         link_regex = re.compile('<td class="col-md-4">(.*?)<br>', re.S)
         links = []
