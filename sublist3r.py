@@ -592,8 +592,6 @@ class NetcraftEnum(enumratorBaseThreaded):
         except Exception:
             pass
         return links_list
-
-
 class DNSdumpster(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
@@ -637,14 +635,22 @@ class DNSdumpster(enumratorBaseThreaded):
         return self.get_response(resp)
 
     def get_csrftoken(self, resp):
-        csrf_regex = re.compile('<input type="hidden" name="csrfmiddlewaretoken" value="(.*?)">', re.S)
-        token = csrf_regex.findall(resp)[0]
-        return token.strip()
+        import re
+        csrf_regex = re.compile(r'name="csrfmiddlewaretoken" value="([^"]+)"')
+        matches = csrf_regex.findall(resp)
+        if matches:
+            return matches[0]
+        else:
+            print("[!] Warning: DNSdumpster token not found — skipping DNSdumpster engine.")
+            return None
 
     def enumerate(self):
         self.lock = threading.BoundedSemaphore(value=70)
         resp = self.req('GET', self.base_url)
         token = self.get_csrftoken(resp)
+        if not token:
+            return []
+
         params = {'csrfmiddlewaretoken': token, 'targetip': self.domain}
         post_resp = self.req('POST', self.base_url, params)
         self.extract_domains(post_resp)
@@ -723,6 +729,8 @@ class Virustotal(enumratorBaseThreaded):
         except Exception:
             pass
 
+git remote add origin https://github.com/SANJAY23CB50/Sublist3r.git
+git branch -M main
 
 class ThreatCrowd(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
