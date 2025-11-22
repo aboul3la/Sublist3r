@@ -265,9 +265,27 @@ class enumratorBaseThreaded(multiprocessing.Process, enumratorBase):
         return
 
     def run(self):
-        domain_list = self.enumerate()
-        for domain in domain_list:
-            self.q.append(domain)
+        # Safe wrapper so a broken engine doesn’t kill the whole scan
+        try:
+            domain_list = self.enumerate()
+        except Exception as e:
+            # engine_name is defined in each subclass (Google, Yahoo, Ask, etc.)
+            try:
+                self.print_("[!] Engine {0} failed: {1}".format(self.engine_name, e))
+            except Exception:
+                # Fallback if print_ or engine_name missing for some reason
+                print("[!] Engine failed: {0}".format(e))
+            domain_list = []
+
+        # Push results into the shared list, if present
+        if self.q is not None:
+            for domain in domain_list:
+                try:
+                    self.q.append(domain)
+                except Exception:
+                    # don’t let one bad entry kill the process
+                    pass
+
 
 
 class GoogleEnum(enumratorBaseThreaded):
@@ -283,7 +301,8 @@ class GoogleEnum(enumratorBaseThreaded):
 
     def extract_domains(self, resp):
         links_list = list()
-        link_regx = re.compile('<cite.*?>(.*?)<\/cite>')
+        link_regx = re.compile(r'<cite.*?>(.*?)</cite>')
+
         try:
             links_list = link_regx.findall(resp)
             for link in links_list:
@@ -340,7 +359,7 @@ class YahooEnum(enumratorBaseThreaded):
             links2 = link_regx2.findall(resp)
             links_list = links + links2
             for link in links_list:
-                link = re.sub("<(\/)?b>", "", link)
+                link = re.sub(r"</?b>", "", link)
                 if not link.startswith('http'):
                     link = "http://" + link
                 subdomain = urlparse.urlparse(link).netloc
@@ -436,7 +455,7 @@ class BingEnum(enumratorBaseThreaded):
             links_list = links + links2
 
             for link in links_list:
-                link = re.sub('<(\/)?strong>|<span.*?>|<|>', '', link)
+                link = re.sub(r'</?strong>|<span.*?>|<|>', '', link)
                 if not link.startswith('http'):
                     link = "http://" + link
                 subdomain = urlparse.urlparse(link).netloc
@@ -637,14 +656,36 @@ class DNSdumpster(enumratorBaseThreaded):
         return self.get_response(resp)
 
     def get_csrftoken(self, resp):
-        csrf_regex = re.compile('<input type="hidden" name="csrfmiddlewaretoken" value="(.*?)">', re.S)
-        token = csrf_regex.findall(resp)[0]
-        return token.strip()
+        """
+        Accepts either a requests.Response object or a raw HTML string.
+        Returns the CSRF token from DNSDumpster HTML.
+        """
+        # If it's a Response object, extract .text
+        if hasattr(resp, "text"):
+            html = resp.text
+        else:
+            # Assume it's already a string
+            html = resp
+
+        match = re.search(
+            r'name="csrfmiddlewaretoken" value="(.*?)"',
+            html,
+        )
+        if not match:
+            raise Exception("Could not find CSRF token on DNSDumpster page")
+        return match.group(1)
+
+
 
     def enumerate(self):
         self.lock = threading.BoundedSemaphore(value=70)
         resp = self.req('GET', self.base_url)
-        token = self.get_csrftoken(resp)
+        try:
+            token = self.get_csrftoken(resp)
+        except Exception as e:
+            print("[!] DNSDumpster module failed: {0}".format(e))
+            return []  # gracefully skip this source
+
         params = {'csrfmiddlewaretoken': token, 'targetip': self.domain}
         post_resp = self.req('POST', self.base_url, params)
         self.extract_domains(post_resp)
@@ -655,7 +696,8 @@ class DNSdumpster(enumratorBaseThreaded):
         return self.live_subdomains
 
     def extract_domains(self, resp):
-        tbl_regex = re.compile('<a name="hostanchor"><\/a>Host Records.*?<table.*?>(.*?)</table>', re.S)
+        tbl_regex = re.compile(r'<a name="hostanchor"></a>Host Records.*?<table.*?>(.*?)</table>',
+    re.S,)
         link_regex = re.compile('<td class="col-md-4">(.*?)<br>', re.S)
         links = []
         try:
@@ -895,7 +937,7 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         enable_bruteforce = True
 
     # Validate domain
-    domain_check = re.compile("^(http|https)?[a-zA-Z0-9]+([\-\.]{1}[a-zA-Z0-9]+)*\.[a-zA-Z]{2,}$")
+    domain_check = re.compile(r"^(http|https)?[a-zA-Z0-9]+([\-\.]{1}[a-zA-Z0-9]+)*\.[a-zA-Z]{2,}$")
     if not domain_check.match(domain):
         if not silent:
             print(R + "Error: Please enter a valid domain" + W)
