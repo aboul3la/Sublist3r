@@ -1,1 +1,23 @@
+# Python
+__pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.egg-info/
+build/
+dist/
+*.egg
+*.log
+
+# virtualenv
+sublist3r-env/
+.venv/
+
+# editor backups
+*~ 
+*.bak
+
+# output files
+fanduel_subs.txt
+run.log
+run_after_fix.log
