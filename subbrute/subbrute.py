@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #SubBrute v1.2
 #A (very) fast subdomain enumeration tool.
@@ -67,7 +67,7 @@ class verify_nameservers(multiprocessing.Process):
             #Lets test the letancy of our connection.
             #Google's DNS server should be an ideal time test.
             resolver.nameservers = ['8.8.8.8']
-            resolver.query(self.most_popular_website, self.record_type)
+            resolver.resolve(self.most_popular_website, self.record_type)
         except:
             #Our connection is slower than a junebug in molasses
             resolver = dns.resolver.Resolver()
@@ -138,7 +138,7 @@ class verify_nameservers(multiprocessing.Process):
         #I have seen a CloudFlare Enterprise customer with the first two conditions.
         try:
             #This is case #3,  these spam nameservers seem to be more trouble then they are worth.
-             wildtest = self.resolver.query(uuid.uuid4().hex + ".com", "A")
+             wildtest = self.resolver.resolve(uuid.uuid4().hex + ".com", "A")
              if len(wildtest):
                 trace("Spam DNS detected:", host)
                 return False
@@ -152,7 +152,7 @@ class verify_nameservers(multiprocessing.Process):
             test_counter -= 1            
             try:
                 testdomain = "%s.%s" % (uuid.uuid4().hex, host)
-                wildtest = self.resolver.query(testdomain, self.record_type)
+                wildtest = self.resolver.resolve(testdomain, self.record_type)
                 #This 'A' record may contain a list of wildcards.
                 if wildtest:
                     for w in wildtest:
@@ -204,7 +204,10 @@ class lookup(multiprocessing.Process):
 
     def get_ns_blocking(self):
         ret = []
-        ret = [self.resolver_q.get()]
+        try:
+            ret = [self.resolver_q.get()]
+        except KeyboardInterrupt:
+            return []
         if ret == False:
             trace("get_ns_blocking - Resolver list is empty.")
             #Queue is empty,  inform the rest.
@@ -224,7 +227,7 @@ class lookup(multiprocessing.Process):
             try:
                 #Query the nameserver, this is not simple...
                 if not record_type or record_type == "A":
-                    resp = self.resolver.query(host)
+                    resp = self.resolver.resolve(host)
                     #Crawl the response
                     hosts = extract_hosts(str(resp.response), self.domain)
                     for h in hosts:
@@ -237,7 +240,7 @@ class lookup(multiprocessing.Process):
                     #A max 20 lookups
                     for x in range(20):
                         try:
-                            resp = self.resolver.query(host, record_type)
+                            resp = self.resolver.resolve(host, record_type)
                         except dns.resolver.NoAnswer:
                             resp = False
                             pass
@@ -248,7 +251,7 @@ class lookup(multiprocessing.Process):
                             return cname_record                    
                 else:
                     #All other records:
-                    return self.resolver.query(host, record_type)
+                    return self.resolver.resolve(host, record_type)
 
             except Exception as e:
                 if type(e) == dns.resolver.NoNameservers:
@@ -299,59 +302,62 @@ class lookup(multiprocessing.Process):
                     raise e
 
     def run(self):
-        #This process needs one resolver before it can start looking.
-        self.resolver.nameservers += self.get_ns_blocking()
-        while True:
-            found_addresses = []
-            work = self.in_q.get()
-            #Check if we have hit the end marker
-            while not work:
-                #Look for a re-queued lookup
-                try:
-                    work = self.in_q.get(blocking = False)
-                    #if we took the end marker of the queue we need to put it back
-                    if work:
-                        self.in_q.put(False)
-                except:#Queue.Empty
-                    trace('End of work queue')
-                    #There isn't an item behind the end marker
-                    work = False
+        try:
+            #This process needs one resolver before it can start looking.
+            self.resolver.nameservers += self.get_ns_blocking()
+            while True:
+                found_addresses = []
+                work = self.in_q.get()
+                #Check if we have hit the end marker
+                while not work:
+                    #Look for a re-queued lookup
+                    try:
+                        work = self.in_q.get(block=False)
+                        #if we took the end marker of the queue we need to put it back
+                        if work:
+                            self.in_q.put(False)
+                    except:#Queue.Empty
+                        trace('End of work queue')
+                        #There isn't an item behind the end marker
+                        work = False
+                        break
+                #Is this the end all work that needs to be done?
+                if not work:
+                    #Perpetuate the end marker for all threads to see
+                    self.in_q.put(False)
+                    #Notify the parent that we have died of natural causes
+                    self.out_q.put(False)
                     break
-            #Is this the end all work that needs to be done?
-            if not work:
-                #Perpetuate the end marker for all threads to see
-                self.in_q.put(False)
-                #Notify the parent that we have died of natural causes
-                self.out_q.put(False)
-                break
-            else:
-                if len(work) == 3:
-                    #keep track of how many times this lookup has timedout.
-                    (hostname, record_type, timeout_retries) = work
-                    response = self.check(hostname, record_type, timeout_retries)
                 else:
-                    (hostname, record_type) = work
-                    response = self.check(hostname, record_type) 
-                sys.stdout.flush()
-                trace(response)                  
-                #self.wildcards is populated by the verify_nameservers() thread.
-                #This variable doesn't need a muetex, because it has a queue. 
-                #A queue ensure nameserver cannot be used before it's wildcard entries are found.
-                reject = False
-                if response:
-                    for a in response:
-                        a = str(a)
-                        if a in self.wildcards:
-                            trace("resovled wildcard:", hostname)
-                            reject= True
-                            #reject this domain.
-                            break;
-                        else:
-                            found_addresses.append(a)
-                    if not reject:
-                        #This request is filled, send the results back  
-                        result = (hostname, record_type, found_addresses)
-                        self.out_q.put(result)
+                    if len(work) == 3:
+                        #keep track of how many times this lookup has timedout.
+                        (hostname, record_type, timeout_retries) = work
+                        response = self.check(hostname, record_type, timeout_retries)
+                    else:
+                        (hostname, record_type) = work
+                        response = self.check(hostname, record_type) 
+                    sys.stdout.flush()
+                    trace(response)                  
+                    #self.wildcards is populated by the verify_nameservers() thread.
+                    #This variable doesn't need a muetex, because it has a queue. 
+                    #A queue ensure nameserver cannot be used before it's wildcard entries are found.
+                    reject = False
+                    if response:
+                        for a in response:
+                            a = str(a)
+                            if a in self.wildcards:
+                                trace("resovled wildcard:", hostname)
+                                reject= True
+                                #reject this domain.
+                                break;
+                            else:
+                                found_addresses.append(a)
+                        if not reject:
+                            #This request is filled, send the results back  
+                            result = (hostname, record_type, found_addresses)
+                            self.out_q.put(result)
+        except KeyboardInterrupt:
+            return
 
 #Extract relevant hosts
 #The dot at the end of a domain signifies the root,
@@ -371,7 +377,7 @@ def extract_hosts(data, hostname):
 
 #Return a list of unique sub domains,  sorted by frequency.
 #Only match domains that have 3 or more sections subdomain.domain.tld
-domain_match = re.compile("([a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*)+")
+domain_match = re.compile(r"([a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*)+")
 def extract_subdomains(file_name):
     #Avoid re-compilation
     global domain_match
@@ -462,9 +468,11 @@ def run(target, record_type = None, subdomains = "names.txt", resolve_list = "re
                 in_q.put(work)
     #Terminate the queue
     in_q.put(False)
+    workers = []
     for i in range(process_count):
         worker = lookup(in_q, out_q, resolve_q, target, wildcards, spider_blacklist)
         worker.start()
+        workers.append(worker)
     threads_remaining = process_count
     while True:
         try:
@@ -476,6 +484,20 @@ def run(target, record_type = None, subdomains = "names.txt", resolve_list = "re
             else:
                 #run() is a generator, and yields results from the work queue
                 yield result
+        except KeyboardInterrupt:
+            try:
+                killproc(pid = verify_nameservers_proc.pid)
+            except:
+                try:
+                    verify_nameservers_proc.end()
+                except:
+                    pass
+            for w in workers:
+                try:
+                    killproc(pid = w.pid)
+                except:
+                    pass
+            return
         except Exception as e:
             #The cx_freeze version uses queue.Empty instead of Queue.Empty :(
             if type(e) == Queue.Empty or str(type(e)) == "<class 'queue.Empty'>":
@@ -533,7 +555,14 @@ def check_open(input_file):
     try:
         ret = open(input_file).readlines()
     except:
-        error("File not found:", input_file)
+        if not os.path.isabs(input_file):
+            try:
+                base_path = os.path.dirname(os.path.realpath(__file__))
+                ret = open(os.path.join(base_path, input_file)).readlines()
+            except:
+                error("File not found:", input_file)
+        else:
+            error("File not found:", input_file)
     if not len(ret):
         error("File is empty:", input_file)
     return ret
