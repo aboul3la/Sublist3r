@@ -1,1 +1,4 @@
 *.pyc
+build/
+dist/
+Sublist3r.egg-info/

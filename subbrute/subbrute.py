@@ -371,7 +371,7 @@ def extract_hosts(data, hostname):
 
 #Return a list of unique sub domains,  sorted by frequency.
 #Only match domains that have 3 or more sections subdomain.domain.tld
-domain_match = re.compile("([a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*)+")
+domain_match = re.compile(r"([a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*)+")
 def extract_subdomains(file_name):
     #Avoid re-compilation
     global domain_match
