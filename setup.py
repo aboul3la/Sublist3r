@@ -1,15 +1,25 @@
+#!/usr/bin/env python
+import os
 from setuptools import setup, find_packages
 
+
+def read(fname: str) -> str:
+    """Open files relative to package."""
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+
 setup(
-    name='Sublist3r',
-    version='1.0',
-    python_requires='>=2.7',
-    install_requires=['dnspython', 'requests', 'argparse; python_version==\'2.7\''],
-    packages=find_packages()+['.'],
-    include_package_data=True,
-    url='https://github.com/aboul3la/Sublist3r',
-    license='GPL-2.0',
+    name='sublist3r2',
+    version='1.0.1',
+    python_requires='>=3.6',
     description='Subdomains enumeration tool for penetration testers',
+    long_description=read('README.md'),
+    long_description_content_type='text/markdown',
+    keywords='subdomain dns detection',
+    url='https://github.com/RoninNakomoto/Sublist3r2',
+    license='GPL-2.0',
+    packages=find_packages(),
+    include_package_data=True,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
@@ -18,19 +28,23 @@ setup(
         'Intended Audience :: Telecommunications Industry',
         'License :: OSI Approved :: GNU General Public License v2',
         'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
+        'Operating System :: MacOS',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Topic :: Security',
     ],
-    keywords='subdomain dns detection',
+    install_requires=[
+        'argparse',
+        'dnspython',
+        'requests',
+        'asyncio',
+        'uvloop',
+        'tqdm',
+        'aiodns',
+        'click',
+    ],
     entry_points={
         'console_scripts': [
-            'sublist3r = sublist3r:interactive',
+            'sublist3r2 = sublist3r2:interactive',
         ],
     },
 )
