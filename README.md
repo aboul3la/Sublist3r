@@ -9,10 +9,16 @@ Sublist3r is a python tool designed to enumerate subdomains of websites using OS
 ![Sublist3r](http://www.secgeek.net/images/Sublist3r.png "Sublist3r in action")
 
 
-## Installation
+## Installation in Debian distros
 
 ```
-git clone https://github.com/aboul3la/Sublist3r.git
+cd /usr/share && git clone https://github.com/aboul3la/Sublist3r.git && cd /usr/share/Sublist3r && chmod +x *.* && sudo pip install ebcdic && sudo pip3 install ebcdic && sudo pip install -r requirements.txt && python setup.py install && cd
+```
+
+## Usage in Debian Distros 
+
+```
+sublist3r -b -d yourdomain.com -t 37 -v -o /root/sublist3r_yourdomain_com
 ```
 
 ## Recommended Python Version:
@@ -32,10 +38,7 @@ These dependencies can be installed using the requirements file:
 ```
 c:\python27\python.exe -m pip install -r requirements.txt
 ```
-- Installation on Linux
-```
-sudo pip install -r requirements.txt
-```
+
 
 Alternatively, each module can be installed independently as shown below.
 
@@ -46,20 +49,11 @@ Alternatively, each module can be installed independently as shown below.
 c:\python27\python.exe -m pip install requests
 ```
 
-- Install for Ubuntu/Debian:
-```
-sudo apt-get install python-requests
-```
-
 - Install for Centos/Redhat:
 ```
 sudo yum install python-requests
 ```
 
-- Install using pip on Linux:
-```
-sudo pip install requests
-```
 
 #### dnspython Module (http://www.dnspython.org/)
 
@@ -68,32 +62,11 @@ sudo pip install requests
 c:\python27\python.exe -m pip install dnspython
 ```
 
-- Install for Ubuntu/Debian:
-```
-sudo apt-get install python-dnspython
-```
-
-- Install using pip:
-```
-sudo pip install dnspython
-```
-
-#### argparse Module
-
-- Install for Ubuntu/Debian:
-```
-sudo apt-get install python-argparse
-```
 
 - Install for Centos/Redhat:
 ```
 sudo yum install python-argparse
 ``` 
-
-- Install using pip:
-```
-sudo pip install argparse
-```
 
 **for coloring in windows install the following libraries**
 ```
