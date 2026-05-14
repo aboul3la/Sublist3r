@@ -18,9 +18,28 @@ import json
 from collections import Counter
 
 # external modules
-from subbrute import subbrute
 import dns.resolver
 import requests
+
+
+def load_subbrute_module():
+    """Load the bundled subbrute module even if another package shadows it."""
+    try:
+        from subbrute import subbrute
+        return subbrute
+    except ImportError:
+        module_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'subbrute', 'subbrute.py')
+        if sys.version_info[0] >= 3:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location('sublist3r_bundled_subbrute', module_path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module
+        import imp
+        return imp.load_source('sublist3r_bundled_subbrute', module_path)
+
+
+subbrute = load_subbrute_module()
 
 # Python 2.x and 3.x compatiablity
 if sys.version > '3':
