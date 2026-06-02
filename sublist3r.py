@@ -35,7 +35,7 @@ else:
 try:
     import requests.packages.urllib3
     requests.packages.urllib3.disable_warnings()
-except:
+except Exception:
     pass
 
 # Check if we are running this on windows platform
@@ -54,7 +54,7 @@ if is_windows:
         win_unicode_console.enable()
         colorama.init()
         #Now the unicode will work ^_^
-    except:
+    except Exception:
         print("[!] Error: Coloring libraries not installed, no coloring will be used [Check the readme]")
         G = Y = B = R = W = G = Y = B = R = W = ''
 
@@ -617,7 +617,7 @@ class DNSdumpster(enumratorBaseThreaded):
                     self.print_("%s%s: %s%s" % (R, self.engine_name, W, host))
                 is_valid = True
                 self.live_subdomains.append(host)
-        except:
+        except Exception:
             pass
         self.lock.release()
         return is_valid

@@ -23,7 +23,7 @@ import json
 #We need the Queue library for exception handling
 try:
     import queue as Queue
-except:
+except Exception:
     import Queue
 
 #The 'multiprocessing' library does not rely upon a Global Interpreter Lock (GIL)
@@ -68,7 +68,7 @@ class verify_nameservers(multiprocessing.Process):
             #Google's DNS server should be an ideal time test.
             resolver.nameservers = ['8.8.8.8']
             resolver.query(self.most_popular_website, self.record_type)
-        except:
+        except Exception:
             #Our connection is slower than a junebug in molasses
             resolver = dns.resolver.Resolver()
         self.resolver = resolver
@@ -125,7 +125,7 @@ class verify_nameservers(multiprocessing.Process):
         #End of the resolvers list.
         try:
             self.resolver_q.put(False, timeout = 1)
-        except:
+        except Exception:
             pass
 
     #Only add the nameserver to the queue if we can detect wildcards. 
@@ -142,7 +142,7 @@ class verify_nameservers(multiprocessing.Process):
              if len(wildtest):
                 trace("Spam DNS detected:", host)
                 return False
-        except:
+        except Exception:
             pass
         test_counter = 8
         looking_for_wildcards = True
@@ -198,7 +198,7 @@ class lookup(multiprocessing.Process):
                 #Queue is empty,  inform the rest.
                 self.resolver_q.put(False)
                 ret = []
-        except:
+        except Exception:
             pass      
         return ret  
 
@@ -312,7 +312,7 @@ class lookup(multiprocessing.Process):
                     #if we took the end marker of the queue we need to put it back
                     if work:
                         self.in_q.put(False)
-                except:#Queue.Empty
+                except Exception:#Queue.Empty
                     trace('End of work queue')
                     #There isn't an item behind the end marker
                     work = False
@@ -489,7 +489,7 @@ def run(target, record_type = None, subdomains = "names.txt", resolve_list = "re
     #We no longer require name servers.
     try:
         killproc(pid = verify_nameservers_proc.pid)
-    except:
+    except Exception:
         #Windows threading.tread
         verify_nameservers_proc.end()
     trace("End")
@@ -505,7 +505,7 @@ def killproc(signum = 0, frame = 0, pid = False):
             kernel32 = ctypes.windll.kernel32
             handle = kernel32.OpenProcess(1, 0, pid)
             kernel32.TerminateProcess(handle, 0)
-        except:
+        except Exception:
             #Oah windows.
             pass
     else:
@@ -532,7 +532,7 @@ def check_open(input_file):
     #If we can't find a resolver from an input file, then we need to improvise.
     try:
         ret = open(input_file).readlines()
-    except:
+    except Exception:
         error("File not found:", input_file)
     if not len(ret):
         error("File is empty:", input_file)
@@ -546,7 +546,7 @@ def signal_init():
     try:
         signal.signal(signal.SIGTSTP, killproc)
         signal.signal(signal.SIGQUIT, killproc)
-    except:
+    except Exception:
         #Windows
         pass
 
@@ -601,14 +601,14 @@ if __name__ == "__main__":
     if options.output:
         try:
              output = open(options.output, "w")
-        except:
+        except Exception:
             error("Failed writing to file:", options.output)
 
     json_output = False
     if options.json:
         try:
             json_output = open(options.json, "w")
-        except:
+        except Exception:
             error("Failed writing to file:", options.json)
 
     record_type = False
