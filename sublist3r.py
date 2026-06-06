@@ -72,15 +72,7 @@ def no_color():
 
 
 def banner():
-    print("""%s
-                 ____        _     _ _     _   _____
-                / ___| _   _| |__ | (_)___| |_|___ / _ __
-                \___ \| | | | '_ \| | / __| __| |_ \| '__|
-                 ___) | |_| | |_) | | \__ \ |_ ___) | |
-                |____/ \__,_|_.__/|_|_|___/\__|____/|_|%s%s
-
-                # Coded By Ahmed Aboul-Ela - @aboul3la
-    """ % (R, W, Y))
+    return 
 
 
 def parser_error(errmsg):
@@ -96,22 +88,106 @@ def parse_args():
     parser.error = parser_error
     parser._optionals.title = "OPTIONS"
     parser.add_argument('-d', '--domain', help="Domain name to enumerate it's subdomains", required=True)
-    parser.add_argument('-b', '--bruteforce', help='Enable the subbrute bruteforce module', nargs='?', default=False)
+    parser.add_argument('-b', '--bruteforce', help='Enable the subbrute bruteforce module', default=False, action='store_true')
     parser.add_argument('-p', '--ports', help='Scan the found subdomains against specified tcp ports')
     parser.add_argument('-v', '--verbose', help='Enable Verbosity and display results in realtime', nargs='?', default=False)
     parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
+    parser.add_argument('-of', '--output-format', help='Output format: markdown, raw (default), or json', choices=['markdown', 'raw', 'json'], default='raw')
+    parser.add_argument('--portscan', help='Scan for open ports using Shodan InternetDB', default=False, action='store_true')
+    parser.add_argument('--no-resolve', help='Do not resolve subdomains to IP addresses', default=False, action='store_true')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
     return parser.parse_args()
 
 
-def write_file(filename, subdomains):
-    # saving subdomains results to output file
+def write_file(filename, subdomains, output_format='raw', port_scan_results=None, ip_map=None):
     print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R, filename, W))
     with open(str(filename), 'wt') as f:
-        for subdomain in subdomains:
-            f.write(subdomain + os.linesep)
+        if output_format == 'json':
+            output = {}
+            items = []
+            for subdomain in subdomains:
+                item = {'subdomain': subdomain}
+                if ip_map and subdomain in ip_map:
+                    item['ip'] = ip_map[subdomain]
+                if port_scan_results and subdomain in port_scan_results:
+                    item['ports'] = port_scan_results[subdomain]['ports']
+                items.append(item)
+            if port_scan_results:
+                output['port_scan'] = port_scan_results
+            output['subdomains'] = items
+            f.write(json.dumps(output, separators=(',', ':')) + os.linesep)
+        elif output_format == 'markdown':
+            f.write("# Sublist3r Results\n\n")
+            f.write("## Subdomains\n\n")
+            if ip_map:
+                f.write("| Subdomain | IP |\n")
+                f.write("|-----------|-----|\n")
+                for subdomain in subdomains:
+                    ip = ip_map.get(subdomain, '')
+                    f.write("| %s | %s |\n" % (subdomain, ip))
+            else:
+                for subdomain in subdomains:
+                    f.write("- %s\n" % subdomain)
+            if port_scan_results:
+                f.write("\n## Port Scan Results\n\n")
+                f.write("| Subdomain | IP | Ports |\n")
+                f.write("|-----------|-----|-------|\n")
+                for subdomain, data in port_scan_results.items():
+                    ip = data.get('ip', '')
+                    ports = ', '.join(str(p) for p in data.get('ports', []))
+                    f.write("| %s | %s | %s |\n" % (subdomain, ip, ports))
+        else:
+            if port_scan_results:
+                for subdomain in subdomains:
+                    ip = ip_map.get(subdomain, '') if ip_map else ''
+                    if subdomain in port_scan_results:
+                        data = port_scan_results[subdomain]
+                        ports = ', '.join(str(p) for p in data.get('ports', []))
+                        if ip:
+                            f.write("%s,%s,%s%s" % (subdomain, ip, ports, os.linesep))
+                        else:
+                            f.write("%s,%s%s" % (subdomain, ports, os.linesep))
+                    else:
+                        if ip:
+                            f.write("%s,%s%s" % (subdomain, ip, os.linesep))
+                        else:
+                            f.write(subdomain + os.linesep)
+            else:
+                for subdomain in subdomains:
+                    if ip_map and subdomain in ip_map:
+                        f.write("%s,%s%s" % (subdomain, ip_map[subdomain], os.linesep))
+                    else:
+                        f.write(subdomain + os.linesep)
+
+
+def portscan_shodan(subdomains, ip_map):
+    results = {}
+    for subdomain in subdomains:
+        ip = ip_map.get(subdomain)
+        if not ip:
+            continue
+        try:
+            resp = requests.get("https://internetdb.shodan.io/%s" % ip, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json()
+                ports = data.get('ports', [])
+                if ports:
+                    results[subdomain] = {'ip': ip, 'ports': ports}
+        except Exception:
+            pass
+    return results
+
+
+def resolve_ips(subdomains):
+    ips = {}
+    for subdomain in subdomains:
+        try:
+            ips[subdomain] = socket.gethostbyname(subdomain)
+        except Exception:
+            pass
+    return ips
 
 
 def subdomain_sorting_key(hostname):
@@ -283,7 +359,7 @@ class GoogleEnum(enumratorBaseThreaded):
 
     def extract_domains(self, resp):
         links_list = list()
-        link_regx = re.compile('<cite.*?>(.*?)<\/cite>')
+        link_regx = re.compile(r'<cite.*?>(.*?)</cite>')
         try:
             links_list = link_regx.findall(resp)
             for link in links_list:
@@ -319,6 +395,44 @@ class GoogleEnum(enumratorBaseThreaded):
             query = "site:{domain} -www.{domain}".format(domain=self.domain)
         return query
 
+class HackertargetEnum(enumratorBaseThreaded):
+    def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
+        subdomains = subdomains or []
+        # HackerTarget API endpoint
+        base_url = 'https://api.hackertarget.com/hostsearch/?q={query}'
+        self.engine_name = "HackerTarget"
+        self.MAX_DOMAINS = 11
+        self.MAX_PAGES = 0
+        enumratorBaseThreaded.__init__(self, base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        self.q = q
+        return
+
+    def extract_domains(self, resp):
+        links_list = list()
+        try:
+            # The API returns plain text, line-by-line in format: subdomain.domain.com,IP_Address
+            lines = resp.splitlines()
+            for line in lines:
+                if ',' in line:
+                    subdomain = line.split(',')[0].strip()
+                    # Verify it's a valid subdomain of our target and not a duplicate
+                    if subdomain.endswith(self.domain) and subdomain not in self.subdomains and subdomain != self.domain:
+                        if self.verbose:
+                            self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdomain))
+                        self.subdomains.append(subdomain)
+                        links_list.append(subdomain)
+        except Exception:
+            pass
+
+        return links_list
+
+    def get_page(self, num):
+        # Pagination isn't used for this API, but required by the base class
+        return num + 1
+
+    def generate_query(self):
+        # We only need to feed the root domain to the API
+        return self.domain
 
 class YahooEnum(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
@@ -340,7 +454,7 @@ class YahooEnum(enumratorBaseThreaded):
             links2 = link_regx2.findall(resp)
             links_list = links + links2
             for link in links_list:
-                link = re.sub("<(\/)?b>", "", link)
+                link = re.sub(r"<(\/)?b>", "", link)
                 if not link.startswith('http'):
                     link = "http://" + link
                 subdomain = urlparse.urlparse(link).netloc
@@ -436,7 +550,7 @@ class BingEnum(enumratorBaseThreaded):
             links_list = links + links2
 
             for link in links_list:
-                link = re.sub('<(\/)?strong>|<span.*?>|<|>', '', link)
+                link = re.sub(r'<(\/)?strong>|<span.*?>|<|>', '', link)
                 if not link.startswith('http'):
                     link = "http://" + link
                 subdomain = urlparse.urlparse(link).netloc
@@ -655,7 +769,7 @@ class DNSdumpster(enumratorBaseThreaded):
         return self.live_subdomains
 
     def extract_domains(self, resp):
-        tbl_regex = re.compile('<a name="hostanchor"><\/a>Host Records.*?<table.*?>(.*?)</table>', re.S)
+        tbl_regex = re.compile(r'<a name="hostanchor"><\/a>Host Records.*?<table.*?>(.*?)</table>', re.S)
         link_regex = re.compile('<td class="col-md-4">(.*?)<br>', re.S)
         links = []
         try:
@@ -881,7 +995,7 @@ class portscan():
             t.start()
 
 
-def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines):
+def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, engines, portscan=False, output_format='raw', no_resolve=False):
     bruteforce_list = set()
     search_list = set()
 
@@ -891,11 +1005,11 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         subdomains_queue = multiprocessing.Manager().list()
 
     # Check Bruteforce Status
-    if enable_bruteforce or enable_bruteforce is None:
+    if enable_bruteforce:
         enable_bruteforce = True
 
     # Validate domain
-    domain_check = re.compile("^(http|https)?[a-zA-Z0-9]+([\-\.]{1}[a-zA-Z0-9]+)*\.[a-zA-Z]{2,}$")
+    domain_check = re.compile(r"^(http|https)?[a-zA-Z0-9]+([\-\.]{1}[a-zA-Z0-9]+)*\.[a-zA-Z]{2,}$")
     if not domain_check.match(domain):
         if not silent:
             print(R + "Error: Please enter a valid domain" + W)
@@ -922,7 +1036,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
                          'virustotal': Virustotal,
                          'threatcrowd': ThreatCrowd,
                          'ssl': CrtSearch,
-                         'passivedns': PassiveDNS
+                         'passivedns': PassiveDNS,
+                         'hackertarget':HackertargetEnum
                          }
 
     chosenEnums = []
@@ -930,8 +1045,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     if engines is None:
         chosenEnums = [
             BaiduEnum, YahooEnum, GoogleEnum, BingEnum, AskEnum,
-            NetcraftEnum, DNSdumpster, Virustotal, ThreatCrowd,
-            CrtSearch, PassiveDNS
+            NetcraftEnum, ThreatCrowd,
+            CrtSearch, PassiveDNS, HackertargetEnum,Virustotal
         ]
     else:
         engines = engines.split(',')
@@ -967,8 +1082,20 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
     if subdomains:
         subdomains = sorted(subdomains, key=subdomain_sorting_key)
 
+        ip_map = None
+        if not no_resolve:
+            ip_map = resolve_ips(subdomains)
+
+        portscan_results = None
+        if portscan:
+            if not silent:
+                print(G + "[-] Starting Shodan InternetDB port scan.." + W)
+            portscan_results = portscan_shodan(subdomains, ip_map)
+            if not silent:
+                print(G + "[-] Shodan InternetDB port scan completed" + W)
+
         if savefile:
-            write_file(savefile, subdomains)
+            write_file(savefile, subdomains, output_format=output_format, port_scan_results=portscan_results, ip_map=ip_map)
 
         if not silent:
             print(Y + "[-] Total Unique Subdomains Found: %s" % len(subdomains) + W)
@@ -980,9 +1107,63 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
             pscan = portscan(subdomains, ports)
             pscan.run()
 
-        elif not silent:
-            for subdomain in subdomains:
-                print(G + subdomain + W)
+        if not silent:
+            if output_format == 'json':
+                output = {}
+                items = []
+                for subdomain in subdomains:
+                    item = {'subdomain': subdomain}
+                    if ip_map and subdomain in ip_map:
+                        item['ip'] = ip_map[subdomain]
+                    if portscan_results and subdomain in portscan_results:
+                        item['ports'] = portscan_results[subdomain]['ports']
+                    items.append(item)
+                if portscan_results:
+                    output['port_scan'] = portscan_results
+                output['subdomains'] = items
+                print(json.dumps(output, separators=(',', ':')))
+            elif output_format == 'markdown':
+                print("# Sublist3r Results\n")
+                print("## Subdomains\n")
+                if ip_map:
+                    print("| Subdomain | IP |")
+                    print("|-----------|-----|")
+                    for subdomain in subdomains:
+                        ip = ip_map.get(subdomain, '')
+                        print("| %s | %s |" % (subdomain, ip))
+                else:
+                    for subdomain in subdomains:
+                        print("- %s" % subdomain)
+                if portscan_results:
+                    print("\n## Port Scan Results\n")
+                    print("| Subdomain | IP | Ports |")
+                    print("|-----------|-----|-------|")
+                    for subdomain, data in portscan_results.items():
+                        ip = data.get('ip', '')
+                        ports_str = ', '.join(str(p) for p in data.get('ports', []))
+                        print("| %s | %s | %s |" % (subdomain, ip, ports_str))
+            else:
+                if portscan_results:
+                    for subdomain in subdomains:
+                        ip = ip_map.get(subdomain, '') if ip_map else ''
+                        if subdomain in portscan_results:
+                            data = portscan_results[subdomain]
+                            pports = ', '.join(str(p) for p in data.get('ports', []))
+                            if ip:
+                                print("%s,%s,%s" % (subdomain, ip, pports))
+                            else:
+                                print("%s,%s" % (subdomain, pports))
+                        else:
+                            if ip:
+                                print("%s,%s" % (subdomain, ip))
+                            else:
+                                print(G + subdomain + W)
+                else:
+                    for subdomain in subdomains:
+                        if ip_map and subdomain in ip_map:
+                            print("%s,%s" % (subdomain, ip_map[subdomain]))
+                        else:
+                            print(G + subdomain + W)
     return subdomains
 
 
@@ -1000,7 +1181,7 @@ def interactive():
     if args.no_color:
         no_color()
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines, portscan=args.portscan, output_format=args.output_format, no_resolve=args.no_resolve)
 
 if __name__ == "__main__":
     interactive()

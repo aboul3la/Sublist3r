@@ -1,0 +1,35 @@
+Metadata-Version: 2.4
+Name: Sublist3r
+Version: 1.6
+Summary: Subdomains enumeration tool for penetration testers
+Home-page: https://github.com/aboul3la/Sublist3r
+License: GPL-2.0
+Keywords: subdomain dns detection
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Information Technology
+Classifier: Intended Audience :: System Administrators
+Classifier: Intended Audience :: Telecommunications Industry
+Classifier: License :: OSI Approved :: GNU General Public License v2
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Topic :: Security
+Requires-Python: >=2.7
+License-File: LICENSE
+Requires-Dist: dnspython
+Requires-Dist: requests
+Requires-Dist: argparse; python_version == "2.7"
+Dynamic: classifier
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
