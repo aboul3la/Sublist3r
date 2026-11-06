@@ -2,6 +2,8 @@
 # coding: utf-8
 # Sublist3r v1.0
 # By Ahmed Aboul-Ela - twitter.com/aboul3la
+# Modified 2026-11-06: lower-case the parsed domain host (urlparse netloc) so
+# DNS case folding applies to engine lookups. GPLv2 section 2(a) change notice.
 
 # modules in standard library
 import re
@@ -143,7 +145,7 @@ def subdomain_sorting_key(hostname):
 class enumratorBase(object):
     def __init__(self, base_url, engine_name, domain, subdomains=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        self.domain = urlparse.urlparse(domain).netloc
+        self.domain = urlparse.urlparse(domain).netloc.lower()
         self.session = requests.Session()
         self.subdomains = []
         self.timeout = 25
